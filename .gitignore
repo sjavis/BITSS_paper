@@ -1,0 +1,7 @@
+*.png
+*.pgf
+manuscript.aux
+manuscript.bbl
+manuscript.blg
+manuscript.log
+manuscript.pdf
