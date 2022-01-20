@@ -22,6 +22,22 @@
 \usepackage{lipsum}
 \usepackage{xcolor}
 \newcommand{\temp}[1]{{\leavevmode\color{red}#1}}
+\newcommand*{\newlinecommand}[2]{%
+  \newcommand*{#1}{%
+    \begingroup%
+    \escapechar=`\\%
+    \catcode\endlinechar=\active%
+    \csname\string#1\endcsname%
+  }%
+  \begingroup%
+  \escapechar=`\\%
+  \lccode`\~=\endlinechar%
+  \lowercase{%
+    \expandafter\endgroup
+    \expandafter\def\csname\string#1\endcsname##1~%
+  }{\endgroup#2\space}%
+}
+\newlinecommand{\topic}{#1}%\textbf{#1}}
 
 
 
@@ -38,61 +54,78 @@
 \maketitle
 
 
-\section{Introduction}
-Historically, the development of computational methods to locate transition states in free or potential energy landscapes has had significant impact in particulate and atomistic systems.
-In these, the energy barrier between a local energy minimum and a transition state informs the probability of the transition occurring within a thermalised population, and ultimately reaction rates and kinetics.
-However, it is increasingly being recognised that transition states are useful in mesoscale or macroscale systems, in which the energy barriers are sufficiently high that thermal transition probabilities are vanishingly small.
-Instead, the minimum energy barriers provide important lower bounds to the energy input required for transitions to occur.
-
+%\section{Introduction \& Method}
+\topic Historically, the development of computational methods to locate transition states in free or potential energy landscapes has had significant impact in particulate and atomistic systems.
+In these, the energy barrier between a local energy minimum and a transition state informs the probability of the transition occurring within a thermalised population, and ultimately reaction rates and kinetics \temp{[cite]}.
+The energy barriers can also be used to characterise the behaviour of molecules and structures with large numbers of stable configurations, which has applications to protein folding \cite{Bryngelson1995,Onuchic1997}, crystalisation and clusters \cite{Wales1998,Wales2012}.
+In addition to these microscale applications it is also increasingly being recognised that transition states are useful in mesoscale or macroscale systems. %, in which the energy barriers are sufficiently high that thermal transition probabilities are vanishingly small.
+Here, the minimum energy barriers provide important lower bounds to the energy input required for transitions to occur.
 This is essential to capture in, for example, structural engineering applications, where the minimum energy mechanism for structural failure must be known in order to ensure safety \cite{Panter2019,Hutchinson2018}.
 Moreover, it is becoming desirable to functionalise elastic deformation transition mechanisms to enable technologies such as advanced deployable structures \cite{Filipov2015,Zhai2018}, mechanical sensors and actuators, and energy absorption \cite{Shan2015} to name but a few.
-A second mesoscale area benefiting from a description of transition states is in multi-fluidic and wetting applications.
-For example, a knowledge of the minimum energy failure mechanisms on super liquid-repellent surfaces informs design criteria in order to optimise device performance \cite{Zhang2014,Panter2019b}.
-Finally, transition mechanisms are important in robotics, for locomotion and navigation of rigid bodies through complex terrain \cite{Othayoth2020}.
+%A second mesoscale area benefiting from a description of transition states is in multi-fluidic and wetting applications.
+%For example, a knowledge of the minimum energy failure mechanisms on super liquid-repellent surfaces informs design criteria in order to optimise device performance \cite{Zhang2014,Panter2019b}.
+%Finally, transition mechanisms are important in robotics, for locomotion and navigation of rigid bodies through complex terrain \cite{Othayoth2020}.
 
-Transition state search methods generally fall into two categories, single- and double-ended methods.
+\topic The large variety of both micro- and macro-scale applications leads to a number of complex challenges that many existing transition state search methods do not adequately address.
+For example, in many problems there exist soft-modes where the landscape is locally flat. \temp{[cite]}
+This can cause issues for search methods that rely only upon local information.
+Another issue arises for systems with short-range contact forces, such as hard-core particles \temp{[cite]} and patchy colloids \temp{[cite]}, resulting in discontinuous landscapes and undefined gradients.
+Adaptive coarse-graining is often used for many macro-scale simulations as a method to reduce computational overhead. \temp{[cite]}
+To enable this, the search method must be able to deal with changing degrees of freedom as the method runs.
+Lastly, many applications can have extremely large numbers of degrees of freedom, such as large particulate systems or discretisations of 3D continuum systems.
+As a result, inefficient methods can become computationally expensive or prohibitive.
+In an effort to address these issues we will introduce and demonstrate a new transition state search method over the course of this work.
+
+\topic Transition state search methods generally fall into two categories, single- and double-ended methods.
 Single-ended methods are initialised at a single state, typically a minimum in the potential energy landscape, and attempt to identify nearby saddle points.
 These methods can converge to a transition state quickly, although are not well suited to identifying specific pathways because a single minimum can be surrounded by many saddle points.
 Examples include eigenvector following \cite{Cerjan1981}, the dimer method \cite{Heyden2005,Kastner2008}, and climbing image methods \cite{E2007,Ren2013}.
 Double-ended methods, such as the string method \cite{E2002,E2007} and doubly-nudged elastic band (DNEB) \cite{Trygubenko2004}, involve initialising a chain of states between two minima and then minimising the total energy of the chain.
 In addition to approximating the transition state, these are useful for obtaining an estimate for the full transition pathway.
 
-Meso- and macroscale potential energy landscapes exhibit a range of features not typically observed in atomistic systems, which make these traditional landscape techniques inefficient or inapplicable.
-For example, discretisations of 3D continuum systems can posses extremely large numbers of degrees of freedom.
-As a result, double-ended methods involving a chain of tens of states can become computationally expensive, or even prohibitive.
-The issue is compounded by systems with long, non-linear pathways, or sudden structural changes near the transition state, because these require an even larger number of states to accurately approximate the transition state.
-Here, we introduce a new method for identifying transition states to address these and other issues relevant to meso- and macroscale applications.
-The method, dubbed the Binary Image Transition State Search (BITSS), involves the convergence of only two states from minima to an intermediate transition state.
-So it requires much less memory and has the potential to be significantly faster than existing chain-of-states approaches.
+\topic Our method lies somewhere between these two categories.
+Dubbed the Binary Image Transition State Search (BITSS), it involves the convergence of just two states from seperate minima to a transition state that separates them.
+We begin the method by choosing the states, $\bm{x}_1$ and $\bm{x}_2$, to be in different basins of attraction of local minima.
+These states can indeed be the local minima, but this is not a necessary requirement.
+Upon application of the BITSS method, the two images are brought closer to the ridge separating the basins of attraction, while also minimising the energy of the pair of images.
+In this way, the two images meet at the lowest energy point on the ridge - the transition state.
+This is demonstrated for a simple 2D potential with two minima in \cref{fig:toy2d}a.
+The two states begin at the blue minima and follow the red paths as their separation is reduced to converge at the orange transition state.
 
+\begin{figure}[htb]
+  \centering
+  \includegraphics{fig/toy2d.pdf}
+  \caption{
+    (a) A simple 2D potential with 2 minima (blue) and an intermediate transition state (orange).
+        The trajectories of the two states using the BITSS method are shown in red and the minimum energy pathway is the dashed magenta line.
+    (b) A schematic showing a snapshot of the BITSS minimisation with the driving forces on each state due to the energy constraint, $\bm{F}_E$, and distance constraint, $\bm{F}_D$.
+        Here the state on the right has a higher energy, and the two states have a separation larger than $d_i$.
+    (c) A schematic of the final configuration of the BITSS method.
+        Showing the two states in red, the transition state approximation in orange, and the direction of negative curvature, $\bm{\hat{\tau}}$, that passes through the two states.
+  }
+  \label{fig:toy2d}
+\end{figure}
 
-\section{Method}
-The method begins with two initial states, $\bm{x}_1$ and $\bm{x}_2$.
-These are typically minima on the energy landscape, but this is not required.
-The energy of this pair of states is then minimised subject to two constraints.
-Firstly, there is a prescribed separation between the two states which is reduced over time so that they converge.
-The second constraint requires the two energies to be equal.
-This ensures that the two states remain in different basins of attraction by preventing either state from passing over the dividing ridge.
-Consequently, they will meet at either side of a saddle point on the ridge, with the transition state midway between the two.
-Furthermore, these final states can also be used to obtain the negative curvature eigenvector and eigenvalue for free.
-
-The two constraints are implemented using quadratic energy penalty terms, resulting in the following potential for the pair of states,
+\topic Two soft constraints are utilised in order to get the states to converge and prevent either from passing over the dividing ridge.
+The former is implemented by constraining the distance between the states and iteratively reducing the target separation, $d_i$, from the separation of the initial states, $d_0$, by a constant factor:
+\begin{equation}
+  d_{i+1} = (1 - f) d_i.
+  \label{eq:diteration}
+\end{equation}
+We find that a factor of $f = 0.5$ is succesful for most applications, however in some cases it may be necessary to use a smaller value if one of the states jumps over the dividing ridge.
+The second constraint sets the energies of the two states to be equal.
+This ensures neither state can pass over the ridge so long as the distance is not reduced too quickly.
+These constraints are implemented using quadratic energy penalty terms, resulting in the following potential for the pair of states,
 \begin{multline}
   V_\text{BITSS}(\bm{x}_1, \bm{x}_2) = E_1 + E_2
     + \kappa_e \left( E_1 - E_2 \right) ^2 \\
-    + \kappa_d \left( \mathrm{d}(\bm{x}_1, \bm{x}_2) - d_0 \right) ^2,
+    + \kappa_d \left( \mathrm{d}(\bm{x}_1, \bm{x}_2) - d_i \right) ^2,
   \label{eq:bitss}
 \end{multline}
-where $E_1$ and $E_2$ are the single state energies, $\mathrm{d}(\bm{x}_1, \bm{x}_2)$ is the measure of distance between the two states, and $d_0$ is the target distance.
-\Cref{fig:toy2d} demonstrates the driving forces resulting from each of these energy penalty terms for a 2D potential.
-The method is performed iteratively, first minimising \cref{eq:bitss} for a constant separation $d_0$, then reducing $d_0$ and repeating.
-To perform the minimisation we primarily use the L-BFGS algorithm, owing to its fast convergence and low memory requirement for large numbers of degrees of freedom \cite{Liu1989}.
-When the separation between the states is low it is possible for a state to jump over the saddle point.
-To prevent this, the amount $d_0$ is reduced should shrink in proportion to $d_0$.
-The more this is reduced each iteration the faster it will converge, although it will have a greater chance of failure.
-We find halving the distance is successful for most applications, and therefore a good place to start.
+where $E_1$ and $E_2$ are the single state energies, and $\mathrm{d}(\bm{x}_1, \bm{x}_2)$ is the measure of distance between the two states.
+\Cref{fig:toy2d}b demonstrates the driving forces resulting from each of these energy penalty terms for a 2D potential.
 
-The coefficients for the constraints, $\kappa_d$ and $\kappa_e$, must be assigned carefully.
+\topic The coefficients for the constraints, $\kappa_d$ and $\kappa_e$, must be assigned carefully.
 If they are too small one state may pass over the ridge and converge at a minimum, or they may not converge at all, and if they are too large they can screen out the single state potentials.
 Furthermore, as the separation decreases these coefficients will have to change.
 To solve these issues the coefficient assignment is automated.
@@ -103,38 +136,33 @@ The coefficients are chosen such that each term in the gradient of \cref{eq:bits
   \label{eq:ke}
   \\
   \kappa_d = \text{max} \left(
-    \frac {\sqrt{|\bm{\nabla} E_1|^2 + |\bm{\nabla} E_2|^2}} {2\sqrt{2} \beta d_0} \ , \ 
-    \frac{\Delta E}{\beta d_0^2} \right),
+    \frac {\sqrt{|\bm{\nabla} E_1|^2 + |\bm{\nabla} E_2|^2}} {2\sqrt{2} \beta d_i} \; , \;
+    \frac{\Delta E}{\beta d_i^2} \right),
   \label{eq:kd}
 \end{gather}
 where $\alpha$ and $\beta$ are parameters with recommended values of $\alpha = 10$ and $\beta = 0.1$ (see supplementary information).
 $\Delta E$ is an estimation for the current energy barrier which is evaluated by linearly interpolating between the two current states.
 For systems where the interpolation deviates significantly from the MEP this estimate can be much too large.
-In which case, a maximum estimated value for the barrier can be provided, which then decreases proportionally with $d_0$.
+In which case, a maximum estimated value for the barrier can be provided, which then decreases proportionally with $d_i$.
 
-\begin{figure}[htb]
-  \centering
-  \includegraphics{fig/toy2d.pdf}
-  \caption{ 
-    (a) A simple 2D potential with 2 minima (blue) and an intermediate transition state (orange).
-        The trajectories of the two states using the BITSS method are shown in red and the minimum energy pathway is the dashed magenta line.
-    (b) A schematic showing a snapshot of the BITSS minimisation with the driving forces on each state due to the energy constraint, $\bm{F}_E$, and distance constraint, $\bm{F}_D$.
-    (c) A schematic of the final configuration of the BITSS method.
-        Showing the two states in red, the transition state approximation in orange, and the direction of negative curvature, $\bm{\hat{\tau}}$, that passes through the two states.
-  }
-  \label{fig:toy2d}
-\end{figure}
+\topic In summary, the method involves iteratively performing the following three steps: \\
+1: Reduce the target separation using \cref{eq:diteration}. \\
+2: Compute the constraint coefficients using \cref{eq:ke,eq:kd}. \\
+3: Minimise the potential, \cref{eq:bitss}, and recompute the coefficients every 100 iterations of the minimisation. \\
+Any minimisation algorithm can be used in step three; here the L-BFGS algorithm is chosen, owing to its fast convergence and low memory requirement for large numbers of degrees of freedom \cite{Liu1989}.
+Finally, to determine convergence of the method, a criteria can be based upon either the separation between the states, or the size of gradient midway between the two states.
 
-Once BITSS has identified the transition state it is possible to find the full minimum energy pathway (MEP), which is the path between the two minima passing through the transition state while following the gradient.
-This is done by tracing the trajectory of downhill minimisations either side of the transition state, which are provided by the two final states of BITSS.
-The maximum step size of the minimisation should be restricted to ensure a sufficiently smooth pathway.
-
-As an illustrative example, the BITSS method is applied to a simple 2D potential, as shown in \cref{fig:toy2d}c.
-We can see that the trajectory taken by BITSS does not match the MEP.
+\topic In the 2D example in \cref{fig:toy2d}a, we can see that the trajectory taken by BITSS does not match the minimum energy pathway (MEP), which is the path between the two minima that follows the gradient and passes through the transition state.
 Instead, one state initially jumps up to match the energy of the other.
 Then when the states cannot get closer without increasing their energy they begin moving directly towards each other as a result of the decreasing separation constraint.
 Once they get closer the potential wells are distorted by the saddle and so the states are deflected towards it.
-Consequently, if there were multiple pathways between the two states, BITSS would be biased towards identifying pathways that are more direct or with lower energy.
+Consequently, if there are multiple possible pathways between two states, BITSS will be biased towards identifying pathways that are more direct or with lower energy.
+Once the method has converged, \cref{fig:toy2d}c, we see that the two states are separated in the direction of the negative curvature eigenvector, $\bm{\hat{\tau}}$.
+Therefore, using BITSS we can also obtain the eigenvector and eigenvalue for free.
+
+\topic Once BITSS has identified the transition state it is possible to find the full MEP.
+This is done by tracing the trajectory of downhill minimisations either side of the transition state, which are provided by the two final states of BITSS.
+To ensure this pathway is sufficiently smooth the maximum step size of the minimisation should be restricted.
 
 
 \section{Speed Comparison}
@@ -152,37 +180,97 @@ Consequently, if there were multiple pathways between the two states, BITSS woul
   \label{fig:speedtest}
 \end{figure*}
 
-As a result of the BITSS method using only two states it has the potential to be significantly faster than chain-of-states approaches which typically use tens of states.
+\topic As a result of the BITSS method using only two states it has the potential to be significantly faster than chain-of-states approaches which typically use tens of states.
 This is tested here by measuring the speed at which the BITSS method converges to the transition state and comparing it to the string method and DNEB for several examples.
 The accuracy of the BITSS method is calculated using the distance between the correct transition state and the average of the two states.
 While for the chain-of-states methods, the accuracy is measured as the distance of the transition state from a cubic spline interpolation of the points along the string.
 For each method, the accuracy is measured against the number of times the energy and gradient of the system are evaluated.
 The results of this are shown in \cref{fig:speedtest} and \temp{SI} for the string method and DNEB respectively.
 
-The first system to be tested is a two-dimensional seven-particle cluster with Lennard-Jones interactions.
+\topic The first system to be tested is a two-dimensional seven-particle cluster with Lennard-Jones interactions.
 The transition begins with the hexagonal cluster and involves the movement of two particles to reach a higher energy configuration.
 
-The second system is an elastic cylindrical shell under an applied strain.
+\topic The second system is an elastic cylindrical shell under an applied strain.
 This undergoes a transition from an unbuckled state to a singly-dimpled state, which is significant because it defines the minimum energy required for the cylinder to buckle \cite{Panter2019}.
 To model the surface a two-dimensional triangular mesh is used.
 The energy of the surface is calculated by considering the stretching energies of bonds and the bending energies for pairs of triangular faces.
 With the corresponding rigidities depending upon the geometry of the mesh in an attempt to accurately model the continuum elastic properties.
 
-The final system involves a droplet situated on a chemically striped surface with both hydrophilic and hydrophobic regions.
+\topic The final system involves a droplet situated on a chemically striped surface with both hydrophilic and hydrophobic regions.
 This has two possible states, with the droplet either upon one hydrophilic stripe, or straddling across two.
 This is modelled on a 200x200 2D grid using a phase-field model as outlined in \ccite{Panter2019b}.
 This uses an order parameter field to distinguish between the liquid and gas, resulting in a diffuse interface, and uses a fixed volume constraint for the droplet.
 The contact angles of the hydrophilic and hydrophobic regions are 60\si{\degree} and 110\si{\degree} respectively.
 
-The results for this test, shown in \cref{fig:speedtest}, demonstrate two main advantages for the BITSS method.
+\topic The results for this test, shown in \cref{fig:speedtest}, demonstrate two main advantages for the BITSS method.
 Firstly, the slope illustrates that the rate of convergence is indeed much greater for the BITSS method.
 It is matched only by the initial rate of the string method with five to ten images, however these soon slow and are relatively inaccurate.
 Secondly, the BITSS method can more accurately approximate the transition state by orders of magnitude, particularly for the wetting example, where the string method does not significantly improve upon the initial pathway estimate.
 Therefore, unlike the string method, BITSS does not require a second approach to accurately locate the transition state.
 Similar results are also found when comparing against against DNEB, which can be seen in the supplementary information.
 
+
+\section{Zero-curvature modes}
+\topic Interaction potentials in meso- or macroscale systems are typically short range, and often limited to contact forces.
+Thus, there may be many regions in the potential energy landscape that are locally flat.
+Single-ended search methods generally only use local information, and so require specialist treatment to deal with these zero modes, such as global translation and rotation in free space.
+These require analytic expressions for the translation and rotation vectors, which are known.
+However, these single-ended search methods are thwarted by local zero modes.
+
+\topic In \cref{fig:flatdiscontinuous}a we demonstrate the BITSS method applied to a 2D potential with regions containing such zero modes (i \& ii).
+It is able to successfully converge when there are flat regions, even with one very close to the transition state (ii).
+In these regions there are no driving forces due to the potential and the energy constraint, because these use purely local information about the gradient.
+However, the distance constraint continues to pull the states together, preventing them from getting stuck.
+When only a single state has a zero-gradient mode then the other is likely to slide down the potential slightly, causing a kink in the pathway (iii).
+Although, this will not affect the result because the two states still remain either side of the dividing ridge.
+Indeed, only if the zero-gradient mode is at the transition state in the direction of the pathway will it cause BITSS to fail.
+But in this case there is no single transition state, instead the MEP would have a flat section at the top of its energy profile.
+
+
+\begin{figure}[htb]
+  \centering
+  \begin{tabular}[b]{c}
+    \includegraphics{fig/zeroeigen.pdf}\\
+    \includegraphics{fig/discontinuous.pdf}
+  \end{tabular}
+  \caption{
+    (a) Energy profile of the BITSS pathway on a 2D potential with flat regions.
+        The minima and transition state are marked by red and magenta dots respectively.
+        Points of interest are labelled by i-iii.
+        Top inset: A zoomed in view around the transition state.
+        Bottom inset: The pathway taken, with the edges of the flat regions marked by dashed lines.
+    (b) Disconnectivity graph of the energy landscape for a seven-particle cluster with a discontinuous hard-core pair potential.
+    (c) Plot of the discontinuous potential.
+        The repulsive section of the usual Lennard-Jones potential is also shown in grey.
+  }
+  \label{fig:flatdiscontinuous}
+\end{figure}
+
+
+\section{Gradient-free problems}
+\topic The energy landscapes may be discontinuous, prevalent for example in systems of solid bodies in which overlap incurs an infinite (or undefined) energetic penalty.
+Alternatively, the potential energy gradients may be prohibitively expensive to compute, or not available.
+In both cases, typical landscapes methods that require continuous, differentiable (often twice-differentiable) optimisation functions will not be appropriate.
+
+\begin{itemize}
+\item
+Two adjustments are necessary to remove any dependence upon gradient in the method.
+First, a gradient-free minimiser instead of L-BFGS.
+Second, we can ignore the term in \cref{eq:kd} that uses the gradient information.
+\item
+Simulated annealing can be used for the minimiser for each step of the BITSS method.
+To reduce the probability of the states jumping over the barrier the initial temperature is set to $T_0 = \frac{\Delta E}{10}$, and the maximum size of random displacements to $d_\text{max} = d(\bm{x}_1, \bm{x}_2) / 100$.
+Each minimisation is stopped after 1000 consecutive rejections or 10000 total iterations.
+\item
+Tested using a Lennard-Jones 7-particle cluster with hard cores, for which the gradient is not defined when the particles overlap.
+The gradient-free method is able to successfully find the transition states, allowing us to plot the disconnectivity graph of the system, as shown in \cref{fig:flatdiscontinuous}b.
+\item
+Notably, this takes much longer than gradient-based approaches, which are preferable if possible.
+\end{itemize}
+
+
 \section{Adaptive mesh}
-In many meso- and macroscale simulations, a strategy to reduce the computational overheads is to have a coarse-grained description of the system in regions with few changing features, and increase in resolution in regions of interest.
+\topic In many meso- and macroscale simulations, a strategy to reduce the computational overheads is to have a coarse-grained description of the system in regions with few changing features, and increase in resolution in regions of interest.
 However, this adaptive remeshing can result in difficulties for double-ended search methods because different states can have different numbers of degrees of freedom.
 
 \begin{itemize}
@@ -226,65 +314,6 @@ Furthermore, if we use an adaptive grid model the grids should converge as the s
   }
   \label{fig:differentgrids}
 \end{figure}
-
-
-\section{Zero-curvature modes}
-Interaction potentials in meso- or macroscale systems are typically short range, and often limited to contact forces.
-Thus, there may be many regions in the potential energy landscape that are locally flat.
-Single-ended search methods generally only use local information, and so require specialist treatment to deal with these zero modes, such as global translation and rotation in free space.
-These require analytic expressions for the translation and rotation vectors, which are known.
-However, these single-ended search methods are thwarted by local zero modes.
-
-In \cref{fig:flatdiscontinuous}a we demonstrate the BITSS method applied to a 2D potential with regions containing such zero modes (i \& ii).
-It is able to successfully converge when there are flat regions, even with one very close to the transition state (ii).
-In these regions there are no driving forces due to the potential and the energy constraint, because these use purely local information about the gradient.
-However, the distance constraint continues to pull the states together, preventing them from getting stuck.
-When only a single state has a zero-gradient mode then the other is likely to slide down the potential slightly, causing a kink in the pathway (iii).
-Although, this will not affect the result because the two states still remain either side of the dividing ridge.
-Indeed, only if the zero-gradient mode is at the transition state in the direction of the pathway will it cause BITSS to fail.
-But in this case there is no single transition state, instead the MEP would have a flat section at the top of its energy profile. 
-
-
-\begin{figure}[htb]
-  \centering
-  \begin{tabular}[b]{c}
-    \includegraphics{fig/zeroeigen.pdf}\\
-    \includegraphics{fig/discontinuous.pdf}
-  \end{tabular}
-  \caption{
-    (a) Energy profile of the BITSS pathway on a 2D potential with flat regions.
-        The minima and transition state are marked by red and magenta dots respectively.
-        Points of interest are labelled by i-iii.
-        Top inset: A zoomed in view around the transition state.
-        Bottom inset: The pathway taken, with the edges of the flat regions marked by dashed lines.
-    (b) Disconnectivity graph of the energy landscape for a seven-particle cluster with a discontinuous hard-core pair potential.
-    (c) Plot of the discontinuous potential.
-        The repulsive section of the usual Lennard-Jones potential is also shown in grey.
-  }
-  \label{fig:flatdiscontinuous}
-\end{figure}
-
-
-\section{Gradient-free problems}
-The energy landscapes may be discontinuous, prevalent for example in systems of solid bodies in which overlap incurs an infinite (or undefined) energetic penalty.
-Alternatively, the potential energy gradients may be prohibitively expensive to compute, or not available.
-In both cases, typical landscapes methods that require continuous, differentiable (often twice-differentiable) optimisation functions will not be appropriate.
-
-\begin{itemize}
-\item
-Two adjustments are necessary to remove any dependence upon gradient in the method.
-First, a gradient-free minimiser instead of L-BFGS.
-Second, we can ignore the term in \cref{eq:kd} that uses the gradient information.
-\item
-Simulated annealing can be used for the minimiser for each step of the BITSS method.
-To reduce the probability of the states jumping over the barrier the initial temperature is set to $T_0 = \frac{\Delta E}{10}$, and the maximum size of random displacements to $d_\text{max} = d(\bm{x}_1, \bm{x}_2) / 100$.
-Each minimisation is stopped after 1000 consecutive rejections or 10000 total iterations.
-\item
-Tested using a Lennard-Jones 7-particle cluster with hard cores, for which the gradient is not defined when the particles overlap.
-The gradient-free method is able to successfully find the transition states, allowing us to plot the disconnectivity graph of the system, as shown in \cref{fig:flatdiscontinuous}b.
-\item
-Notably, this takes much longer than gradient-based approaches, which are preferable if possible.
-\end{itemize}
 
 
 \section{Conclusion}
