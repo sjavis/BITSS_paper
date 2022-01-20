@@ -55,10 +55,11 @@
 
 
 %\section{Introduction \& Method}
-\topic Historically, the development of computational methods to locate transition states in free or potential energy landscapes has had significant impact in particulate and atomistic systems.
+\topic Transition states provide fundamental insight into the stability and possible reconfiguration of systems in chemistry, condensed matter physics, and engineering.
+Historically, the development of computational methods for locating transition states in free or potential energy landscapes has focused significantly upon particulate and atomistic systems.
 In these, the energy barrier between a local energy minimum and a transition state informs the probability of the transition occurring within a thermalised population, and ultimately reaction rates and kinetics \temp{[cite]}.
 The energy barriers can also be used to characterise the behaviour of molecules and structures with large numbers of stable configurations, which has applications to protein folding \cite{Bryngelson1995,Onuchic1997}, crystalisation and clusters \cite{Wales1998,Wales2012}.
-In addition to these microscale applications it is also increasingly being recognised that transition states are useful in mesoscale or macroscale systems. %, in which the energy barriers are sufficiently high that thermal transition probabilities are vanishingly small.
+In addition to these microscale applications it is also increasingly being recognised that transition states are useful in mesoscale or macroscale systems.
 Here, the minimum energy barriers provide important lower bounds to the energy input required for transitions to occur.
 This is essential to capture in, for example, structural engineering applications, where the minimum energy mechanism for structural failure must be known in order to ensure safety \cite{Panter2019,Hutchinson2018}.
 Moreover, it is becoming desirable to functionalise elastic deformation transition mechanisms to enable technologies such as advanced deployable structures \cite{Filipov2015,Zhai2018}, mechanical sensors and actuators, and energy absorption \cite{Shan2015} to name but a few.
@@ -66,27 +67,28 @@ Moreover, it is becoming desirable to functionalise elastic deformation transiti
 %For example, a knowledge of the minimum energy failure mechanisms on super liquid-repellent surfaces informs design criteria in order to optimise device performance \cite{Zhang2014,Panter2019b}.
 %Finally, transition mechanisms are important in robotics, for locomotion and navigation of rigid bodies through complex terrain \cite{Othayoth2020}.
 
-\topic The large variety of both micro- and macro-scale applications leads to a number of complex challenges that many existing transition state search methods do not adequately address.
-For example, in many problems there exist soft-modes where the landscape is locally flat. \temp{[cite]}
-This can cause issues for search methods that rely only upon local information.
-Another issue arises for systems with short-range contact forces, such as hard-core particles \temp{[cite]} and patchy colloids \temp{[cite]}, resulting in discontinuous landscapes and undefined gradients.
-Adaptive coarse-graining is often used for many macro-scale simulations as a method to reduce computational overhead. \temp{[cite]}
-To enable this, the search method must be able to deal with changing degrees of freedom as the method runs.
-Lastly, many applications can have extremely large numbers of degrees of freedom, such as large particulate systems or discretisations of 3D continuum systems.
-As a result, inefficient methods can become computationally expensive or prohibitive.
-In an effort to address these issues we will introduce and demonstrate a new transition state search method over the course of this work.
-
-\topic Transition state search methods generally fall into two categories, single- and double-ended methods.
+\topic Existing transition state search methods generally fall into two categories, single- and double-ended methods.
 Single-ended methods are initialised at a single state, typically a minimum in the potential energy landscape, and attempt to identify nearby saddle points.
 These methods can converge to a transition state quickly, although are not well suited to identifying specific pathways because a single minimum can be surrounded by many saddle points.
 Examples include eigenvector following \cite{Cerjan1981}, the dimer method \cite{Heyden2005,Kastner2008}, and climbing image methods \cite{E2007,Ren2013}.
 Double-ended methods, such as the string method \cite{E2002,E2007} and doubly-nudged elastic band (DNEB) \cite{Trygubenko2004}, involve initialising a chain of states between two minima and then minimising the total energy of the chain.
 In addition to approximating the transition state, these are useful for obtaining an estimate for the full transition pathway.
 
-\topic Our method lies somewhere between these two categories.
-Dubbed the Binary Image Transition State Search (BITSS), it involves the convergence of just two states from seperate minima to a transition state that separates them.
-We begin the method by choosing the states, $\bm{x}_1$ and $\bm{x}_2$, to be in different basins of attraction of local minima.
-These states can indeed be the local minima, but this is not a necessary requirement.
+\topic Despite this wide variety of existing methods, there are still some important classes of problems relevant to both micro- and macro-scale applications that have not been adequately addressed.
+One key problem involves systems that have extremely large numbers of degrees of freedom, such as large particulate systems or discretisations of 3D continuum systems.
+In this case, double-ended methods can become computationally expensive, or even prohibitive, owing to the tens of states that are required to accurately approximate the transition state.
+A method to reduce the computational overhead in many macro-scale simulations is adaptive coarse-graining or remeshing. \temp{[cite]}
+However, for a transition state search method to utilise this it must be able to deal with changing numbers of degrees of freedom as the method runs.
+This is a particular problem for double-ended methods for which each of the states will have a different discretisation.
+Further issues arise for systems with short-range contact forces, such as hard-core particles \temp{[cite]} and patchy colloids \temp{[cite]}.
+In this case, in many configurations there will exist soft-modes where the landscape is locally flat. \temp{[cite]}
+This can cause issues for single-ended search methods that rely only upon local information.
+Finally, if short range interactions are chosen that are discontinuous the gradients will be undefined, in which case typical landscape methods that require continuous, differentiable optimisation functions will not be appropriate.
+
+\topic In this work we introduce a new method, the Binary Image Transition State Search (BITSS), and demonstrate how it addresses each of these challenges.
+This method lies somewhere between the two traditional categories; it uses two states which converge from different minima to a transition state that separates them.
+The states, $\bm{x}_1$ and $\bm{x}_2$, are first initialised in different basins of attraction of local minima.
+While these states can indeed be the local minima, this is not a necessary requirement.
 Upon application of the BITSS method, the two images are brought closer to the ridge separating the basins of attraction, while also minimising the energy of the pair of images.
 In this way, the two images meet at the lowest energy point on the ridge - the transition state.
 This is demonstrated for a simple 2D potential with two minima in \cref{fig:toy2d}a.
