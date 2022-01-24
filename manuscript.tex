@@ -37,7 +37,7 @@
     \expandafter\def\csname\string#1\endcsname##1~%
   }{\endgroup#2\space}%
 }
-\newlinecommand{\topic}{#1}%\textbf{#1}}
+\newlinecommand{\topic}{\textbf{#1}}
 
 
 
@@ -183,33 +183,90 @@ To ensure this pathway is sufficiently smooth the maximum step size of the minim
 \end{figure*}
 
 \topic As a result of the BITSS method using only two states it has the potential to be significantly faster than chain-of-states approaches which typically use tens of states.
-This is tested here by measuring the speed at which the BITSS method converges to the transition state and comparing it to the string method and DNEB for several examples.
+This is tested here by measuring the speed at which the BITSS method converges to the transition state and comparing it to the string method and DNEB for several representitive examples.
 The accuracy of the BITSS method is calculated using the distance between the correct transition state and the average of the two states.
 While for the chain-of-states methods, the accuracy is measured as the distance of the transition state from a cubic spline interpolation of the points along the string.
 For each method, the accuracy is measured against the number of times the energy and gradient of the system are evaluated.
 The results of this are shown in \cref{fig:speedtest} and \temp{SI} for the string method and DNEB respectively.
 
 \topic The first system to be tested is a two-dimensional seven-particle cluster with Lennard-Jones interactions.
-The transition begins with the hexagonal cluster and involves the movement of two particles to reach a higher energy configuration.
+The transition begins with the hexagonal cluster and involves two particles shifting to reach a higher energy configuration.
 
 \topic The second system is an elastic cylindrical shell under an applied strain.
 This undergoes a transition from an unbuckled state to a singly-dimpled state, which is significant because it defines the minimum energy required for the cylinder to buckle \cite{Panter2019}.
-To model the surface a two-dimensional triangular mesh is used.
-The energy of the surface is calculated by considering the stretching energies of bonds and the bending energies for pairs of triangular faces.
-With the corresponding rigidities depending upon the geometry of the mesh in an attempt to accurately model the continuum elastic properties.
+A 2D triangular mesh is used to model this system, with the following energy function,
+\begin{equation}
+  E = \sum_i k^S_i (r_i - r^0_i)^2 + \sum_j k^B_j [1 + \text{cos}(\theta_j - \theta^0_j)].
+\end{equation}
+The first term provides the stretching energy for the system using a sum over all the bonds, where $r_i$ is the length, $r^0_i$ --- the equilibrium length, and $k^S_i$ --- the stretching rigidity of bond $i$.
+The second term models the bending energy by representing each pair of adjacent triangles as an elastic hinge.
+For hinge $j$, $\theta_j$ is the dihedral angle, $\theta^0_j$ --- the equilibrium angle, and $k^B_j$ --- the bending rigidity.
 
 \topic The final system involves a droplet situated on a chemically striped surface with both hydrophilic and hydrophobic regions.
 This has two possible states, with the droplet either upon one hydrophilic stripe, or straddling across two.
-This is modelled on a 200x200 2D grid using a phase-field model as outlined in \ccite{Panter2019b}.
-This uses an order parameter field to distinguish between the liquid and gas, resulting in a diffuse interface, and uses a fixed volume constraint for the droplet.
-The contact angles of the hydrophilic and hydrophobic regions are 60\si{\degree} and 110\si{\degree} respectively.
+This is modelled on a 200x200 2D grid using a phase-field model \cite{Panter2019b}, which has an order parameter, $\phi(\bm{r})$, representing the phase of the liquid ($\phi=-1$ for gas, $\phi=1$ for liquid).
+The energy functional has four separate terms,
+\begin{equation}
+  E[\phi] = E_B + E_I + E_S + E_V.
+\end{equation}
+The first term, $E_B$, uses a double well potential to set values of $\phi=\pm1$ in the bulk.
+The second term then provides the interfacial energy between the liquid and gas by imposing an energy penalty to changes in $\phi$.
+$E_S$ is the solid-liquid interaction energy, which sets the contact angles of the hydrophilic and hydrophobic regions to 60\si{\degree} and 110\si{\degree} respectively.
+Finally, $E_V$ constrains the volume of the liquid drop by penalising any variation from 11\% of the total volume of the system.
 
 \topic The results for this test, shown in \cref{fig:speedtest}, demonstrate two main advantages for the BITSS method.
 Firstly, the slope illustrates that the rate of convergence is indeed much greater for the BITSS method.
-It is matched only by the initial rate of the string method with five to ten images, however these soon slow and are relatively inaccurate.
+It is matched only by the initial rate of the string method using less than ten images, however these soon slow and are relatively inaccurate.
 Secondly, the BITSS method can more accurately approximate the transition state by orders of magnitude, particularly for the wetting example, where the string method does not significantly improve upon the initial pathway estimate.
 Therefore, unlike the string method, BITSS does not require a second approach to accurately locate the transition state.
 Similar results are also found when comparing against against DNEB, which can be seen in the supplementary information.
+
+
+\section{Adaptive mesh}
+\topic In many meso- and macroscale simulations, a strategy to reduce the computational overheads is to have a coarse-grained description of the system in regions with few changing features, and increase in resolution in regions of interest.
+However, this adaptive remeshing can result in difficulties for double-ended search methods because different states can have different numbers of degrees of freedom.
+
+\begin{itemize}
+\item
+To test how BITSS can be applied to these models we investigate two problems individually.
+\item
+First, we test the effect of changing the mesh which is shared by the two states.
+For this we use the cylindrical buckling example and refine the mesh as it approaches the transition state.
+This is successful without any special considerations, as shown in \cref{fig:differentgrids}a.
+\item
+For the second test we investigate how BITSS performs when the two states use different meshes.
+We need to make sure that the distance measure takes into account the different grids.
+The most straightforward approach - interpolate onto the same grid and compute the Euclidean distance.
+Simpler distance measures may be sufficient for some applications, such as the difference between average values of the system.
+\item
+Demonstration: wetting on striped surface, one state using a resolution of 200x200, and 400x400 for the other.
+The result is shown in \cref{fig:differentgrids}b.
+\item
+In this case there is a limit to how close the states can get.
+This is because the energy of the transition state is slightly different on each grid, and so eventually the equal energy constraint will fail.
+This effect will be more pronounced at low resolutions.
+However, as shown in \cref{fig:differentgrids}b, we are able to get a very accurate approximation without having to resorting to high resolutions.
+Furthermore, if we use an adaptive grid model the grids should converge as the states do, thereby eliminating the issue.
+\end{itemize}
+
+\begin{figure}[htb]
+  \centering
+  \begin{tabular}[b]{c}
+    \includegraphics{fig/changingmesh.pdf}\\
+    \includegraphics{fig/differentgrids-a.pdf}%
+    \includegraphics{fig/differentgrids-b.pdf}%
+  \end{tabular}
+  \caption{
+    (a) Snapshots of the BITSS method applied to the buckling of a cylinder with a changing mesh.
+        The radial displacement relative the unbuckled cylinder is shown, as well as the underlying triangular mesh.
+    (b) The final two states after applying the BITSS method to wetting on a striped surface using a pair of different grid resolutions.
+        Each grid cell denotes 50x50 lattice nodes.
+        The black sections of the substrate are hydrophilic (60\si{\degree} contact angle), while the white are hydrophobic (110\si{\degree}).
+        The right axes shows the interface of the approximated transition state with a single resolution of 200 or 400, and for a mixed resolution.
+        The inset shows a closer view of the location with the largest discrepancy.
+  }
+  \label{fig:differentgrids}
+\end{figure}
 
 
 \section{Zero-curvature modes}
@@ -269,53 +326,6 @@ The gradient-free method is able to successfully find the transition states, all
 \item
 Notably, this takes much longer than gradient-based approaches, which are preferable if possible.
 \end{itemize}
-
-
-\section{Adaptive mesh}
-\topic In many meso- and macroscale simulations, a strategy to reduce the computational overheads is to have a coarse-grained description of the system in regions with few changing features, and increase in resolution in regions of interest.
-However, this adaptive remeshing can result in difficulties for double-ended search methods because different states can have different numbers of degrees of freedom.
-
-\begin{itemize}
-\item
-To test how BITSS can be applied to these models we investigate two problems individually.
-\item
-First, we test the effect of changing the mesh which is shared by the two states.
-For this we use the cylindrical buckling example and refine the mesh as it approaches the transition state.
-This is successful without any special considerations, as shown in \cref{fig:differentgrids}a.
-\item
-For the second test we investigate how BITSS performs when the two states use different meshes.
-We need to make sure that the distance measure takes into account the different grids.
-The most straightforward approach - interpolate onto the same grid and compute the Euclidean distance.
-Simpler distance measures may be sufficient for some applications, such as the difference between average values of the system.
-\item
-Demonstration: wetting on striped surface, one state using a resolution of 200x200, and 400x400 for the other.
-The result is shown in \cref{fig:differentgrids}b.
-\item
-In this case there is a limit to how close the states can get.
-This is because the energy of the transition state is slightly different on each grid, and so eventually the equal energy constraint will fail.
-This effect will be more pronounced at low resolutions.
-However, as shown in \cref{fig:differentgrids}b, we are able to get a very accurate approximation without having to resorting to high resolutions.
-Furthermore, if we use an adaptive grid model the grids should converge as the states do, thereby eliminating the issue.
-\end{itemize}
-
-\begin{figure}[htb]
-  \centering
-  \begin{tabular}[b]{c}
-    \includegraphics{fig/changingmesh.pdf}\\
-    \includegraphics{fig/differentgrids-a.pdf}%
-    \includegraphics{fig/differentgrids-b.pdf}%
-  \end{tabular}
-  \caption{
-    (a) Snapshots of the BITSS method applied to the buckling of a cylinder with a changing mesh.
-        The radial displacement relative the unbuckled cylinder is shown, as well as the underlying triangular mesh.
-    (b) The final two states after applying the BITSS method to wetting on a striped surface using a pair of different grid resolutions.
-        Each grid cell denotes 50x50 lattice nodes.
-        The black sections of the substrate are hydrophilic (60\si{\degree} contact angle), while the white are hydrophobic (110\si{\degree}).
-        The right axes shows the interface of the approximated transition state with a single resolution of 200 or 400, and for a mixed resolution.
-        The inset shows a closer view of the location with the largest discrepancy.
-  }
-  \label{fig:differentgrids}
-\end{figure}
 
 
 \section{Conclusion}
