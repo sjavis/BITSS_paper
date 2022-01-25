@@ -167,7 +167,7 @@ This is done by tracing the trajectory of downhill minimisations either side of 
 To ensure this pathway is sufficiently smooth the maximum step size of the minimisation should be restricted.
 
 
-\section{Speed Comparison}
+%\section{Speed Comparison}
 \begin{figure*}[htb]
   \centering
   \includegraphics{fig/speedtest-a.pdf}%
@@ -223,6 +223,13 @@ Similar results are also found when comparing against against DNEB, which can be
 
 
 \section{Adaptive mesh}
+\topic To further increase the speed of the method we can use adaptive remeshing and coarse-graining.
+
+\topic Firstly, we demonstrate in \cref{fig:differentgrids}a that BITSS is able to handle the discretisation changing as the method runs.
+
+\topic For the second test, we investigate how BITSS performs when the two states are using different meshes.
+
+
 \topic In many meso- and macroscale simulations, a strategy to reduce the computational overheads is to have a coarse-grained description of the system in regions with few changing features, and increase in resolution in regions of interest.
 However, this adaptive remeshing can result in difficulties for double-ended search methods because different states can have different numbers of degrees of freedom.
 
@@ -253,8 +260,7 @@ Furthermore, if we use an adaptive grid model the grids should converge as the s
   \centering
   \begin{tabular}[b]{c}
     \includegraphics{fig/changingmesh.pdf}\\
-    \includegraphics{fig/differentgrids-a.pdf}%
-    \includegraphics{fig/differentgrids-b.pdf}%
+    \includegraphics{fig/differentgrids.pdf}%
   \end{tabular}
   \caption{
     (a) Snapshots of the BITSS method applied to the buckling of a cylinder with a changing mesh.
