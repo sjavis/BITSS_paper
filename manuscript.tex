@@ -261,19 +261,19 @@ Despite this, the two states are still able to get very close and give a very go
 Furthermore, using an adaptive grid model the grids would also be expected to converge, thereby eliminating the issue.
 
 
-\section{Zero-curvature modes}
-\topic Interaction potentials in meso- or macroscale systems are typically short range, and often limited to contact forces.
+%\section{Zero-curvature modes}
+\topic Interaction potentials in many particulate and macroscale systems are short range, and often limited to contact forces.
 Thus, there may be many regions in the potential energy landscape that are locally flat.
-Single-ended search methods generally only use local information, and so require specialist treatment to deal with these zero modes, such as global translation and rotation in free space.
-These require analytic expressions for the translation and rotation vectors, which are known.
+Single-ended search methods generally only use local information, and so require specialist treatment to deal with these zero modes.
+For example, global translation and rotation in free space require analytic expressions for the translation and rotation vectors, which are known.
 However, these single-ended search methods are thwarted by local zero modes.
 
 \topic In \cref{fig:flatdiscontinuous}a we demonstrate the BITSS method applied to a 2D potential with regions containing such zero modes (i \& ii).
-It is able to successfully converge when there are flat regions, even with one very close to the transition state (ii).
-In these regions there are no driving forces due to the potential and the energy constraint, because these use purely local information about the gradient.
+We see it is able to successfully converge past these flat regions, even with one very close to the transition state (ii).
+In these regions there are no driving forces due to the potential and the energy constraint, which use purely local information about the gradient.
 However, the distance constraint continues to pull the states together, preventing them from getting stuck.
 When only a single state has a zero-gradient mode then the other is likely to slide down the potential slightly, causing a kink in the pathway (iii).
-Although, this will not affect the result because the two states still remain either side of the dividing ridge.
+Although, the two states still remain either side of the dividing ridge and so the result will be unaffected.
 Indeed, only if the zero-gradient mode is at the transition state in the direction of the pathway will it cause BITSS to fail.
 But in this case there is no single transition state, instead the MEP would have a flat section at the top of its energy profile.
 
@@ -298,26 +298,21 @@ But in this case there is no single transition state, instead the MEP would have
 \end{figure}
 
 
-\section{Gradient-free problems}
-\topic The energy landscapes may be discontinuous, prevalent for example in systems of solid bodies in which overlap incurs an infinite (or undefined) energetic penalty.
-Alternatively, the potential energy gradients may be prohibitively expensive to compute, or not available.
+%\section{Gradient-free problems}
+\topic In many cases contact forces may be chosen to be infinite to prevent overlap of solid bodies.
+This results in the energy landscape becoming discontinuous with regions of undefined gradients.
+Alternatively, for some systems the potential energy gradients may be prohibitively expensive to compute, or not available.
 In both cases, typical landscapes methods that require continuous, differentiable (often twice-differentiable) optimisation functions will not be appropriate.
 
-\begin{itemize}
-\item
-Two adjustments are necessary to remove any dependence upon gradient in the method.
-First, a gradient-free minimiser instead of L-BFGS.
-Second, we can ignore the term in \cref{eq:kd} that uses the gradient information.
-\item
-Simulated annealing can be used for the minimiser for each step of the BITSS method.
-To reduce the probability of the states jumping over the barrier the initial temperature is set to $T_0 = \frac{\Delta E}{10}$, and the maximum size of random displacements to $d_\text{max} = d(\bm{x}_1, \bm{x}_2) / 100$.
-Each minimisation is stopped after 1000 consecutive rejections or 10000 total iterations.
-\item
-Tested using a Lennard-Jones 7-particle cluster with hard cores, for which the gradient is not defined when the particles overlap.
-The gradient-free method is able to successfully find the transition states, allowing us to plot the disconnectivity graph of the system, as shown in \cref{fig:flatdiscontinuous}b.
-\item
-Notably, this takes much longer than gradient-based approaches, which are preferable if possible.
-\end{itemize}
+\topic BITSS can be used for these systems with undefined gradients with just a couple of alterations.
+First, the term using gradients in \cref{eq:kd} can be ignored and $\kappa_d$ can instead be calculated using just the second term.
+Next we must use a minimiser that does not require a differentiable optimisation function; for this we use simulated annealing \temp{[cite]}.
+This has a chance of randomly jumping one state over the dividing barrier, but we can reduce this probability by setting the initial temperature to $T_0 = \frac{\Delta E}{10}$, and the maximum size of random displacements to $d_\text{max} = d(\bm{x}_1, \bm{x}_2) / 100$.
+
+\topic This has been tested using a Lennard-Jones 7-particle cluster with hard cores, resulting in a discontinuous landscape.
+Using the gradient-free approach, BITSS is able to successfully find the transition states, allowing us to plot the disconnectivity graph of the system, as shown in \cref{fig:flatdiscontinuous}b.
+In the supplementary information this is compared with the results for the standard Lennard-Jones cluster.
+It is worth noting that gradient-based approaches are significantly more efficient, so these should be preferred if possible.
 
 
 \section{Conclusion}
