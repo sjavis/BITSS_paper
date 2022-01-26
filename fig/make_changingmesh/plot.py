@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 import matplotlib.tri as mtri
 import json
 import pyutils.latexify as lt
-
-# Latexify parameters
-lt.update_width(246) # Double column: 510 pt, single column: 246 pt
+# Get default style for paper
+import sys; sys.path.insert(0, '..')
+import style
 
 # Figure parameters
 ar = 0.5

@@ -7,8 +7,9 @@ import matplotlib.patheffects as mpe
 import json
 import pyutils.latexify as lt
 from mpl_toolkits.axes_grid1.inset_locator import mark_inset
-
-lt.update_width(246) # Double column: 510 pt, single column: 246 pt
+# Get default style for paper
+import sys; sys.path.insert(0, '..')
+import style
 
 ### Plot parameters
 dt = 0.06

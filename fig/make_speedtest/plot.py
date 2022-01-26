@@ -5,10 +5,10 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.image as mim
 import pyutils.latexify as lt
-
-lt.update_width(510) # Double column: 510 pt, single column: 246 pt
-plt.rc('font', size=9)
-plt.rc('axes', labelsize=9)
+# Get default style for paper
+import sys; sys.path.insert(0, '..')
+import style
+lt.update_width('r4-double')
 
 def str_converter(instr):
     return np.fromstring(instr[1:-1],sep=' ')

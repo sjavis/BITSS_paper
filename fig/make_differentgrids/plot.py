@@ -12,7 +12,6 @@ import style
 w1 = 0.24 # width of state boxes
 h1 = 0.135 # height of state boxes
 w2 = 0.13 # width of zoom box
-h2 = 0.25 # height of zoom box
 h3 = 0.05 # height of arrow box
 ws0 = 0.09 # horizontal space left of state boxes
 ws1 = 0.02 # horizontal space between state boxes
@@ -20,8 +19,7 @@ ws2 = 0.03 # horizontal space left of zoom box
 hs1 = 0.02 # vertical space between state boxes
 hs3 = 0.0 # vertical space above arrow box
 
-zoom_region = [185, 455, 140, 140]
-zoom_region = [0.59, -0.015, 0.05, 0.1]
+zoom_region = [0.595, -0.01, 0.04, 0.08]
 cs1 = 'lightgrey' # hydrophobic
 cs2 = 'k'         # hydrophilic
 cz1 = 'orange'
@@ -43,6 +41,8 @@ def load_data(data_file):
 
 def fig_layout():
     # Parameters
+    h2 = w1 * zoom_region[3] / zoom_region[2]
+    w3 = 3*w1 + 2*ws1
     h = 2*h1 + h3 + hs1 + hs3
     xa = ws0
     xb = xa + w1 + ws1
@@ -51,7 +51,6 @@ def fig_layout():
     ya = (h3 + hs3) / h
     yb = 0.999 - h1/h
     yc = ya + 0.5*(1 - ya - h2/h)
-    w3 = 3*w1 + 2*ws1
     # Axes
     fig = lt.figure(1, h)
     fig.text(0,  1, '(b)', ha='left', va='top')
@@ -125,6 +124,7 @@ def plot_zoom(ax, state1, state2, ts):
     ax.axvspan(0.625, 0.875, ymax=y0, color=cs2)
     ax.axhline(0, c='k', lw=0.5, zorder=1)
     # Axes limits
+    ax.set_aspect('equal')
     ax.set_xlim([zoom_region[0], zoom_region[0] + zoom_region[2]])
     ax.set_ylim([zoom_region[1], zoom_region[1] + zoom_region[3]])
 

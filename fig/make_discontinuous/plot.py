@@ -7,9 +7,9 @@ import networkx as nx
 from pele.utils.disconnectivity_graph import DisconnectivityGraph
 
 import pyutils.latexify as lt
-lt.update_width(246) # Double column: 510 pt, single column: 246 pt
-plt.rc('font', size=9)
-plt.rc('axes', labelsize=9)
+# Get default style for paper
+import sys; sys.path.insert(0, '..')
+import style
 
 ndof = 14
 

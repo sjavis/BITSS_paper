@@ -37,7 +37,7 @@
     \expandafter\def\csname\string#1\endcsname##1~%
   }{\endgroup#2\space}%
 }
-\newlinecommand{\topic}{\textbf{#1}}
+\newlinecommand{\topic}{#1}%\textbf{#1}}
 
 
 
@@ -222,40 +222,7 @@ Therefore, unlike the string method, BITSS does not require a second approach to
 Similar results are also found when comparing against against DNEB, which can be seen in the supplementary information.
 
 
-\section{Adaptive mesh}
-\topic To further increase the speed of the method we can use adaptive remeshing and coarse-graining.
-
-\topic Firstly, we demonstrate in \cref{fig:differentgrids}a that BITSS is able to handle the discretisation changing as the method runs.
-
-\topic For the second test, we investigate how BITSS performs when the two states are using different meshes.
-
-
-\topic In many meso- and macroscale simulations, a strategy to reduce the computational overheads is to have a coarse-grained description of the system in regions with few changing features, and increase in resolution in regions of interest.
-However, this adaptive remeshing can result in difficulties for double-ended search methods because different states can have different numbers of degrees of freedom.
-
-\begin{itemize}
-\item
-To test how BITSS can be applied to these models we investigate two problems individually.
-\item
-First, we test the effect of changing the mesh which is shared by the two states.
-For this we use the cylindrical buckling example and refine the mesh as it approaches the transition state.
-This is successful without any special considerations, as shown in \cref{fig:differentgrids}a.
-\item
-For the second test we investigate how BITSS performs when the two states use different meshes.
-We need to make sure that the distance measure takes into account the different grids.
-The most straightforward approach - interpolate onto the same grid and compute the Euclidean distance.
-Simpler distance measures may be sufficient for some applications, such as the difference between average values of the system.
-\item
-Demonstration: wetting on striped surface, one state using a resolution of 200x200, and 400x400 for the other.
-The result is shown in \cref{fig:differentgrids}b.
-\item
-In this case there is a limit to how close the states can get.
-This is because the energy of the transition state is slightly different on each grid, and so eventually the equal energy constraint will fail.
-This effect will be more pronounced at low resolutions.
-However, as shown in \cref{fig:differentgrids}b, we are able to get a very accurate approximation without having to resorting to high resolutions.
-Furthermore, if we use an adaptive grid model the grids should converge as the states do, thereby eliminating the issue.
-\end{itemize}
-
+%\section{Adaptive mesh}
 \begin{figure}[htb]
   \centering
   \begin{tabular}[b]{c}
@@ -265,14 +232,33 @@ Furthermore, if we use an adaptive grid model the grids should converge as the s
   \caption{
     (a) Snapshots of the BITSS method applied to the buckling of a cylinder with a changing mesh.
         The radial displacement relative the unbuckled cylinder is shown, as well as the underlying triangular mesh.
-    (b) The final two states after applying the BITSS method to wetting on a striped surface using a pair of different grid resolutions.
+    (b) BITSS applied to the striped wetting example with different resolutions for the two states.
         Each grid cell denotes 50x50 lattice nodes.
-        The black sections of the substrate are hydrophilic (60\si{\degree} contact angle), while the white are hydrophobic (110\si{\degree}).
-        The right axes shows the interface of the approximated transition state with a single resolution of 200 or 400, and for a mixed resolution.
-        The inset shows a closer view of the location with the largest discrepancy.
+        The zoomed axes shows the difference in the fluid interface between the two final states, as well as the approximated transition state (solid black line).
+        This is compared to the dashed line showing the true transition state found using a high resolution for both states.
   }
-  \label{fig:differentgrids}
+  \label{fig:adaptivemesh}
 \end{figure}
+
+\topic To further increase the speed of the method we can use adaptive remeshing and coarse-graining to lower the resolution of the system in regions with few changing features.
+However, this introduces additional complexity to the method.
+It must be able to handle both the degrees of freedom changing, and the two states having separate discretisations.
+Here we test each of these issues individually.
+
+\topic Firstly, we demonstrate in \cref{fig:adaptivemesh}a that BITSS is indeed able to handle the discretisation changing as the method runs.
+For this we use the cylindrical buckling example with the resolution increasing from 40 to 100 triangles around the cylinder.
+These changes are performed after the minimisation step in each iteration of the BITSS method.
+This demonstrates that BITSS is able to converge to the transition state so long as the remeshing is not so drastic that one state is shifted into the basin of another minima.
+
+\topic For the second test, we investigate how BITSS performs when the two states have different meshes.
+The only special consideration needed for this is that the distance measure must take into account the different grids.
+This is done here by interpolating one state onto the other grid and computing the Euclidean distance.
+For some applications it may be sufficient to use simpler distance measures, such as the difference between average values of the system.
+The results for the striped wetting example with two different resolutions (shown in \cref{fig:adaptivemesh}b) demonstates that BITSS is successful.
+Notably, however, there is a limit to how close the two states can get.
+This is because the energy of the transition state is slightly different on each grid, so eventually the energy constraint will fail.
+Despite this, the two states are still able to get very close and give a very good approximation to the transition state.
+Furthermore, using an adaptive grid model the grids would also be expected to converge, thereby eliminating the issue.
 
 
 \section{Zero-curvature modes}
