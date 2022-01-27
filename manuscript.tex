@@ -1,4 +1,4 @@
-\documentclass[aps,twocolumn]{revtex4}
+\documentclass[aps,twocolumn]{revtex4-1}
 
 % Maths
 \usepackage{bm}
@@ -306,7 +306,7 @@ In both cases, typical landscapes methods that require continuous, differentiabl
 
 \topic BITSS can be used for these systems with undefined gradients with just a couple of alterations.
 First, the term using gradients in \cref{eq:kd} can be ignored and $\kappa_d$ can instead be calculated using just the second term.
-Next we must use a minimiser that does not require a differentiable optimisation function; for this we use simulated annealing \temp{[cite]}.
+Next we must use a minimiser that does not require a differentiable optimisation function; for this we use simulated annealing \cite{Kirkpatrick1983}.
 This has a chance of randomly jumping one state over the dividing barrier, but we can reduce this probability by setting the initial temperature to $T_0 = \frac{\Delta E}{10}$, and the maximum size of random displacements to $d_\text{max} = d(\bm{x}_1, \bm{x}_2) / 100$.
 
 \topic This has been tested using a Lennard-Jones 7-particle cluster with hard cores, resulting in a discontinuous landscape.
@@ -316,18 +316,9 @@ It is worth noting that gradient-based approaches are significantly more efficie
 
 
 \section{Conclusion}
-\begin{itemize}
-\item
-Introduced new method for finding transition state that addresses problems faced by macroscale systems.
-\item
-Low memory \& fast.
-\item
-Does not require an initial path estimation which simplifies problems with non-linear pathways.
-\item
-Can be used with adaptive mesh algorithms.
-\item
-Can also be used for gradient-free location of transition state
-\end{itemize}
+\topic In conclusion, we have demonstrated a novel method for finding transition states that addresses some problems not currently addressed by existing methods.
+The method has advantages over current double-ended methods because it is more efficient, both in terms of memory and computational cost, and does not require an initial estimate for the pathway, useful for systems with non-linear pathways.
+Furthermore, we have demonstrated that the method can sucessfully be used with adaptive mesh algorithms, as well as systemd with flat or discontinuous energy landscapes.
 
 
 \bibliographystyle{plain}
