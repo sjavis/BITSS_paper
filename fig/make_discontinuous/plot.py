@@ -109,10 +109,13 @@ def main():
     space2 = 0.1
     w1 = 0.4
     w2 = 0.25
+    h1 = 0.9
+    h2 = 0.7
+    y2 = 0.2
 
     # Plot
-    fig = lt.figure(1, 0.5)#, facecolor='grey')
-    ax = fig.add_axes([space1, 0.05, w1, 0.9])
+    fig = lt.figure(1, 0.4)#, facecolor='grey')
+    ax = fig.add_axes([space1, (1-h1)/2, w1, h1])
     fig.text(0, 0.95, '(b)', ha='left', va='top')
     fig.text(w1+space1, 0.95, '(c)', ha='left', va='top')
     dg.plot(axes=ax, linewidth=1)
@@ -130,7 +133,7 @@ def main():
 
     # Show potential
     # pot_ax = ax.inset_axes([0.17, 0.03, 0.3, 0.3])
-    pot_ax = fig.add_axes([w1+space1+space2, 0.2, w2, 0.6])
+    pot_ax = fig.add_axes([w1+space1+space2, y2, w2, h2])
     plot_potenial(pot_ax)
 
     # plt.tight_layout()

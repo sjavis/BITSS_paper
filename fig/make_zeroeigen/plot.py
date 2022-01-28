@@ -22,10 +22,11 @@ y0 = 0.3
 dx = 2.5
 dy = dx * ax_size[1][3] / ax_size[1][2] * aspect
 
-cmin = 'r'
-cpath = 'b'
-cts = 'm'
+cmin = 'b'
+cpath = 'tab:red'
+cts = 'orange'
 ms = 4
+mec = 'k'
 lw = 1.2
 
 
@@ -100,9 +101,9 @@ def plot_path_energy(ax, path):
     dist = np.cumsum(np.linalg.norm(np.diff(path, axis=0, prepend=0), axis=1))
     dist = dist / np.max(dist)
     ax.plot(dist, e, c=cpath, lw=lw)
-    ax.plot(dist[0] , e[0] , c=cmin, marker='o', ms=ms)
-    ax.plot(dist[-1] , e[-1] , c=cmin, marker='o', ms=ms)
-    ax.plot(dist[np.argmax(e)], np.max(e), c=cts , marker='o', ms=ms)
+    ax.plot(dist[0] , e[0] , c=cmin, marker='o', ms=ms, mec=mec)
+    ax.plot(dist[-1] , e[-1] , c=cmin, marker='o', ms=ms, mec=mec)
+    ax.plot(dist[np.argmax(e)], np.max(e), c=cts , marker='o', ms=ms, mec=mec)
 
     # dcenter = dist - dist[np.argmax(e)]
     # in_ins = np.logical_and(dcenter>-0.045, dcenter<0.06)
@@ -116,7 +117,7 @@ def plot_path_energy(ax, path):
 
     axin = ax.inset_axes(axin_size, transform=ax.transData)
     axin.plot(dist, e, c=cpath, lw=lw)
-    axin.plot(dist[np.argmax(e)], np.max(e), c=cts , marker='o', ms=ms)
+    axin.plot(dist[np.argmax(e)], np.max(e), c=cts , marker='o', ms=ms, mec=mec)
     axin.set_xlim(axin_bounds[0])
     axin.set_ylim(axin_ylim)
     axin.set_xticks([])
@@ -149,10 +150,10 @@ def plot_path(ax, path):
     x2 = path[1]
     ax.plot(x1[:,0] , x1[:,1] , c=cpath, lw=lw)
     ax.plot(x2[:,0] , x2[:,1] , c=cpath, lw=lw)
-    ax.plot(x1[0,0] , x1[0,1] , c=cmin, marker='o', ms=ms)
-    ax.plot(x2[0,0] , x2[0,1] , c=cmin, marker='o', ms=ms)
-    ax.plot(x1[-1,0], x1[-1,1], c=cts , marker='o', ms=ms)
-    ax.plot(x2[-1,0], x2[-1,1], c=cts , marker='o', ms=ms)
+    ax.plot(x1[0,0] , x1[0,1] , c=cmin, marker='o', ms=ms, mec=mec)
+    ax.plot(x2[0,0] , x2[0,1] , c=cmin, marker='o', ms=ms, mec=mec)
+    ax.plot(x1[-1,0], x1[-1,1], c=cts , marker='o', ms=ms, mec=mec)
+    ax.plot(x2[-1,0], x2[-1,1], c=cts , marker='o', ms=ms, mec=mec)
 
 
 def main():

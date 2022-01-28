@@ -14,8 +14,8 @@ import style
 ### Plot parameters
 dt = 0.06
 de = 0.02
-ar1 = 0.5
-ar2 = 0.6
+ar1 = 0.4
+ar2 = 0.5
 ldx = 0#.008
 
 cmap = 'Greys_r'
@@ -44,7 +44,7 @@ def gradient(x, y):
     return g
 
 dx = 2.25
-y0 = 0.25
+y0 = 0.27
 xlim = (-dx, dx)
 ylim = (y0-dx*ar1, y0+dx*ar1)
 x, y = np.mgrid[xlim[0]:xlim[1]:100j, ylim[0]:ylim[1]:100j]
@@ -109,7 +109,7 @@ axa.plot(bits[:,0,0], bits[:,0,1], c='r', zorder=2)
 axa.plot(bits[:,1,0], bits[:,1,1], c='r', zorder=2)
 
 # Pathway
-axa.plot(path[:,0], path[:,1], ls='--', c='m', zorder=1)
+axa.plot(path[:,0], path[:,1], ls='--', c='k', zorder=1)
 
 
 ### Plot midway
@@ -152,6 +152,9 @@ axb.quiver(x2[0], x2[1], -gd[0], -gd[1], color='b', **arrow_args)
 axb.text(0.38, 0.7, r'$\bm{F}_E$', c='r', transform=axb.transAxes)#.set_path_effects([mpe.withStroke(linewidth=2, foreground='w')])
 axb.text(0.35, 0.5, r'$\bm{F}_D$', c='b', transform=axb.transAxes)#.set_path_effects([mpe.withStroke(linewidth=2, foreground='w')])
 
+axb.text(x1[0], x1[1]-0.03, r'$\bm{x}_1$', va='top', ha='center')
+axb.text(x2[0], x2[1]-0.03, r'$\bm{x}_2$', va='top', ha='center')
+
 
 ### Plot final
 dx = 0.0045
@@ -169,7 +172,7 @@ axc.plot(tau[:,0], tau[:,1], ls=':', c='k')
 axc.plot(bits[i,:,0], bits[i,:,1], 'ro', mec=mec, ms=ms)
 axc.plot(ts[0], ts[1], c='orange', marker='o', mec=mec, ms=ms)
         
-axc.text(0.78, 0.45, r'$\bm{\hat\tau}$', transform=axc.transAxes)#.set_path_effects([mpe.withStroke(linewidth=2, foreground='w')])
+axc.text(0.78, 0.4, r'$\bm{\hat\tau}$', transform=axc.transAxes)#.set_path_effects([mpe.withStroke(linewidth=2, foreground='w')])
 
 #arrow_args = {'units':'xy', 'width':0.02, 'headlength':3, 'headaxislength':2.5, 'scale':3}
 #g = gradient(bits[i,:,0], bits[i,:,1])
