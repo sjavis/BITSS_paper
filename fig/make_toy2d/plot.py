@@ -18,6 +18,11 @@ ar1 = 0.4
 ar2 = 0.5
 ldx = 0#.008
 
+cbits = style.c1
+cts = style.c2
+cmin = style.c3
+cenergy = style.c3
+cdist = style.c2
 cmap = 'Greys_r'
 mec = 'k'
 ms = 6
@@ -101,12 +106,12 @@ img = mim.imread('potential.png')
 axa.imshow(img, extent=(xlim[0],xlim[1],ylim[0],ylim[1]))
 
 # Minima & TS
-axa.plot(minima[:,0], minima[:,1], 'bo', mec=mec, ms=ms, zorder=99)
-axa.plot(ts[0], ts[1], marker='o', mec=mec, ms=ms, zorder=99, c='orange')
+axa.plot(minima[:,0], minima[:,1], c=cmin, marker='o', mec=mec, ms=ms, ls='none', zorder=99)
+axa.plot(ts[0], ts[1], c=cts, marker='o', mec=mec, ms=ms, zorder=99)
 
 # BITS
-axa.plot(bits[:,0,0], bits[:,0,1], c='r', zorder=2)
-axa.plot(bits[:,1,0], bits[:,1,1], c='r', zorder=2)
+axa.plot(bits[:,0,0], bits[:,0,1], c=cbits, zorder=2)
+axa.plot(bits[:,1,0], bits[:,1,1], c=cbits, zorder=2)
 
 # Pathway
 axa.plot(path[:,0], path[:,1], ls='--', c='k', zorder=1)
@@ -133,24 +138,24 @@ for c in cnt.collections:
 # axb.contour(x, y, e, levels=levels, colors='k', linestyles='solid', linewidths=clw)
 # axb.contour(x, y, e, levels=[e0], colors='k', linestyles='solid', linewidths=1.5*clw)
 
-axb.plot(x1[0], x1[1], 'ro', mec=mec, ms=ms, zorder=99)
-axb.plot(x2[0], x2[1], 'ro', mec=mec, ms=ms, zorder=99)
+axb.plot(x1[0], x1[1], c=cbits, marker='o', mec=mec, ms=ms, zorder=99)
+axb.plot(x2[0], x2[1], c=cbits, marker='o', mec=mec, ms=ms, zorder=99)
 arrow_args = {'units':'xy', 'width':0.018, 'headwidth':4, 'headlength':4, 'headaxislength':3.5, 'scale':2, 'zorder':98}
 g1 = gradient(x1[0], x1[1])
 g2 = gradient(x2[0], x2[1])
 ge_factor = 1.5
-axb.quiver(x1[0], x1[1], ge_factor*g1[:,0], ge_factor*g1[:,1], color='r', **arrow_args)
-axb.quiver(x2[0], x2[1], -ge_factor*g2[:,0], -ge_factor*g2[:,1], color='r', **arrow_args)
+axb.quiver(x1[0], x1[1], ge_factor*g1[:,0], ge_factor*g1[:,1], color=cenergy, **arrow_args)
+axb.quiver(x2[0], x2[1], -ge_factor*g2[:,0], -ge_factor*g2[:,1], color=cenergy, **arrow_args)
 # axb.quiver(x1[0], x1[1], -g1[:,0], -g1[:,1], **arrow_args)
 # axb.quiver(x2[0], x2[1], -g2[:,0], -g2[:,1], **arrow_args)
 
 gd = (x2 - x1) * 0.65
-axb.quiver(x1[0], x1[1], gd[0], gd[1], color='b', **arrow_args)
-axb.quiver(x2[0], x2[1], -gd[0], -gd[1], color='b', **arrow_args)
+axb.quiver(x1[0], x1[1], gd[0], gd[1], color=cdist, **arrow_args)
+axb.quiver(x2[0], x2[1], -gd[0], -gd[1], color=cdist, **arrow_args)
 
 # axb.text(0.03, 0.35, '$F_P$', transform=axb.transAxes).set_path_effects([mpe.withStroke(linewidth=2, foreground='w')])
-axb.text(0.38, 0.7, r'$\bm{F}_E$', c='r', transform=axb.transAxes)#.set_path_effects([mpe.withStroke(linewidth=2, foreground='w')])
-axb.text(0.35, 0.5, r'$\bm{F}_D$', c='b', transform=axb.transAxes)#.set_path_effects([mpe.withStroke(linewidth=2, foreground='w')])
+axb.text(0.38, 0.7, r'$\bm{F}_E$', c=cenergy, transform=axb.transAxes)#.set_path_effects([mpe.withStroke(linewidth=2, foreground='w')])
+axb.text(0.35, 0.5, r'$\bm{F}_D$', c=cdist, transform=axb.transAxes)#.set_path_effects([mpe.withStroke(linewidth=2, foreground='w')])
 
 axb.text(x1[0], x1[1]-0.03, r'$\bm{x}_1$', va='top', ha='center')
 axb.text(x2[0], x2[1]-0.03, r'$\bm{x}_2$', va='top', ha='center')
@@ -169,8 +174,8 @@ for c in cnt.collections:
 i = -1
 tau = np.array([tau_len*bits[i,0]-(tau_len-1)*bits[i,1], tau_len*bits[i,1]-(tau_len-1)*bits[i,0]])
 axc.plot(tau[:,0], tau[:,1], ls=':', c='k')
-axc.plot(bits[i,:,0], bits[i,:,1], 'ro', mec=mec, ms=ms)
-axc.plot(ts[0], ts[1], c='orange', marker='o', mec=mec, ms=ms)
+axc.plot(bits[i,:,0], bits[i,:,1], c=cbits, marker='o', mec=mec, ms=ms, ls='none')
+axc.plot(ts[0], ts[1], c=cts, marker='o', mec=mec, ms=ms)
         
 axc.text(0.78, 0.4, r'$\bm{\hat\tau}$', transform=axc.transAxes)#.set_path_effects([mpe.withStroke(linewidth=2, foreground='w')])
 

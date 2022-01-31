@@ -22,10 +22,10 @@ y0 = 0.3
 dx = 2.5
 dy = dx * ax_size[1][3] / ax_size[1][2] * aspect
 
-cmin = 'b'
-cpath = 'tab:red'
-cts = 'orange'
-ms = 4
+cpath = style.c1
+cts = style.c2
+cmin = style.c3
+ms = 5
 mec = 'k'
 lw = 1.2
 

@@ -79,7 +79,7 @@ def plot_cluster(x, ax):
 
 
 def plot_potenial(ax):
-    c = 'C1'
+    c = style.c1
     xpad = 0#-2
     ypad = 0
     arrow_len = 0.3

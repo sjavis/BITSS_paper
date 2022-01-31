@@ -22,8 +22,8 @@ hs3 = 0.0 # vertical space above arrow box
 zoom_region = [0.595, -0.01, 0.04, 0.08]
 cs1 = 'lightgrey' # hydrophobic
 cs2 = 'k'         # hydrophilic
-cz1 = 'orange'
-cz2 = 'red'
+cz1 = style.c1
+cz2 = style.c2
 
 
 def load_data(data_file):
