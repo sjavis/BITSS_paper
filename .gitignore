@@ -1,8 +1,8 @@
 *.png
 *.pdf
 *.pgf
-manuscript.aux
-manuscript.bbl
-manuscript.blg
-manuscript.log
-manuscript.pdf
+*.aux
+*.bbl
+*.blg
+*.log
+*.bib

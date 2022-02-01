@@ -1,4 +1,4 @@
-\documentclass[aps,twocolumn]{revtex4-1}
+\documentclass[aps,prl,twocolumn,groupedaddress]{revtex4}
 
 % Maths
 \usepackage{bm}
@@ -41,11 +41,13 @@
 
 
 
+
 \begin{document}
 \title{Efficient saddle point search - Binary image transistion state search}
 \author{Sam Avis}
 \author{Jack Panter}
 \author{Halim Kusumaatmaja}
+\affiliation{Department of Physics, Durham University, South Road, Durham DH1 3LE, UK}
 
 \begin{abstract}
   Locating transition states is crucial for investigating minimum energy transition mechanisms, which have been widely investigated for atomistic systems and, more recently, macroscale applications.
@@ -97,7 +99,6 @@ In this way, the two images meet at the lowest energy point on the ridge - the t
 This is demonstrated for a simple 2D potential with two minima in \cref{fig:toy2d}a.
 
 \begin{figure}[htb]
-  \centering
   \includegraphics{fig/toy2d.pdf}
   \caption{
     (a) The trajectories of the two states under the BITSS method for a simple 2D potential with two minima (blue dots).
@@ -144,7 +145,7 @@ The coefficients are chosen such that each term in the gradient of \cref{eq:bits
 \end{gather}
 where $\alpha$ and $\beta$ are parameters with recommended values of $\alpha = 10$ and $\beta = 0.1$ (see supplementary information).
 $\Delta E$ is an estimation for the current energy barrier which is evaluated by linearly interpolating between the two current states.
-For systems where the interpolation deviates significantly from the MEP this estimate can be much too large.
+For systems where the interpolation deviates significantly from the minimum energy pathway this estimate can be much too large.
 In which case, a maximum estimated value for the barrier can be provided, which then decreases proportionally with $d_i$.
 
 \topic In summary, the method involves iteratively performing the following three steps:
@@ -158,7 +159,6 @@ Finally, the convergence criteria for the method can be based upon either the se
 
 % This is here to prevent it being put on the wrong page
 \begin{figure*}[tb]
-  \centering
   \includegraphics{fig/speedtest-a.pdf}%
   \includegraphics{fig/speedtest-b.pdf}%
   \includegraphics{fig/speedtest-c.pdf}%
@@ -175,11 +175,11 @@ Finally, the convergence criteria for the method can be based upon either the se
 Initially, the lower energy state jumps up to satisfy the equal energy constraint and then moves to reduce the separation as much as possible without increasing it's energy.
 Then, the two states begin to converge directly towards one another, before being deflected in the direction of a saddle in the potential.
 Consequently, if there are multiple possible pathways between two states, BITSS will be biased towards identifying pathways that are more direct or with lower energy.
-As the two states approach the transition state, the path they take begins to closely follow the minimum energy pathway (MEP), which is the path that follows the gradient from the minima and passes through the transition state.
+As the two states approach the transition state, the path they take begins to closely follow the minimum energy pathway, which is the path that follows the gradient from the minima and passes through the transition state.
 Therefore, the final two states are positioned in the direction of the negative curvature eigenvector, $\bm{\hat{\tau}}$, as shown in \cref{fig:toy2d}c.
 So it is also possible to obtain the eigenvector and eigenvalue using BITSS.
 
-\topic Once BITSS has identified the transition state it is possible to find the full MEP.
+\topic Once BITSS has identified the transition state it is possible to find the full minimum energy pathway.
 This is done by tracing the trajectory of downhill minimisations from either side of the transition state, which are provided by the two final states of BITSS.
 To ensure this pathway is sufficiently smooth the maximum step size of the minimisation should be restricted.
 
@@ -213,7 +213,7 @@ The energy functional has four separate terms,
   E[\phi] = E_B + E_I + E_S + E_V.
 \end{equation}
 The first term, $E_B$, uses a double well potential to set values of $\phi=\pm1$ in the bulk.
-The second term then provides the interfacial energy between the liquid and gas by imposing an energy penalty to changes in $\phi$.
+The second term then provides the interfacial energy between the liquid and gas by imposing an energy penalty to gradients in $\phi$.
 $E_S$ is the solid-liquid interaction energy, which sets the contact angles of the hydrophilic and hydrophobic regions to 60\si{\degree} and 110\si{\degree}, respectively.
 Finally, $E_V$ constrains the volume of the liquid drop by penalising any variation from 11\% of the total volume of the system.
 
@@ -247,7 +247,6 @@ Despite this, the two states are still able to get very close and give a very go
 Furthermore, using an adaptive grid model the grids would also be expected to converge, thereby eliminating the issue.
 
 \begin{figure}[tb]
-  \centering
   \begin{tabular}[b]{c}
     \includegraphics{fig/changingmesh.pdf}\\
     \includegraphics{fig/differentgrids.pdf}%
@@ -278,10 +277,9 @@ However, the distance constraint continues to pull the states together, preventi
 When only a single state has a zero-gradient mode then the other is likely to slide down the potential slightly, causing a kink in the pathway (iii).
 Although, the two states still remain either side of the dividing ridge and so the result will be unaffected.
 Indeed, it may only cause BITSS to fail if the zero-gradient mode is positioned at the transition state in the direction of the pathway.
-But in this case there is no single transition state, instead the MEP would have a flat section at the top of its energy profile.
+But in this case there is no single transition state, instead the minimum energy pathway would have a flat section at the top of its energy profile.
 
 \begin{figure}[tb]
-  \centering
   \begin{tabular}[b]{c}
     \includegraphics{fig/zeroeigen.pdf}\\
     \includegraphics{fig/discontinuous.pdf}
@@ -309,7 +307,7 @@ In both cases, typical landscapes methods that require continuous, differentiabl
 \topic However, BITSS can be used for these systems with undefined gradients with just a couple of alterations.
 First, the term using gradients in \cref{eq:kd} can be ignored and $\kappa_d$ can instead be calculated using just the second term.
 Next we must use a minimiser that does not require a differentiable optimisation function; for this we use simulated annealing \cite{Kirkpatrick1983}.
-This has a chance of randomly jumping one state over the dividing barrier, but we can reduce this probability by setting the initial temperature to $T_0 = \frac{\Delta E}{10}$, and the maximum size of random displacements to $d_\text{max} = d(\bm{x}_1, \bm{x}_2) / 100$.
+This has a chance of randomly jumping one state over the dividing barrier, but we can reduce this probability by setting the initial temperature to $T_0 = \Delta E / 10$, and the maximum size of random displacements to $d_\text{max} = d(\bm{x}_1, \bm{x}_2) / 100$.
 
 \topic This has been tested using a Lennard-Jones 7-particle cluster with hard cores, resulting in a discontinuous landscape.
 Using the gradient-free approach, BITSS is able to successfully find the transition states, allowing us to plot the disconnectivity graph of the system, as shown in \cref{fig:flatdiscontinuous}b.
@@ -323,7 +321,7 @@ The method has advantages over current double-ended methods because it is more e
 Furthermore, we have demonstrated that the method can sucessfully be used with adaptive mesh algorithms, as well as systems with flat or discontinuous energy landscapes.
 
 
-\bibliographystyle{plain}
+% \bibliographystyle{apsrev4-2}
 \bibliography{../../library.bib}
 
 \end{document}
