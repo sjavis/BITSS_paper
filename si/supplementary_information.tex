@@ -1,0 +1,82 @@
+\documentclass[aps,prl]{revtex4}
+
+% Maths
+\usepackage{bm}
+\usepackage{amsmath}
+\newcommand{\abs}[1]{\left| #1 \right|}
+\newcommand{\grad}[1]{\bm{\nabla} #1}
+
+% Referencing
+\usepackage{cleveref}
+\renewcommand{\theequation}{S\arabic{equation}}
+
+% Figures
+\usepackage{graphicx}
+
+
+\begin{document}
+\title{Supplementary Information}
+\maketitle
+
+\section{Constraint coefficients}
+The constraint coefficients are chosen to set comparable sizes for each term in the gradient of the BITSS potential,
+\begin{equation}
+  \grad{E_{tot}} = \sum_{\substack{i=1,2 \\ j\neq i}} \left[ 1 + 2 \kappa_e (E_i - E_j) \right] \grad{E_i} + 2 \kappa_d (d - d_0) \grad{d}.
+\end{equation}
+
+To obtain the expression for the energy coefficient we first assume that the separation is fixed, so the distance term can be ignored.
+The coefficient must be high enough to prevent one state from being pulled over the ridge, for which the greatest risk occurs when the gradient on one state is much greater than the other, $\abs{\grad{E_2}} \gg \abs{\grad{E_1}}$.
+In this case the total gradient is approximated by
+\begin{equation}
+  \grad{E_{tot}} = \left[ 1 - 2 \kappa_e (E_1 - E_2) \right] \grad{E_2}.
+\end{equation}
+This will converge when the term in the square brackets is zero, resulting in $\kappa_e = 1 / 2 (E_1 - E_2)$.
+To ensure this is large enough we can replace the energy difference with the estimate for the energy barrier, $\Delta E$, and then scale it by a factor, $\alpha$, that is greater than or equal to one,
+\begin{equation}
+  \kappa_e = \frac {\alpha} {2 \Delta E}.
+\end{equation}
+
+The distance coefficient is determined by assuming that the energies are equal and thus the energy constraint can be ignored.
+In this case, convergence will occur when $\grad{E_1} + \grad{E_2} = -2 \kappa_d (d - d_0) \grad{d}$.
+By comparing the magnitude of the two sides it is possible to obtain an expression for the coefficient in terms of the relative error in the distance, $\beta = (d - d_0) / d_0$.
+(Note: The gradient of the distance with respect to a single state has a magnitude of 1, thus $\abs{\grad{d}} = \sqrt{2}$.)
+A lower bound on the size of the coefficient is also set using the estimated energy barrier to ensure that the distance constraint is applied even when the gradient is close to zero, such as at the minima.
+\begin{equation}
+  \kappa_d = \mathrm{max} \! \left(
+  \frac {\sqrt{\abs{\grad{E_1}}^2 + \abs{\grad{E_2}}^2}} {2 \sqrt{2} \beta d_0}, \quad
+  \frac{\Delta E}{\beta d_0^2} \right).
+\end{equation}
+
+In practice, when numerically minimising, the states will jump about slightly which can result in large gradients perpendicular to the optimal movement direction.
+To reduce this effect, the size of the gradients in the direction separating the two states are instead calculated:
+\begin{equation}
+  \abs{\grad{E_i}} \approx \frac {\abs{(\bm{x}_1 - \bm{x}_2) \cdot \grad{E_i}}} {\abs{\bm{x}_1 - \bm{x}_2}}.
+\end{equation}
+
+
+\section{Parameter test}
+The constant parameters $\alpha$ and $\beta$ still must be chosen.
+To this end we have tested different parameter choices using the seven-particle cluster and cylindrical buckling examples.
+\Cref{fig:paramtest} shows which choices lead to convergence and the speed at which they do.
+The parameters $\alpha = 10$ and $\beta = 0.1$ are chosen for both converging quickly and being situated far from the regions of non-convergence.
+Hence, this choice is unlikely to fail if the boudaries of the regions were to shift under different systems.
+
+\begin{figure} \label{fig:paramtest}
+  \includegraphics{fig/paramtest-a.pdf}%
+  \includegraphics{fig/paramtest-b.pdf}%
+  \caption{
+    Speed of convergence of the BITSS method under different choices of parameters for (a) the seven-particle cluster, (b) cylindrical buckling.
+    The speed is given by the number of evaluations of the gradient until the two states are separated by less than a thousandth of the initial separation.
+    The combinations that do not converge to the transition state are shown in grey. 
+    The chosen parameters are marked by a red star.
+  }
+\end{figure}
+
+
+\section{Test potentials and gradients}
+
+
+\section{7 particle cluster comparison}
+
+
+\end{document}
