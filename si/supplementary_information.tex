@@ -9,6 +9,7 @@
 % Referencing
 \usepackage{cleveref}
 \renewcommand{\theequation}{S\arabic{equation}}
+\renewcommand{\thefigure}{S\arabic{figure}}
 
 % Figures
 \usepackage{graphicx}
@@ -20,8 +21,8 @@
 
 \section{Constraint coefficients}
 The constraint coefficients are chosen to set comparable sizes for each term in the gradient of the BITSS potential,
-\begin{equation}
-  \grad{E_{tot}} = \sum_{\substack{i=1,2 \\ j\neq i}} \left[ 1 + 2 \kappa_e (E_i - E_j) \right] \grad{E_i} + 2 \kappa_d (d - d_0) \grad{d}.
+\begin{equation} \label{eq:gradBITSS}
+  \grad{E_\text{BITSS}} = \sum_{\substack{i=1,2 \\ j\neq i}} \left[ 1 + 2 \kappa_e (E_i - E_j) \right] \grad{E_i} + 2 \kappa_d (d - d_0) \grad{d}.
 \end{equation}
 
 To obtain the expression for the energy coefficient we first assume that the separation is fixed, so the distance term can be ignored.
@@ -57,14 +58,14 @@ To reduce this effect, the size of the gradients in the direction separating the
 \section{Parameter test}
 The constant parameters $\alpha$ and $\beta$ still must be chosen.
 To this end we have tested different parameter choices using the seven-particle cluster and cylindrical buckling examples.
-\Cref{fig:paramtest} shows which choices lead to convergence and the speed at which they do.
+\Cref{fig:paramtest} shows which choices lead to convergence and the speed at which this occurs.
 The parameters $\alpha = 10$ and $\beta = 0.1$ are chosen for both converging quickly and being situated far from the regions of non-convergence.
-Hence, this choice is unlikely to fail if the boudaries of the regions were to shift under different systems.
+Hence, this choice is unlikely to fail if the boudaries of the regions were to shift for different systems.
 
-\begin{figure} \label{fig:paramtest}
+\begin{figure}
   \includegraphics{fig/paramtest-a.pdf}%
   \includegraphics{fig/paramtest-b.pdf}%
-  \caption{
+  \caption{\label{fig:paramtest}
     Speed of convergence of the BITSS method under different choices of parameters for (a) the seven-particle cluster, (b) cylindrical buckling.
     The speed is given by the number of evaluations of the gradient until the two states are separated by less than a thousandth of the initial separation.
     The combinations that do not converge to the transition state are shown in grey. 
@@ -74,6 +75,30 @@ Hence, this choice is unlikely to fail if the boudaries of the regions were to s
 
 
 \section{Test potentials and gradients}
+\begin{figure}
+  \includegraphics{fig/BAHschematic.pdf}
+  \caption{\label{fig:BAHschematic}
+    Schematic of the bar and hinge model showing the relevent parameters for a single hinge element. $h_i$ and $\bm{\hat{n}}_i$ denote the height and unit normal of each triangle respectively.
+  }
+\end{figure}
+To use L-BFGS minisation the gradients of the optimisation function must be known.
+For the BITSS potential this is given by \cref{eq:gradBITSS}, but this still requires knowledge of the gradients of the system under consideration.
+For the cylindrical buckling example we can obtain the gradient by considering each bond and hinge individually.
+Using the schematic in \cref{fig:BAHschematic}, the gradient of the stretching energy of the bond between $\bm{x}_2$ and $\bm{x}_3$ is given by,
+\begin{equation}
+  \frac{\partial E^S}{\partial \bm{x}_2} = - \frac{\partial E^S}{\partial \bm{x}_3} = 
+    2 k^S (r - r^0) (\bm{x_2} - \bm{x_3}).
+\end{equation}
+While the gradients of the bending energy of the hinge are,
+\begin{align}
+  \frac{\partial E^B}{\partial \bm{x}_1} &= k^B \sin(\theta - \theta^0) \frac{\bm{\hat{n}}_a}{h_a}, \\
+  \frac{\partial E^B}{\partial \bm{x}_2} &= - k^B \sin(\theta - \theta^0) \left[\frac{\bm{\hat{n}}_a}{h_a} + \frac{\bm{\hat{n}}_a + \bm{\hat{n}}_b}{r}\right], \\
+  \frac{\partial E^B}{\partial \bm{x}_3} &= - k^B \sin(\theta - \theta^0) \left[\frac{\bm{\hat{n}}_b}{h_b} + \frac{\bm{\hat{n}}_a + \bm{\hat{n}}_b}{r}\right], \\
+  \frac{\partial E^B}{\partial \bm{x}_4} &= k^B \sin(\theta - \theta^0) \frac{\bm{\hat{n}}_b}{h_b}.
+\end{align}
+
+
+\section{DNEB speedtest}
 
 
 \section{7 particle cluster comparison}
