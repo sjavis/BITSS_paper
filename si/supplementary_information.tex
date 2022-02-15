@@ -4,7 +4,8 @@
 \usepackage{bm}
 \usepackage{amsmath}
 \newcommand{\abs}[1]{\left| #1 \right|}
-\newcommand{\grad}[1]{\bm{\nabla} #1}
+\newcommand{\grad}{\bm{\nabla}}
+\newcommand{\upDelta}{\mathop{}\!\Delta}
 
 % Referencing
 \usepackage{cleveref}
@@ -22,47 +23,33 @@
 \section{Constraint coefficients}
 The constraint coefficients are chosen to set comparable sizes for each term in the gradient of the BITSS potential,
 \begin{equation} \label{eq:gradBITSS}
-  \grad{E_\text{BITSS}} = \sum_{\substack{i=1,2 \\ j\neq i}} \left[ 1 + 2 \kappa_e (E_i - E_j) \right] \grad{E_i} + 2 \kappa_d (d - d_0) \grad{d}.
+  \grad E_\text{BITSS} = \sum_{\substack{i=1,2 \\ j\neq i}} \left[ 1 + 2 \kappa_e (E_i - E_j) \right] \grad E_i + 2 \kappa_d (d - d_0) \grad d.
 \end{equation}
 
 To obtain the expression for the energy coefficient we first assume that the separation is fixed, so the distance term can be ignored.
-The coefficient must be high enough to prevent one state from being pulled over the ridge, for which the greatest risk occurs when the gradient on one state is much greater than the other, $\abs{\grad{E_2}} \gg \abs{\grad{E_1}}$.
+The coefficient must be high enough to prevent one state from being pulled over the ridge, for which the greatest risk occurs when the gradient on one state is much greater than the other, $\abs{\grad E_2} \gg \abs{\grad E_1}$.
 In this case the total gradient is approximated by
 \begin{equation}
-  \grad{E_{tot}} = \left[ 1 - 2 \kappa_e (E_1 - E_2) \right] \grad{E_2}.
+  \grad E_{tot} = \left[ 1 - 2 \kappa_e (E_1 - E_2) \right] \grad E_2.
 \end{equation}
 This will converge when the term in the square brackets is zero, resulting in $\kappa_e = 1 / 2 (E_1 - E_2)$.
-To ensure this is large enough we can replace the energy difference with the estimate for the energy barrier, $\Delta E$, and then scale it by a factor, $\alpha$, that is greater than or equal to one,
+To ensure this is large enough we can replace the energy difference with the estimate for the energy barrier, $\upDelta E$, and then scale it by a factor, $\alpha$, that is greater than or equal to one,
 \begin{equation}
-  \kappa_e = \frac {\alpha} {2 \Delta E}.
+  \kappa_e = \frac {\alpha} {2 \upDelta E}.
 \end{equation}
 
 The distance coefficient is determined by assuming that the energies are equal and thus the energy constraint can be ignored.
-In this case, convergence will occur when $\grad{E_1} + \grad{E_2} = -2 \kappa_d (d - d_0) \grad{d}$.
+In this case, convergence will occur when $\grad E_1 + \grad E_2 = -2 \kappa_d (d - d_0) \grad d$.
 By comparing the magnitude of the two sides it is possible to obtain an expression for the coefficient in terms of the relative error in the distance, $\beta = (d - d_0) / d_0$.
-(Note: The gradient of the distance with respect to a single state has a magnitude of 1, thus $\abs{\grad{d}} = \sqrt{2}$.)
+(Note: The gradient of the distance with respect to a single state has a magnitude of 1, thus $\abs{\grad d} = \sqrt{2}$.)
 A lower bound on the size of the coefficient is also set using the estimated energy barrier to ensure that the distance constraint is applied even when the gradient is close to zero, such as at the minima.
 \begin{equation}
   \kappa_d = \mathrm{max} \! \left(
-  \frac {\sqrt{\abs{\grad{E_1}}^2 + \abs{\grad{E_2}}^2}} {2 \sqrt{2} \beta d_0}, \quad
-  \frac{\Delta E}{\beta d_0^2} \right).
+  \frac {\sqrt{\abs{\grad E_1}^2 + \abs{\grad E_2}^2}} {2 \sqrt{2} \beta d_0}, \quad
+  \frac{\upDelta E}{\beta d_0^2} \right).
 \end{equation}
 
-In practice, when numerically minimising, the states will jump about slightly which can result in large gradients perpendicular to the optimal movement direction.
-To reduce this effect, the size of the gradients in the direction separating the two states are instead calculated:
-\begin{equation}
-  \abs{\grad{E_i}} \approx \frac {\abs{(\bm{x}_1 - \bm{x}_2) \cdot \grad{E_i}}} {\abs{\bm{x}_1 - \bm{x}_2}}.
-\end{equation}
-
-
-\section{Parameter test}
-The constant parameters $\alpha$ and $\beta$ still must be chosen.
-To this end we have tested different parameter choices using the seven-particle cluster and cylindrical buckling examples.
-\Cref{fig:paramtest} shows which choices lead to convergence and the speed at which this occurs.
-The parameters $\alpha = 10$ and $\beta = 0.1$ are chosen for both converging quickly and being situated far from the regions of non-convergence.
-Hence, this choice is unlikely to fail if the boudaries of the regions were to shift for different systems.
-
-\begin{figure}
+\begin{figure}[b]
   \includegraphics{fig/paramtest-a.pdf}%
   \includegraphics{fig/paramtest-b.pdf}%
   \caption{\label{fig:paramtest}
@@ -73,16 +60,38 @@ Hence, this choice is unlikely to fail if the boudaries of the regions were to s
   }
 \end{figure}
 
+In practice, when numerically minimising, the states will jump about slightly which can result in large gradients perpendicular to the optimal movement direction.
+To reduce this effect, the size of the gradients in the direction separating the two states are instead calculated:
+\begin{equation}
+  \abs{\grad E_i} \approx \frac {\abs{(\bm{x}_1 - \bm{x}_2) \cdot \grad E_i}} {\abs{\bm{x}_1 - \bm{x}_2}}.
+\end{equation}
+
+The constant parameters $\alpha$ and $\beta$ still must be chosen.
+To this end we have tested different parameter choices using the seven-particle cluster and cylindrical buckling examples.
+\Cref{fig:paramtest} shows which choices lead to convergence and the speed at which this occurs.
+The parameters $\alpha = 10$ and $\beta = 0.1$ are chosen for both converging quickly and being situated far from the regions of non-convergence.
+Hence, this choice is unlikely to fail if the boudaries of the regions were to shift for different systems.
+
 
 \section{Test potentials and gradients}
-\begin{figure}
+To use L-BFGS minisation the gradients of the optimisation function must be known.
+For the BITSS potential this is given by \cref{eq:gradBITSS}, but this also requires the gradients of the system under consideration.
+
+\subsection{Particle cluster}
+For the Lennard-Jones particle cluster the gradient of the potential is found by considering the gradient of the interaction between each pair of particles,
+\begin{equation}
+  \frac{\partial E}{\partial \bm{x}_1} = -\frac{\partial E}{\partial \bm{x}_2} = - \frac{24 \epsilon}{r^2}
+    \left[ 2 \left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{r}\right)^6 \right] (\bm{x}_1 - \bm{x}_2),
+\end{equation}
+where $\bm{x}_1$ and $\bm{x}_2$ are the positions of the two particles, $r$ is their separation, $\epsilon$ is the interaction strength, and $\sigma$ is the particle radius.
+
+\subsection{Cylindrical buckling}
+\begin{figure}[htb]
   \includegraphics{fig/BAHschematic.pdf}
   \caption{\label{fig:BAHschematic}
     Schematic of the bar and hinge model showing the relevent parameters for a single hinge element. $h_i$ and $\bm{\hat{n}}_i$ denote the height and unit normal of each triangle respectively.
   }
 \end{figure}
-To use L-BFGS minisation the gradients of the optimisation function must be known.
-For the BITSS potential this is given by \cref{eq:gradBITSS}, but this still requires knowledge of the gradients of the system under consideration.
 For the cylindrical buckling example we can obtain the gradient by considering each bond and hinge individually.
 Using the schematic in \cref{fig:BAHschematic}, the gradient of the stretching energy of the bond between $\bm{x}_2$ and $\bm{x}_3$ is given by,
 \begin{equation}
@@ -97,11 +106,46 @@ While the gradients of the bending energy of the hinge are,
   \frac{\partial E^B}{\partial \bm{x}_4} &= k^B \sin(\theta - \theta^0) \frac{\bm{\hat{n}}_b}{h_b}.
 \end{align}
 
+\subsection{Striped wetting}
+The four sections of the phase-field model detailed in \namecref{eq:gradBITSS}~(6) are obtained using the following equations,
+\begin{align}
+  E_B[\phi] &= \sum_i \frac{1}{\epsilon} \left( \frac{{\phi_i}^4}{4} - \frac{{\phi_i}^2}{2} + \frac{1}{4} \right) \upDelta V,\\
+  E_I[\phi] &= \sum_i \frac{\epsilon}{2} \abs{\grad \phi_i}^2 \upDelta V,\\
+  E_S[\phi] &= \sum_j \sqrt{2}\cos\theta_j \left( \frac{{\phi_j}^3}{6} - \frac{\phi_j}{2} - \frac{1}{3} \right) \upDelta S,\\
+  E_V[\phi] &= k_V \left[ \sum_i \frac{\phi_i + 1}{2} \upDelta V - V_0 \right]^2,
+\end{align}
+where the index $i$ includes all of the nodes, while $j$ represents the nodes along the solid surface.
+$\upDelta V$ and $\upDelta S$ are, respectively, the volume and solid surface areas contained by each individual node.
+$\epsilon$ is the liquid-gas interface width, $\theta_j$ --- the contact-angle with the solid surface, and $V_0$ --- the constrained volume of the liquid drop.
+The strength of the volume constraint is parametrised by $k_V$ for which we use a value of $10^4$.
+The gradients of these terms are given by,
+\begin{align}
+  \frac{\partial E_B}{\partial \phi_i} &= \frac{1}{\epsilon} \left( {\phi_i}^3 - \phi_i \right) \upDelta V,\\
+  \frac{\partial E_I}{\partial \phi_i} &= \frac{\epsilon}{2} \left[
+    \frac{\partial \abs{\grad \phi_i}^2}{\partial \phi_i} +
+    \sum_k\frac{\partial \abs{\grad \phi_k}^2}{\partial \phi_i} \right] \upDelta V,\\
+  \frac{\partial E_S}{\partial \phi_j} &= \sqrt{2}\cos\theta_j \left( \frac{{\phi_j}^2}{2} - \frac{1}{2} \right) \upDelta S,\\
+  \frac{\partial E_V}{\partial \phi_i} &= k_V \left[ \sum_{i'} \frac{\phi_{i'} + 1}{2} \upDelta V - V_0 \right] \upDelta V,
+\end{align}
+where index $k$ denotes neighboring nodes at which the evaluation of the gradient uses $\phi_i$.
 
-\section{DNEB speedtest}
+\begin{figure}[htb]
+  \includegraphics{fig/DNEBspeedtest.pdf}
+  \caption{\label{fig:DNEBspeedtest}
+    The rate of convergence to the transition state for (a) a Lennard-Jones seven-particle cluster, (b) cylindrical shell buckling, (c) wetting of a chemically-striped surface.
+    Above are the two minimum energy states and the transition state, marked by an asterisk.
+    Below is shown the convergence to the transition state as a function of the number of gradient calculations using BITSS (black line) and DNEB.
+    The DNEB results are repeated with differing numbers of images along the chain, the number of which is listed in the legend in (c).
+  }
+\end{figure}
 
 
-\section{7 particle cluster comparison}
+\begin{figure}[htb]
+  \includegraphics{fig/clusterdgraphs.pdf}
+  \caption{\label{fig:clusterdgraphs}
+    Differences in the disconnectivity graphs for the seven-particle cluster when using the discontinuous potential instead of the standard Lennard-Jones potential. The two graphs are horizontally offset for visibility. The energies of the transition states are found to be slightly higher when using the discontinuous potential.
+  }
+\end{figure}
 
 
 \end{document}
