@@ -65,6 +65,7 @@ for subfig in ['a', 'b', 'c']:
     #    plt.plot(dneb_calls[i], dneb_dist[i], lw=1, label=n)
     plt.plot(bits_calls, bits_dist, c='k', lw=1.5)#, label='BITSS')
 
+    # Axes
     plt.semilogy()
     plt.tick_params('both', which='minor')
     plt.xlabel('Gradient evalulations')
@@ -73,7 +74,7 @@ for subfig in ['a', 'b', 'c']:
         plt.xlim(0, 1600)
         plt.ylim(bottom=1e-5)
     elif (subfig == 'b'):
-        plt.xlim(0, 60000)
+        plt.xlim(0, 65000)
         plt.ylim(bottom=1e-4)
     elif (subfig == 'c'):
         plt.xlim(0, 50000)
@@ -81,11 +82,15 @@ for subfig in ['a', 'b', 'c']:
         plt.legend(loc='best')
         plt.xticks([0,20000,40000])
 
+    # Snapshots
     for i in range(3):
-        tmp_ax = plt.axes((0.035+i*0.31, 1-0.31, 0.31, 0.31))
+        tmp_ax = plt.axes((0.035+i*0.31, 1-h2/h, 0.31, h2/h))
         img = mim.imread(f'{subfig}{i}.png')
         plt.imshow(img)
         tmp_ax.axis('off')
         tmp_ax.set_zorder(ax.get_zorder()-1)
+        if (i==1):
+            tmp_ax.text(0.25, 1, '*', va='top', ha='center', size='xx-large', transform=tmp_ax.transAxes)
+
     # plt.savefig(f'speedtest-dneb-{subfig}.png')
     lt.savefig(f'../speedtest-{subfig}.pdf', dpi=300)
