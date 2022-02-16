@@ -5,5 +5,5 @@
 *.bbl
 *.blg
 *.log
-*.bib
+*Notes.bib
 __pycache__

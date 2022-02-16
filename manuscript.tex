@@ -40,8 +40,6 @@
 % \newlinecommand{\topic}{#1}
 
 
-
-
 \begin{document}
 \title{Locating saddle points in complex and memory intensive landscapes}
 \author{Sam Avis}
@@ -62,7 +60,7 @@
 %\section{Introduction \& Method}
 \topic Transition states are central to the description of reconfiguration mechanisms for systems in chemistry, condensed matter physics, and engineering.
 Historically, many computational methods for locating transition states have grown from an atomistic or particulate perspective.
-These have proven to be important tools for understanding, for example, protein folding \cite{Bryngelson1995,Onuchic1997}, biological and industrial catalysis \temp{[cite]}, crystallisation, and cluster formation \cite{Wales1998,Wales2012}.
+These have proven to be important tools for understanding, for example, protein folding \cite{Bryngelson1995,Onuchic1997}, biological and industrial catalysis \cite{Boehr2006,Kerns2015,Guo2018a}, crystallisation, and cluster formation \cite{Wales1998,Wales2012}.
 
 \topic In addition to these microscale applications it is also increasingly being recognised that transition states are useful in mesoscale or macroscale systems.
 Here, the minimum energy barriers provide important lower bounds to the energy input required for transitions to occur.
@@ -301,12 +299,12 @@ It is worth noting that gradient-based approaches are significantly more efficie
 
 %\section{Conclusion}
 \topic In conclusion, we have demonstrated a novel method for finding transition states that tackles problems not currently addressed by existing methods.
-The method is shown to be more efficient than existing double-ended methods, both in memory and combutational cost, with further reductions possible by utilising adaptive remeshing techniques.
+The method is shown to be more efficient than existing double-ended methods, both in memory and computational cost, with further reductions possible by utilising adaptive remeshing techniques.
 It can also be adapted to problems with complex energy landscapes, including those with flat or discontinuous regions.
 This method will enable the analysis of energy landscapes for new systems in both particulate and continuum applications, and increase the feasibility of such methods for large-scale, complex systems.
 
 
 % \bibliographystyle{apsrev4-2}
-\bibliography{../../library.bib}
+\bibliography{bibexport.bib}
 
 \end{document}
