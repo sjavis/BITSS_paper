@@ -3,7 +3,6 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import json
-import latexipy as lp
 
 sigma = 1
 n_particle = 7
@@ -26,6 +25,9 @@ lj[2,:,1] -= lj[2,5,1]
 width = np.max(lj[:,:,0])+rad - (np.min(lj[:,:,0])-rad)
 height = np.max(lj[:,:,1])+rad - (np.min(lj[:,:,1])-rad)
 
+# Rearrange
+lj = lj[:,[5,2,3,4,0,6,1]]
+
 
 ### Plot
 for i_state in np.arange(0, len(lj)):
@@ -33,6 +35,7 @@ for i_state in np.arange(0, len(lj)):
     plt.axes((0,0,1,1))
     for i_part in range(n_particle):
         circle = plt.Circle(lj[i_state,i_part], rad, alpha=1, fc=col, ec='none', lw=3)
+        plt.text(lj[i_state,i_part,0], lj[i_state,i_part,1], i_part, ha='center', va='center_baseline', size=60)
         plt.gca().add_artist(circle)
 
     xlim = (np.max(lj[i_state,:,0]) + np.min(lj[i_state,:,0]))/2 + np.array([-width/2, width/2])
@@ -41,4 +44,4 @@ for i_state in np.arange(0, len(lj)):
     plt.ylim(ylim)
     plt.gca().axis('off')
     plt.gca().set_aspect('equal')
-    plt.savefig(f'lj{i_state}.png')
+    plt.savefig(f'a{i_state}.png')

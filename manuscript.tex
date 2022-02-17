@@ -42,16 +42,20 @@
 
 \begin{document}
 \title{Locating saddle points in complex and memory intensive landscapes}
-\author{Sam Avis}
-\author{Jack Panter}
+\title{Binary Image Transition State Search Method}
+\author{Samuel J. Avis}
+\author{Jack R. Panter}
+\email[]{j.r.panter@durham.ac.uk}
 \author{Halim Kusumaatmaja}
+\email[]{halim.kusumaatmaja@durham.ac.uk}
 \affiliation{Department of Physics, Durham University, South Road, Durham DH1 3LE, UK}
 
 \begin{abstract}
-  Locating transition states is crucial for investigating transition mechanisms in atomistic systems and, more recently, macroscale applications.
-  However, these pose certain challenges that are largely unaddressed by existing methods.
-  We introduce a new double-ended method, the Binary Image Transition State Search (BITSS), that uses just two states that converge to the transition state, resulting in a faster and more memory-efficient method than current approaches.
-  We demonstate it succesfully overcomes challenges associated with large-scale systems and complex energy landscapes.
+  Locating transition states is crucial for investigating transition mechanisms in wide-ranging atomistic systems and, more recently, macroscale systems.
+  Existing methods, however, can struggle in problems with a large number of degrees of freedom, on-the-fly adaptive remeshing and coarse-graining, and energy landscapes that are locally flat or discontinuous.
+  To resolve these challenges, we introduce a new double-ended method, the Binary Image Transition State Search (BITSS).
+  It uses just two states that converge to the transition state, resulting in a flexible, fast, and memory-efficient method.
+  We demonstate its versatility by applying BITSS to three very different classes of problems: Lennard-Jones clusters, shell buckling, and multiphase phase-field models.
 \end{abstract}
 
 \maketitle
@@ -62,7 +66,7 @@
 Historically, many computational methods for locating transition states have grown from an atomistic or particulate perspective.
 These have proven to be important tools for understanding, for example, protein folding \cite{Bryngelson1995,Onuchic1997}, biological and industrial catalysis \cite{Boehr2006,Kerns2015,Guo2018a}, crystallisation, and cluster formation \cite{Wales1998,Wales2012}.
 
-\topic In addition to these microscale applications it is also increasingly being recognised that transition states are useful in mesoscale or macroscale systems.
+\topic More recently, it is increasingly being recognised that transition states are useful in mesoscale or macroscale systems.
 Here, the minimum energy barriers provide important lower bounds to the energy input required for transitions to occur.
 This is essential to capture in, for example, structural engineering applications, where the minimum energy mechanism for structural failure must be known in order to ensure safety \cite{Panter2019,Hutchinson2018}.
 Moreover, it is becoming desirable to tailor elastic deformation transitions to enable technologies such as advanced deployable structures \cite{Filipov2015,Zhai2018}, mechanical sensors and actuators, and energy absorption \cite{Shan2015} to name but a few.
@@ -76,12 +80,11 @@ In addition to approximating the transition state, these are useful for obtainin
 
 \topic However, a large range of landscapes prove challenging or impossible to explore via these methods.
 One key problem arises from the push towards larger and more complex systems \temp{[cite]}, resulting in the need to develop algorithms that are more memory and computationally efficient, and can incorporate optimisation strategies such as on-the-fly adaptive remeshing and coarse-graining.
-However, existing transition state methods exhibit inefficiencies that can make complex systems infeasible.
+Current double-ended methods require a chain of tens of states to gain an accurate approximation, and have issues with remeshing resulting in a different discretisation for each state.
 Single-ended methods are not well suited for identifying specific pathways and can spend a large amount of time searching for undesired transition states.
-While, double-ended methods require a chain of tens of states to gain an accurate approximation, and have issues with remeshing resulting in a different discretisation for each state.
-Other challenges occur for complex landscapes, such as those that are locally flat or discontinous.
-Both of which can be relevent when considering contact forces for macroscopic objects \temp{[cite]}.
-Flat landscapes can pose issues for single-ended search methods that rely only upon local information, and most current methods cannot be used for discontinuous landscapes because they typically require continuous, differentiable optimisation functions.
+Another major challenge in studying complex energy landscapes relates to the presence of locally flat or discontinous regions.
+Both of which can be relevent when considering contact forces for macroscopic objects \temp{[cite]}, or hard-body interactions in atomistic systems \temp{[cite]}.
+Flat landscapes can pose issues for single-ended search methods that rely only upon local information, and current methods cannot typically be applied to discontinuous landscapes because they require continuous, differentiable optimisation functions.
 
 \topic In this work we introduce a new method, the Binary Image Transition State Search (BITSS), and demonstrate how it addresses each of these challenges.
 This method combines aspects of the two traditional categories; it is a double-ended method that uses just two states that converge from two local minima towards a transition state that separates them.
@@ -152,10 +155,9 @@ Finally, the convergence criteria for the method can be based upon either the se
   \includegraphics{fig/speedtest-b.pdf}%
   \includegraphics{fig/speedtest-c.pdf}%
   \caption{\label{fig:speedtest}
-    The rate of convergence to the transition state for (a) a Lennard-Jones seven-particle cluster, (b) cylindrical shell buckling, (c) wetting of a chemically-striped surface.
-    Above are the two minimum energy states and the transition state, marked by an asterisk.
-    Below is shown the convergence to the transition state as a function of the number of gradient calculations using the BITSS (black line) and string methods.
+    The convergence to the transition state as a function of the number of gradient calculations using the BITSS (black line) and string methods for (a) a Lennard-Jones seven-particle cluster, (b) cylindrical shell buckling, (c) wetting of a chemically-striped surface.
     The string method is repeated with a differing number of images along the string, the number of which is listed in the legend in (c).
+    The shown configurations correspond to the two minimum energy states and the transition state, marked by an asterisk.
   }
 \end{figure*}
 
@@ -174,14 +176,17 @@ To ensure this pathway is sufficiently smooth the maximum step size of the minim
 
 %\section{Speed Comparison}
 \topic As a result of the BITSS method using only two states it has the potential to be significantly faster than chain-of-states approaches which typically use tens of states.
-This is tested here by measuring the speed of convergence to the transition state for BITSS in comparison with the string method and DNEB for several representitive examples.
-The accuracy of the BITSS method is calculated using the distance between the correct transition state and the average of the two states.
-While for the chain-of-states methods, the accuracy is measured as the distance of the transition state from a cubic spline interpolation of the points along the string.
+This is tested here by measuring the speed of convergence to the transition state for BITSS in comparison with the string method and DNEB for several representative examples.
+The accuracy of the BITSS method is calculated using the distance between the correct transition state and the average of the two states, whereas the accuracy for the chain-of-states methods is measured as the distance of the transition state from a cubic spline interpolation of the points along the string.
 For each method, the accuracy is measured against the number of times the energy and gradient of the system are evaluated.
 The results in comparison with the string method are shown in \cref{fig:speedtest}.
 
-\topic The first system to be tested is a two-dimensional seven-particle cluster with Lennard-Jones interactions.
-The transition begins with the hexagonal cluster and involves two particles shifting to reach a higher energy configuration.
+\topic The first system to be tested is a two-dimensional, seven-particle cluster, with the transition from a hexagonal cluster to a higher energy configuration.
+The interaction between each pair of particles uses the Lennard-Jones potential,
+\begin{equation}
+  E = 4\epsilon \left[ \left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{r}\right)^6 \right],
+\end{equation}
+where $r$ is the particle separation, $\epsilon$ is the interaction strength, and $\sigma$ is the particle size.
 
 \topic The second system is an elastic cylindrical shell under an applied strain.
 This undergoes a transition from an unbuckled state to a singly-dimpled state, which defines the minimum energy required for the cylinder to buckle \cite{Panter2019}.
@@ -189,9 +194,9 @@ A 2D triangular mesh is used to model this system, with the following energy fun
 \begin{equation}
   E = \sum_i k^S_i (r_i - r^0_i)^2 + \sum_j k^B_j [1 + \cos(\theta_j - \theta^0_j)].
 \end{equation}
-The first term provides the stretching energy for the system using a sum over all the bonds, where $r_i$ is the length, $r^0_i$ --- the equilibrium length, and $k^S_i$ --- the stretching rigidity of bond $i$.
+The first term provides the stretching energy for the system using a sum over all the bonds, where $r_i$ is the length, $r^0_i$ is the equilibrium length, and $k^S_i$ is the stretching rigidity of bond $i$.
 The second term models the bending energy by representing each pair of adjacent triangles as an elastic hinge.
-For hinge $j$, $\theta_j$ is the dihedral angle, $\theta^0_j$ --- the equilibrium angle, and $k^B_j$ --- the bending rigidity.
+For hinge $j$, $\theta_j$ is the dihedral angle, $\theta^0_j$ is the equilibrium angle, and $k^B_j$ is the bending rigidity.
 
 \topic The final system involves a droplet situated on a chemically striped surface with both hydrophilic and hydrophobic regions.
 This has two possible states, with the droplet either upon one hydrophilic stripe, or straddling across two.
@@ -204,6 +209,7 @@ The first term, $E_B$, uses a double well potential to set values of $\phi=\pm1$
 The second term then provides the interfacial energy between the liquid and gas by imposing an energy penalty to gradients in $\phi$.
 $E_S$ is the solid-liquid interaction energy, which sets the contact angles of the hydrophilic and hydrophobic regions to 60\si{\degree} and 110\si{\degree}, respectively.
 Finally, $E_V$ constrains the volume of the liquid drop by penalising any variation from 11\% of the total volume of the system.
+For further details and the gradients of the potentials see the supplementary information.
 
 \topic The results for this test, shown in \cref{fig:speedtest}, demonstrate two main advantages for the BITSS method.
 Firstly, the slope illustrates that the rate of convergence is indeed much greater for the BITSS method.
@@ -222,12 +228,12 @@ Here we test each of these issues individually.
 \topic Firstly, we demonstrate in \cref{fig:adaptivemesh}a that BITSS is indeed able to handle the discretisation changing as the method runs.
 For this we use the cylindrical buckling example with the resolution increasing from 40 to 100 triangles around the cylinder.
 These changes are performed after the minimisation step in each iteration of the BITSS method.
-This demonstrates that BITSS is able to converge to the transition state so long as the remeshing is not so drastic that one state is shifted into the basin of another minima.
+This demonstrates that BITSS is able to converge to the transition state so long as the remeshing does not effectively change the landscape.
 
 \topic For the second test, we investigate how BITSS performs when the two states have different meshes.
 The only special consideration needed for this is that the distance measure must take into account the different grids.
 This is done here by interpolating one state onto the other grid and computing the Euclidean distance.
-Although, for some applications it may be sufficient to use simpler distance measures, such as the difference between average values of the system.
+However, for some applications it may be sufficient to use simpler distance measures, such as the difference between average values of the system.
 The results for the striped wetting example with two different resolutions (shown in \cref{fig:adaptivemesh}b) demonstates that BITSS is successful.
 Notably however, there is a limit to how close the two states can get.
 This is because the energy of the transition state is slightly different on each grid, so eventually the energy constraint will fail.
@@ -259,23 +265,22 @@ However, these single-ended search methods are thwarted by local zero modes.
 We see it is able to successfully converge past these flat regions, even with one very close to the transition state (ii).
 In these regions there are no driving forces due to the potential and the energy constraint, which use purely local information about the gradient.
 However, the distance constraint continues to pull the states together, preventing them from getting stuck.
-When only a single state has a zero-gradient mode then the other is likely to slide down the potential slightly, causing a kink in the pathway (iii).
-Although, the two states still remain either side of the dividing ridge and so the result will be unaffected.
-Indeed, it may only cause BITSS to fail if the zero-gradient mode is positioned at the transition state in the direction of the pathway.
-But in this case there is no single transition state, instead the minimum energy pathway would have a flat section at the top of its energy profile.
+When only a single state has a zero-gradient mode then the other is likely to slide down the potential slightly (iii), but the two states still remain either side of the dividing ridge and so the result will be unaffected.
+Indeed, a zero-gradient mode may only cause BITSS to fail if it is positioned at the transition state in the direction of the pathway.
+In this case there would be no single transition state, instead the minimum energy pathway would have a flat section at the top of its energy profile.
 
 \begin{figure}[tb]
   \includegraphics{fig/zeroeigen.pdf}\\
   \includegraphics{fig/discontinuous.pdf}
   \caption{\label{fig:flatdiscontinuous}
     (a) Energy profile of the BITSS pathway on a 2D potential with flat regions.
-        The minima and transition state are marked by blue and red dots respectively.
-        Points of interest are labelled by i-iii.
+        The blue and red dots denote the minima and transition state, respectively.
+        Points of interest are labelled by i--iii (see text).
         Top inset: A zoomed in view around the transition state.
         Bottom inset: The pathway taken, with the edges of the flat regions marked by dashed lines.
     (b) Disconnectivity graph of the energy landscape for a seven-particle cluster with a discontinuous hard-core pair potential.
     (c) Plot of the discontinuous potential.
-        The repulsive section of the usual Lennard-Jones potential is also shown in grey.
+        The repulsive section of the standard Lennard-Jones potential is also shown in grey.
   }
 \end{figure}
 
@@ -285,8 +290,7 @@ But in this case there is no single transition state, instead the minimum energy
 This results in the energy landscape becoming discontinuous with regions of undefined gradients.
 Alternatively, for some systems the potential energy gradients may be prohibitively expensive to compute, or not available.
 In both cases, typical landscapes methods that require continuous, differentiable (often twice-differentiable) optimisation functions will not be appropriate.
-
-\topic However, BITSS can be used for these systems with undefined gradients with just a couple of alterations.
+However, BITSS can be used for these systems with undefined gradients with just a couple of alterations.
 First, the term using gradients in \cref{eq:kd} can be ignored and $\kappa_d$ can instead be calculated using just the second term.
 Next we must use a minimiser that does not require a differentiable optimisation function; for this we use simulated annealing \cite{Kirkpatrick1983}.
 This has a chance of randomly jumping one state over the dividing barrier, but we can reduce this probability by setting the initial temperature to $T_0 = \Delta E / 10$, and the maximum size of random displacements to $d_\text{max} = d(\bm{x}_1, \bm{x}_2) / 100$.
@@ -303,6 +307,14 @@ The method is shown to be more efficient than existing double-ended methods, bot
 It can also be adapted to problems with complex energy landscapes, including those with flat or discontinuous regions.
 This method will enable the analysis of energy landscapes for new systems in both particulate and continuum applications, and increase the feasibility of such methods for large-scale, complex systems.
 
+
+\appendix
+\section{}
+
+\begin{acknowledgments}
+  S.~J.~A. is supported by a studentship from the Engineering and Physical Sciences Research Council (Grant No. EP/R513039/1).
+  H.~K. and J.~P. acknowledge funding from the Engineering and Physical Sciences Research Council (Grant No. EP/V034154/1).
+\end{acknowledgments}
 
 % \bibliographystyle{apsrev4-2}
 \bibliography{bibexport.bib}
