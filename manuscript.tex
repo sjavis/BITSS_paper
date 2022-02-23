@@ -87,59 +87,67 @@ Flat zero-modes in the landscape pose issues for single-ended search methods tha
 Specialist treatment can sometimes be used such as in the case of global rotation and translation \temp{\cite{Wales2004}}, but they are thwarted by local zero-modes.
 Meanwhile, current methods cannot typically be applied in the case of discontinuous potentials, or where the gradient is prohibitively expensive to compute, because they require continuous, differentiable optimisation functions.
 
-\topic In this work we introduce a new method, the Binary Image Transition State Search (BITSS), and demonstrate how it addresses each of these challenges.
-This method combines aspects of the two traditional categories; it is a double-ended method that uses just two states that converge from two local minima towards a transition state that separates them.
-The states, $\bm{x}_1$ and $\bm{x}_2$, are first initialised in different basins of attraction of the local minima.
-While these can be set to the minima, this is not a necessary requirement.
-Upon application of the BITSS method, the two images are brought closer to the ridge separating the basins of attraction, while also minimising the energy of the pair of images.
-In this way, the two images meet at the lowest energy point on the ridge - the transition state.
-This is demonstrated for a simple 2D potential with two minima in \cref{fig:toy2d}a.
-
 \begin{figure}[htb]
   \includegraphics{fig/toy2d.pdf}
   \caption{\label{fig:toy2d}
     (a) The trajectories of the two states under the BITSS method for a simple 2D potential with two minima (blue dots).
         The transition state is shown by an red dot, and the minimum energy pathway by the dashed line.
-    (b) A snapshot of the BITSS minimisation showing the driving forces on each state due to the energy constraint, $\bm{F}_E$, and distance constraint, $\bm{F}_D$, with $E_1 < E_2$ and $d(\bm{x}_1,\bm{x}_2) > d_i$.
+    (b) A snapshot of the BITSS minimisation showing the driving forces on each state due to the energy constraint, $\bm{F}_E$, and distance constraint, $\bm{F}_D$, with $E_1 < E_2$ and $\mathrm{d}(\bm{x}_1,\bm{x}_2) < d_i$.
     (c) The final configuration of the BITSS method showing the two states in orange, the transition state in red, and the negative curvature eigenvector, $\bm{\hat{\tau}}$.
   }
 \end{figure}
 
-\topic Two soft constraints are used to achieve the transition state convergence, while preventing either from passing over the dividing ridge.
-The former is implemented by constraining the distance between the states at iteration $i$, and reducing the target separation, $d_i$, from the initial separation, $d_0$, by a constant factor:
+\topic In this work we introduce a new method, the Binary Image Transition State Search (BITSS).
+This is a double-ended method that uses two states that converge toward a transition state from either side, therefore combining aspects of the two traditional transition state search categories.
+We will demonstrate how it addresses each of the above challenges using a range of different applications.
+
+
+%\section{Method}
+\topic The method begins by first initialising the states, $\bm{x}_1$ and $\bm{x}_2$, in the basins of attraction of different local minima.
+These can be set to the minima, but this is not a necessary requirement.
+The BITSS method then causes these states to meet at the lowest point on the ridge between the basins of attraction - the transision state.
+This is done by minimising their energy while constraining their separation and incrementally reducing it, such that at iteration $i$ it is given by
 \begin{equation}\label{eq:diteration}
-  d_{i+1} = (1 - f) d_i.
+  d_i = (1 - f) d_{i-1},
 \end{equation}
-We find that a factor of $f = 0.5$ is succesful for most applications, but this can be made smaller to ensure that the states do not slide off the ridge.
-The second constraint sets the energies of the two states to be equal.
-This ensures neither state can pass over the ridge so long as the distance is not reduced too quickly.
-These constraints are implemented using quadratic energy penalty terms, resulting in the following potential for the pair of states,
+with $d_0$ as the separation between the initial states.
+A factor of $f = 0.5$ is succesful for most applications, but this can be made smaller to ensure that the states do not slide off the ridge.
+A secondary constraint that sets the energies of the two states equal is also used to ensure that neither state is pulled over the ridge.
+
+\topic Using this approach, the typical trajectories of the states are demonstrated for a simple 2D potential in \cref{fig:toy2d}a.
+Initially, the lower energy state jumps up to satisfy the equal energy constraint and then moves to minimise the separation without increasing its energy.
+Then, the two states converge directly towards one another, before being deflected towards the saddle in the ridge.
+Consequently, if there are multiple possible pathways between two states, BITSS will be biased towards identifying those that are more direct or with lower energy.
+Furthermore, the final two states are positioned either side of the transition state in the direction of the negative curvature eigenvector, $\bm{\hat{\tau}}$ (\cref{fig:toy2d}c).
+So, BITSS automatically identifies the `reactive mode' and associated eigenvalue in addition to the transition state.
+
+\topic The two constraints are implemented using energy penalty terms, which, if the constraints are not met, result in driving forces on the two states, such as in \cref{fig:toy2d}b.
+The total energy of the pair of states is therefore given by,
 \begin{multline}\label{eq:bitss}
   E_\text{BITSS}(\bm{x}_1, \bm{x}_2) = E_1 + E_2
     + \kappa_e \left( E_1 - E_2 \right) ^2 \\
     + \kappa_d \left( \mathrm{d}(\bm{x}_1, \bm{x}_2) - d_i \right) ^2,
 \end{multline}
-where $E_1$ and $E_2$ are the single state energies, and $\mathrm{d}(\bm{x}_1, \bm{x}_2)$ is the measure of distance between the two states.
-The energy constraint pushes the state with a higher energy down the potential, and the lower energy state up, while the distance constraint pulls them together if their separation is too great, and pushes them apart if they are too close.
-These driving forces are demonstrated for the 2D potential in \cref{fig:toy2d}b.
+where $E_1$ and $E_2$ are the single state energies, $\kappa_e$ and $\kappa_d$ parametrise the strengths of the energy and distance constraints, and $\mathrm{d}(\bm{x}_1, \bm{x}_2)$ is the measure of distance between the two states.
+In this work the L-BFGS algorithm is chosen to minimise the energy, owing to its fast convergence and low memory requirement for large numbers of degrees of freedom \cite{Liu1989}.
+However, any other minimisation method can be used instead.
 
-\topic To locate the transition state without crossing the ridge, the constraint strengths $\kappa_d$ and $\kappa_e$ are updated as the algorithm proceeds.
-Consequently, we automate their assignment using information from the system.
+\topic To ensure that the transition state is located successfully, the constraint strengths $\kappa_d$ and $\kappa_e$ are updated as the algorithm proceeds using information from the system.
 They are initially calculated at the start of each minimisation, and regularly recalculated throughout (once per 100 iterations are used in this work).
-The coefficients are chosen such that each term in the gradient of \cref{eq:bitss} is of a similar size, providing the following expressions,
+They are set using the following equations such that each term in the gradient of \cref{eq:bitss} is of a similar size,
 \begin{gather}
   \kappa_e = \frac {\alpha} {2 \Delta E},
   \label{eq:ke}
   \\
-  \kappa_d = \text{max} \left(
+  \kappa_d = \max \left(
     \frac {\sqrt{|\bm{\nabla} E_1|^2 + |\bm{\nabla} E_2|^2}} {2\sqrt{2} \beta d_i} \; , \;
     \frac{\Delta E}{\beta d_i^2} \right),
   \label{eq:kd}
 \end{gather}
 where $\alpha$ and $\beta$ are parameters with recommended values of $\alpha = 10$ and $\beta = 0.1$ (see supplementary information).
-$\Delta E$ is an estimation for the current energy barrier which is evaluated by linearly interpolating between the two current states.
-For systems where the interpolation deviates significantly from the minimum energy pathway this estimate can be much too large.
-In which case, a maximum estimated value for the barrier can be provided, which then decreases proportionally with $d_i$.
+Here, $\Delta E$ is an estimation for the current energy barrier evaluated by linearly interpolating between the two states.
+For systems where the interpolation deviates significantly from the pathway the estimate can be too large.
+In which case, a maximum estimated value can be provided, which then decreases proportionally with $d_i$.
 
 \topic In summary, the method involves iteratively performing the following three steps:
 \begin{enumerate}
@@ -147,10 +155,13 @@ In which case, a maximum estimated value for the barrier can be provided, which 
   \item Compute the constraint coefficients using \cref{eq:ke,eq:kd}.
   \item Minimise the potential, \cref{eq:bitss}, and recompute the coefficients every 100 iterations of the minimisation.
 \end{enumerate}
-Any minimisation algorithm can be used in step three; in this work the L-BFGS algorithm is chosen, owing to its fast convergence and low memory requirement for large numbers of degrees of freedom \cite{Liu1989}.
-Finally, the convergence criteria for the method can be based upon either the separation between the states, or the size of gradient at the estimate for the transition state midway between the two states.
+This process is completed once a convergence criteria is reached that can be based upon either the separation between the states, or the size of gradient at the midpoint between the two states.
 
-% This is here to prevent it being put on the wrong page
+\topic Once BITSS has identified the transition state it is possible to find the full minimum energy pathway.
+This is done by tracing the trajectory of downhill minimisations from the two final states either side of the transition state.
+
+
+%\section{Speed Comparison}
 \begin{figure*}[tb]
   \includegraphics{fig/speedtest-a.pdf}%
   \includegraphics{fig/speedtest-b.pdf}%
@@ -161,21 +172,6 @@ Finally, the convergence criteria for the method can be based upon either the se
     The shown configurations correspond to the two minimum energy states and the transition state, marked by an asterisk.
   }
 \end{figure*}
-
-\topic The typical trajectory of the two states in the BITSS method is shown in \cref{fig:toy2d}a.
-Initially, the lower energy state jumps up to satisfy the equal energy constraint and then moves to reduce the separation as much as possible without increasing its energy.
-Then, the two states begin to converge directly towards one another, before being deflected in the direction of a saddle in the potential.
-Consequently, if there are multiple possible pathways between two states, BITSS will be biased towards identifying pathways that are more direct or with lower energy.
-As the two states approach the transition state, the path they take begins to closely follow the minimum energy pathway, which is the path that follows the gradient from the minima and passes through the transition state.
-Therefore, the final two states are positioned in the direction of the negative curvature eigenvector, $\bm{\hat{\tau}}$, as shown in \cref{fig:toy2d}c.
-In this way, BITSS automatically identifies the 'reactive mode' and associated eigenvalue.
-
-\topic Once BITSS has identified the transition state it is possible to find the full minimum energy pathway.
-This is done by tracing the trajectory of downhill minimisations from either side of the transition state, which are provided by the two final states of BITSS.
-To ensure this pathway is sufficiently smooth the maximum step size of the minimisation should be restricted.
-
-
-%\section{Speed Comparison}
 \topic As a result of the BITSS method using only two states it has the potential to be significantly faster than chain-of-states approaches which typically use tens of states.
 This is tested here by measuring the speed of convergence to the transition state for BITSS in comparison with the string method and DNEB for several representative examples.
 
