@@ -63,7 +63,7 @@ for isub, subfig in enumerate(['a', 'b', 'c']):
     plt.semilogy()
     plt.tick_params('both', which='minor')
     plt.xlabel('Gradient evalulations')
-    plt.ylabel('Distance error', labelpad=-0.5)
+    plt.ylabel('Distance error / $d_0$', labelpad=-0.2)
     if (subfig == 'a'):
         plt.xlim(0, 1600)
         plt.ylim(bottom=1e-5)
