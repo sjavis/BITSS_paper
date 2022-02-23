@@ -17,7 +17,13 @@
 
 
 \begin{document}
-\title{Supplementary Information}
+\title{Binary Image Transition State Search \\ Supplementary Information}
+\author{Samuel J. Avis}
+\author{Jack R. Panter}
+% \email[]{j.r.panter@durham.ac.uk}
+\author{Halim Kusumaatmaja}
+% \email[]{halim.kusumaatmaja@durham.ac.uk}
+\affiliation{Department of Physics, Durham University, South Road, Durham DH1 3LE, UK}
 \maketitle
 
 \section{Constraint coefficients}
@@ -26,23 +32,24 @@ The constraint coefficients are chosen to set comparable sizes for each term in 
   \grad E_\text{BITSS} = \sum_{\substack{i=1,2 \\ j\neq i}} \left[ 1 + 2 \kappa_e (E_i - E_j) \right] \grad E_i + 2 \kappa_d (d - d_0) \grad d.
 \end{equation}
 
-To obtain the expression for the energy coefficient we first assume that the separation is fixed, so the distance term can be ignored.
-The coefficient must be high enough to prevent one state from being pulled over the ridge, for which the greatest risk occurs when the gradient on one state is much greater than the other, $\abs{\grad E_2} \gg \abs{\grad E_1}$.
+To obtain the expression for the energy coefficient, $\kappa_e$, we first assume that the separation is fixed, so the distance term can be ignored.
+The coefficient $\kappa_e$ must be high enough to prevent one state from being pulled over the ridge, for which the greatest risk occurs when the gradient on one state is much greater than the other, $\abs{\grad E_2} \gg \abs{\grad E_1}$.
 In this case the total gradient is approximated by
 \begin{equation}
   \grad E_{tot} = \left[ 1 - 2 \kappa_e (E_1 - E_2) \right] \grad E_2.
 \end{equation}
-This will converge when the term in the square brackets is zero, resulting in $\kappa_e = 1 / 2 (E_1 - E_2)$.
-To ensure this is large enough we can replace the energy difference with the estimate for the energy barrier, $\upDelta E$, and then scale it by a factor, $\alpha$, that is greater than or equal to one,
+This will converge when the term in the square brackets is zero, resulting in $E_1 - E_2 = 1 / 2 \kappa_e$.
+This energy difference should be less than current energy barrier, so we can substitute it with $\upDelta E / \alpha$, where $\upDelta E$ is the energy barrier estimate and $\alpha$ is a constant greater than one.
+Leaving us with the expression
 \begin{equation}
   \kappa_e = \frac {\alpha} {2 \upDelta E}.
 \end{equation}
 
 The distance coefficient is determined by assuming that the energies are equal and thus the energy constraint can be ignored.
 In this case, convergence will occur when $\grad E_1 + \grad E_2 = -2 \kappa_d (d - d_0) \grad d$.
-By comparing the magnitude of the two sides it is possible to obtain an expression for the coefficient in terms of the relative error in the distance, $\beta = (d - d_0) / d_0$.
-(Note: The gradient of the distance with respect to a single state has a magnitude of 1, thus $\abs{\grad d} = \sqrt{2}$.)
-A lower bound on the size of the coefficient is also set using the estimated energy barrier to ensure that the distance constraint is applied even when the gradient is close to zero, such as at the minima.
+It is then possible to find the value of $\kappa_d$ for which the magnitude of each side of this equation is equal for a desired relative error in the distance, $\beta = (d - d_0) / d_0$.
+(Note: The gradient of the distance with respect to a single state has a magnitude of 1, thus the magnitude of the gradient for the pair of states is $\abs{\grad d} = \sqrt{1^2+1^2} = \sqrt{2}$.)
+A lower bound on the size of the coefficient is also set using the estimated energy barrier to ensure that the distance constraint is applied even when the gradient is close to zero, such as when the states are initialised at the minima.
 \begin{equation}
   \kappa_d = \mathrm{max} \! \left(
   \frac {\sqrt{\abs{\grad E_1}^2 + \abs{\grad E_2}^2}} {2 \sqrt{2} \beta d_0}, \quad
@@ -70,7 +77,8 @@ The constant parameters $\alpha$ and $\beta$ still must be chosen.
 To this end we have tested different parameter choices using the seven-particle cluster and cylindrical buckling examples.
 \Cref{fig:paramtest} shows which choices lead to convergence and the speed at which this occurs.
 The parameters $\alpha = 10$ and $\beta = 0.1$ are chosen for both converging quickly and being situated far from the regions of non-convergence.
-Hence, this choice is unlikely to fail if the boudaries of the regions were to shift for different systems.
+Hence, this choice is likely to still succeed even if the boudaries of the regions were to shift under different systems.
+However, the user is able to choose values optimised for their specific system should they wish.
 
 
 \section{Test potentials and gradients}
@@ -93,12 +101,12 @@ where $\bm{x}_1$ and $\bm{x}_2$ are the positions of the two particles, $r$ is t
   }
 \end{figure}
 For the cylindrical buckling example we can obtain the gradient by considering each bond and hinge individually.
-Using the schematic in \cref{fig:BAHschematic}, the gradient of the stretching energy of the bond between $\bm{x}_2$ and $\bm{x}_3$ is given by,
+Using the variables shown in the schematic in \cref{fig:BAHschematic}, the gradient of the stretching energy of the bond between $\bm{x}_2$ and $\bm{x}_3$, with equilibrium length $r^0$ and stretching rigidity $k^S$, is given by,
 \begin{equation}
   \frac{\partial E^S}{\partial \bm{x}_2} = - \frac{\partial E^S}{\partial \bm{x}_3} = 
     2 k^S (r - r^0) (\bm{x_2} - \bm{x_3}).
 \end{equation}
-While the gradients of the bending energy of the hinge are,
+While the gradients of the bending energy of the hinge, with equilibium angle $\theta^0$ and bending rigidity $k^B$, are,
 \begin{align}
   \frac{\partial E^B}{\partial \bm{x}_1} &= k^B \sin(\theta - \theta^0) \frac{\bm{\hat{n}}_a}{h_a}, \\
   \frac{\partial E^B}{\partial \bm{x}_2} &= - k^B \sin(\theta - \theta^0) \left[\frac{\bm{\hat{n}}_a}{h_a} + \frac{\bm{\hat{n}}_a + \bm{\hat{n}}_b}{r}\right], \\
