@@ -1,4 +1,4 @@
-\documentclass[aps,prl,twocolumn,groupedaddress]{revtex4-2}
+\documentclass[aps,prl,twocolumn,10pt,groupedaddress]{revtex4-2}
 
 % Maths
 \usepackage{bm}
@@ -12,6 +12,7 @@
 
 % Referencing
 \usepackage{cleveref}
+\Crefname{figure}{Fig.}{Figs.}
 \newcommand{\ccite}[1]{ref.~\cite{#1}}
 \newcommand{\Ccite}[1]{Ref.~\cite{#1}}
 \newcommand{\ccites}[1]{refs.~\cite{#1}}
@@ -168,7 +169,7 @@ This is done by tracing the trajectory of downhill minimisations from the two fi
   \includegraphics{fig/speedtest-b.pdf}%
   \includegraphics{fig/speedtest-c.pdf}%
   \caption{\label{fig:speedtest}
-    The convergence to the transition state as a function of the number of gradient calculations using the BITSS (black line) and string methods for (a) a Lennard-Jones seven-particle cluster, (b) cylindrical shell buckling, (c) wetting of a chemically-striped surface.
+    The convergence to the transition state as a function of the number of gradient calculations using the BITSS (black line) and string methods for (a) a Lennard-Jones seven-particle cluster, (b) cylindrical shell buckling, and (c) wetting of a chemically-striped surface.
     The string method is repeated with a differing number of images along the string, the number of which is listed in the legend in (c).
     The shown configurations correspond to the two minimum energy states and the transition state, marked by an asterisk.
   }
