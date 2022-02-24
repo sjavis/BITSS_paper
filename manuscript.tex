@@ -106,7 +106,8 @@ We will demonstrate how it addresses each of the above challenges using a range 
 \topic The method begins by first initialising the states, $\bm{x}_1$ and $\bm{x}_2$, in the basins of attraction of different local minima.
 These can be set to the minima, but this is not a necessary requirement.
 The BITSS method then causes these states to meet at the lowest point on the ridge between the basins of attraction - the transision state.
-This is done by minimising their energy while constraining their separation and incrementally reducing it, such that at iteration $i$ it is given by
+This is done by minimising the energy of the pair while constraining their separation.
+The separation $d_i$ is incrementally reduced, such that at iteration $i$,
 \begin{equation}\label{eq:diteration}
   d_i = (1 - f) d_{i-1},
 \end{equation}
@@ -155,7 +156,7 @@ In which case, a maximum estimated value can be provided, which then decreases p
   \item Compute the constraint coefficients using \cref{eq:ke,eq:kd}.
   \item Minimise the potential, \cref{eq:bitss}, and recompute the coefficients every 100 iterations of the minimisation.
 \end{enumerate}
-This process is completed once a convergence criteria is reached that can be based upon either the separation between the states, or the size of gradient at the midpoint between the two states.
+This process is completed once a convergence criterion is reached that can be based upon either the separation between the states, or the size of gradient at the midpoint between the two states.
 
 \topic Once BITSS has identified the transition state it is possible to find the full minimum energy pathway.
 This is done by tracing the trajectory of downhill minimisations from the two final states either side of the transition state.
@@ -219,8 +220,8 @@ Similar results are also found when comparing against against DNEB, which can be
 %\section{Adaptive mesh}
 \topic Adaptive remeshing and coarse-graining are widely used techniques that we can utilise to further increase the efficiency of BITSS.
 These techniques cause issues for double-ended methods because the coupled states may end up with different discretisations.
-However, in BITSS the only direct coupling is in the distance measure, $\mathrm{d}(\bm{x}_1,\bm{x}_2)$, so it is relatively easy to adapt.
-Here we demonstrate the use of adaptive remeshing by splitting it into two issues that we will consider separately.
+However, in BITSS the only direct coupling is in the distance measure, $\mathrm{d}(\bm{x}_1,\bm{x}_2)$, which is relatively easy to adapt.
+Here we demonstrate the use of adaptive remeshing by considering two separate issues.
 
 \topic Firstly, we show in \cref{fig:adaptivemesh}a that BITSS is able to handle the discretisation changing as the method runs.
 For this we use the cylindrical buckling example with the resolution increasing from 40 to 100 triangles around the cylinder.
@@ -230,8 +231,8 @@ This demonstrates that BITSS is able to converge to the transition state so long
 \topic In the second test, \cref{fig:adaptivemesh}b, we demonstrate the use of different meshes for the two states in the striped wetting example.
 In this case, the distance measure is adapted by interpolating one state onto the other mesh and computing the Euclidean distance.
 However, for some applications a simpler measure may be sufficient, such as the difference between average values of the system.
-Using this approach BITSS is able to get very close to the transition state, but there is now a limit because the energy of the transition state is different on each grid, so the energy constraint will eventually fail.
-However, this is less of an issue for true adaptive methods, because the two meshes would also be expected to converge.
+Using this approach, BITSS is able to closely approach the transition state.
+The convergence precision is now limited by the transition state energy differing slightly on each grid, but this effect is reduced when using an adaptive method or a higher resolution.
 
 \begin{figure}[tb]
   \includegraphics{fig/changingmesh.pdf}\\
@@ -249,14 +250,14 @@ However, this is less of an issue for true adaptive methods, because the two mes
 
 %\section{Zero-curvature modes}
 \topic The final challenges we will address are those related to complex landscapes.
-The first of which being the presence of flat regions in the landscape.
+The first is the presence of flat regions in the landscape.
 \Cref{fig:flatdiscontinuous}a shows BITSS applied to a 2D landscape with two such regions (i \& ii) that are flat in the $x$-direction.
-We see it is able to successfully converge past these flat regions, even with one very close to the transition state (ii).
+We see BITSS is able to successfully converge past these flat regions, even with one very close to the transition state (ii).
 In these regions there are no driving forces due to the potential and the energy constraint, which use purely local information about the gradient.
 However, the distance constraint continues to pull the states together, preventing them from getting stuck.
 When only a single state has a zero-gradient mode then the other is likely to slide down the potential slightly (iii), but the two states still remain either side of the dividing ridge and so the result is unaffected.
-Indeed, a zero-gradient mode may only cause BITSS to fail if it is positioned at the transition state in the direction of the pathway.
-In this case there would be no single transition state, instead the minimum energy pathway would have a flat section at the top of its energy profile.
+\temp{Indeed, the only circumstance under which a zero-mode could cause BITSS to fail is if it is positioned at the transition state in the direction of the pathway.
+In this case there is no single transition state, instead the minimum energy pathway would have a flat section at the top of its energy profile.}
 
 \begin{figure}[tb]
   \includegraphics{fig/zeroeigen.pdf}\\
@@ -298,7 +299,7 @@ This method will enable the analysis of energy landscapes for new systems in bot
 
 \begin{acknowledgments}
   S.~J.~A. is supported by a studentship from the Engineering and Physical Sciences Research Council (Grant No. EP/R513039/1).
-  H.~K. and J.~P. acknowledge funding from the Engineering and Physical Sciences Research Council (Grant No. EP/V034154/1).
+  H.~K. and J.~R.~P. acknowledge funding from the Engineering and Physical Sciences Research Council (Grant No. EP/V034154/1).
 \end{acknowledgments}
 
 \bibliographystyle{apsrev4-2}
