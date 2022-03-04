@@ -143,7 +143,19 @@ The gradients of these terms are given by,
 where index $k$ denotes neighboring nodes at which the evaluation of the gradient uses $\phi_i$.
 
 
-\newpage
+\section{Details for the adaptive discretisation tests}
+Here we provide the details for the interpolations and mapping involved in the two examples demonstrating the feasibility of using an adaptive discretisation method.
+For the cylindrical buckling example with a changing mesh, the resolution is refined each time the separation between the two states is halved. 
+This involves the number of triangles around the circumference of the cylinder increasing along the sequence, $40 \rightarrow 60 \rightarrow 80 \rightarrow 100$.
+The positions of the nodes on the new grid, $\{\bm{n}_i\}$, are determined by linear interpolating from the previous grid $\{\bm{p}_i\}$, using the positions of the unbuckled meshes, $\{\bm{n'}_i\}$ and $\{\bm{p'}_i\}$.
+For each node of the new grid, $\bm{n'}_i$, the triangle that contains it is first identified, which we will denote $\{\bm{p'}_1,\bm{p'}_2,\bm{p'}_3\}$, and the barycentric coordinates of the point are computed, $\{\lambda_1,\lambda_2,\lambda_3\}$.
+The new position is then given by $\bm{n}_i = \lambda_1 \bm{p}_1 + \lambda_2 \bm{p}_2 + \lambda_3 \bm{p}_3$.
+
+In the example with different resolutions for the two states, the distance is obtained by mapping the phase field from the higher resolution grid to the low resolution grid, and then using the 2-norm.
+Because a square grid is used with a resolution ratio of two, the mapping involves averaging each 2x2 block to a single point.
+Finally, the gradient with respect to each point must be mapped back to the higher-resolution grid, which is done by assigning a quarter of each component back to its the original four points.
+
+
 \section{Additional results: DNEB speed comparison}
 \Cref{fig:DNEBspeedtest} shows the results for the speed test in comparison with DNEB.
 Much the same as the string method, the slope of BITSS is greater than DNEB with 10 or 20 states, indicating a faster convergence.
@@ -160,6 +172,7 @@ So it will require a secondary method to accurately locate the transition state,
 \end{figure}
 
 
+\newpage
 \section{Additional results: Seven-particle cluster comparison}
 \Cref{fig:clusterdgraphs} shows the comparison between the energies of the minima and transition states for the seven-particle cluster.
 Notably the energies of the minima are largely unchanged, but the energies of the transition states are found to be slightly higher when using the discontinuous potential.

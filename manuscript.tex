@@ -85,7 +85,7 @@ Single-ended methods are not well suited for identifying specific pathways and c
 Another major challenge in studying complex energy landscapes relates to the presence of locally flat or discontinous regions.
 Both of which can be relevent when considering contact forces for macroscopic objects \temp{[cite]}, or hard-body interactions in atomistic systems \temp{[cite]}.
 Flat zero-modes in the landscape pose issues for single-ended search methods that rely only upon local information.
-Specialist treatment can sometimes be used such as in the case of global rotation and translation \temp{\cite{Wales2004}}, but they are thwarted by local zero-modes.
+Specialist treatment can sometimes be used such as in the case of global rotation and translation \cite{Page1988}, but they are thwarted by local zero-modes.
 Meanwhile, current methods cannot typically be applied in the case of discontinuous potentials, or where the gradient is prohibitively expensive to compute, because they require continuous, differentiable optimisation functions.
 
 \begin{figure}[htb]
@@ -257,8 +257,6 @@ We see BITSS is able to successfully converge past these flat regions, even with
 In these regions there are no driving forces due to the potential and the energy constraint, which use purely local information about the gradient.
 However, the distance constraint continues to pull the states together, preventing them from getting stuck.
 When only a single state has a zero-gradient mode then the other is likely to slide down the potential slightly (iii), but the two states still remain either side of the dividing ridge and so the result is unaffected.
-\temp{Indeed, the only circumstance under which a zero-mode could cause BITSS to fail is if it is positioned at the transition state in the direction of the pathway.
-In this case there is no single transition state, instead the minimum energy pathway would have a flat section at the top of its energy profile.}
 
 \begin{figure}[tb]
   \includegraphics{fig/zeroeigen.pdf}\\
