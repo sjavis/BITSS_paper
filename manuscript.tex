@@ -13,15 +13,8 @@
 % Referencing
 \usepackage{cleveref}
 \Crefname{figure}{Fig.}{Figs.}
-\newcommand{\ccite}[1]{ref.~\cite{#1}}
-\newcommand{\Ccite}[1]{Ref.~\cite{#1}}
-\newcommand{\ccites}[1]{refs.~\cite{#1}}
-\newcommand{\Ccites}[1]{Refs.~\cite{#1}}
 
 % Temp
-\usepackage{lipsum}
-\usepackage{xcolor}
-\newcommand{\temp}[1]{{\leavevmode\color{red}#1}}
 \newcommand*{\newlinecommand}[2]{%
   \newcommand*{#1}{%
     \begingroup%
@@ -83,7 +76,7 @@ One key problem arises from the push towards larger and more complex systems \ci
 Current double-ended methods require a chain of tens of states to gain an accurate approximation, and have issues with remeshing resulting in a different discretisation for each state.
 Single-ended methods are not well suited for identifying specific pathways and can spend a large amount of time searching for undesired transition states.
 Another major challenge in studying complex energy landscapes relates to the presence of locally flat or discontinous regions.
-Both of which can be relevent when considering contact forces for macroscopic objects \temp{[cite]}, or hard-body interactions in atomistic systems \temp{[cite]}.
+Both of which can be relevent when considering contact forces for macroscopic objects [cite], or hard-body interactions in atomistic systems [cite].
 Flat zero-modes in the landscape pose issues for single-ended search methods that rely only upon local information.
 Specialist treatment can sometimes be used such as in the case of global rotation and translation \cite{Page1988}, but they are thwarted by local zero-modes.
 Meanwhile, current methods cannot typically be applied in the case of discontinuous potentials, or where the gradient is prohibitively expensive to compute, because they require continuous, differentiable optimisation functions.
@@ -165,9 +158,7 @@ This is done by tracing the trajectory of downhill minimisations from the two fi
 
 %\section{Speed Comparison}
 \begin{figure*}[tb]
-  \includegraphics{fig/speedtest-a.pdf}%
-  \includegraphics{fig/speedtest-b.pdf}%
-  \includegraphics{fig/speedtest-c.pdf}%
+  \includegraphics{fig/speedtest.pdf}
   \caption{\label{fig:speedtest}
     The convergence to the transition state as a function of the number of gradient calculations using the BITSS (black line) and string methods for (a) a Lennard-Jones seven-particle cluster, (b) cylindrical shell buckling, and (c) wetting of a chemically-striped surface.
     The string method is repeated with a differing number of images along the string, the number of which is listed in the legend in (c).
@@ -236,8 +227,7 @@ Using this approach, BITSS is able to closely approach the transition state.
 The convergence precision is now limited by the transition state energy differing slightly on each grid, but this effect is reduced when using an adaptive method or a higher resolution.
 
 \begin{figure}[tb]
-  \includegraphics{fig/changingmesh.pdf}\\
-  \includegraphics{fig/differentgrids.pdf}
+  \includegraphics{fig/adaptivemesh.pdf}
   \caption{\label{fig:adaptivemesh}
     (a) Snapshots of the BITSS method applied to the buckling of a cylinder with a changing mesh.
         The radial displacement relative the unbuckled cylinder is shown, as well as the underlying triangular mesh.
@@ -259,8 +249,7 @@ However, the distance constraint continues to pull the states together, preventi
 When only a single state has a zero-gradient mode then the other is likely to slide down the potential slightly (iii), but the two states still remain either side of the dividing ridge and so the result is unaffected.
 
 \begin{figure}[tb]
-  \includegraphics{fig/zeroeigen.pdf}\\
-  \includegraphics{fig/discontinuous.pdf}
+  \includegraphics{fig/flatdiscontinuous.pdf}
   \caption{\label{fig:flatdiscontinuous}
     (a) Energy profile of the BITSS pathway on a 2D potential with flat regions.
         The blue and red dots denote the minima and transition state, respectively.

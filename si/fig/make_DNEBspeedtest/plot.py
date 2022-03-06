@@ -86,4 +86,4 @@ for isub, subfig in enumerate(['a', 'b', 'c']):
         if (i==1):
             tmp_ax.text(0.25, 1, '*', va='top', ha='center', size='xx-large', transform=tmp_ax.transAxes)
 
-    lt.savefig(f'../DNEBspeedtest.pdf', dpi=300)
+lt.savefig(f'../DNEBspeedtest.pdf', dpi=300)

@@ -85,7 +85,6 @@ Hence, this choice is likely to still succeed even if the boudaries of the regio
 However, the user is able to choose values optimised for their specific system should they wish.
 
 
-\FloatBarrier
 \section{Test potentials and gradients}
 To use L-BFGS minisation the gradients of the optimisation function must be known.
 For the BITSS potential this is given by \cref{eq:gradBITSS}, but this also requires the gradients of the system under consideration.
@@ -143,6 +142,7 @@ The gradients of these terms are given by,
 where index $k$ denotes neighboring nodes at which the evaluation of the gradient uses $\phi_i$.
 
 
+\newpage
 \section{Details for the adaptive discretisation tests}
 Here we provide the details for the interpolations and mapping involved in the two examples demonstrating the feasibility of using an adaptive discretisation method.
 For the cylindrical buckling example with a changing mesh, the resolution is refined each time the separation between the two states is halved. 

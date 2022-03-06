@@ -13,7 +13,13 @@ lt.update_width('r4-double')
 def str_converter(instr):
     return np.fromstring(instr[1:-1],sep=' ')
 
-for subfig in ['a', 'b', 'c']:
+y0 = 0.15
+h1 = 0.62/3 # height of lower axes relative to width
+h2 = 1/9 # height of upper axes relative to width
+h = h1 + h2
+fig = lt.figure(1, h)
+
+for isub, subfig in enumerate(['a', 'b', 'c']):
 
     ### Load data
     if (subfig == 'a'):
@@ -40,13 +46,9 @@ for subfig in ['a', 'b', 'c']:
 
 
     ### Plot data
-    width = 1/3
-    h1 = 1/1.618 # height of lower axes relative to width
-    h2 = 1/3 # height of upper axes relative to width
-    h = h1 + h2
-    fig = lt.figure(width, h)
-    ax = plt.axes((0.19, 0.13, 0.78, h1/h-0.1))
-    fig.text(0, 1, f'({subfig})', va='top', ha='left')
+    x0 = isub / 3
+    ax = plt.axes((x0+0.19/3, y0, 0.26, h1/h-y0+0.03))
+    fig.text(x0, 1, f'({subfig})', va='top', ha='left')
 
     if (subfig == 'a'):
         ax.annotate('BITSS', [0.1, 0.08], [0.2, 0.1], xycoords='axes fraction',
@@ -84,7 +86,7 @@ for subfig in ['a', 'b', 'c']:
 
     # Snapshots
     for i in range(3):
-        tmp_ax = plt.axes((0.035+i*0.31, 1-h2/h, 0.31, h2/h))
+        tmp_ax = plt.axes((x0+(0.035+i*0.31)/3, 1-h2/h, 0.1, h2/h))
         img = mim.imread(f'{subfig}{i}.png')
         plt.imshow(img)
         tmp_ax.axis('off')
@@ -92,5 +94,4 @@ for subfig in ['a', 'b', 'c']:
         if (i==1):
             tmp_ax.text(0.25, 1, '*', va='top', ha='center', size='xx-large', transform=tmp_ax.transAxes)
 
-    # plt.savefig(f'speedtest-dneb-{subfig}.png')
-    lt.savefig(f'../speedtest-{subfig}.pdf', dpi=300)
+lt.savefig(f'../speedtest.pdf', dpi=300)

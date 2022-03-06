@@ -1,6 +1,6 @@
 #!/bin/bash
 
-figures=('toy2d' 'speedtest' 'changingmesh' 'differentgrids' 'zeroeigen' 'discontinuous')
+figures=('toy2d' 'speedtest' 'adaptivemesh' 'flatdiscontinuous')
 
 for fig in ${figures[@]}; do
   echo "Plotting $fig"
