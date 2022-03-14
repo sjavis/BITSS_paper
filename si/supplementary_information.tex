@@ -39,7 +39,7 @@ In this case the total gradient is approximated by
 \begin{equation}
   \grad E_\text{BITSS} = \left[ 1 - 2 \kappa_e (E_1 - E_2) \right] \grad E_2.
 \end{equation}
-Therefore, when not at a transition state or a minima in the landscape ($\abs{\grad E_2} \neq 0$) convergence will occur when the term in the square brackets is zero, resulting in $E_1 - E_2 = 1 / 2 \kappa_e$.
+Therefore, when not at a transition state or a minimum in the landscape ($\abs{\grad E_2} \neq 0$) convergence will occur when the term in the square brackets is zero, resulting in $E_1 - E_2 = 1 / 2 \kappa_e$.
 This energy difference should be less than current energy barrier, so we can substitute it with $\upDelta E / \alpha$, where $\upDelta E$ is the energy barrier estimate described in the main paper and $\alpha$ is a constant greater than one.
 This leaves us with the expression,
 \begin{equation}
@@ -53,7 +53,7 @@ It is then possible to find the value of $\kappa_d$ for which the magnitude of e
   \kappa_d = \frac {\sqrt{\abs{\grad E_1}^2 + \abs{\grad E_2}^2}} {2 \sqrt{2} \beta d_i}.
 \end{equation}
 (Note: The gradient of the distance with respect to a single state has a magnitude of 1, thus the magnitude of the gradient for the pair of states is $\abs{\grad d} = \sqrt{1^2+1^2} = \sqrt{2}$.)
-To ensure that the coefficient is not too small if the gradient is close to zero, such as when the states are initialised at the minima, a lower bound is set by replacing $\abs{\grad E_1}$ and $\abs{\grad E_2}$ with $2 \upDelta E / d_i$. Giving the expression,
+To ensure that the coefficient is not too small if the gradient is close to zero, such as when the states are initialised at the minima, a lower bound is set by replacing $\abs{\grad E_1}$ and $\abs{\grad E_2}$ with $2 \upDelta E / d_i$. This gives the expression,
 \begin{equation}
   \kappa_d = \mathrm{max} \! \left(
   \frac {\sqrt{\abs{\grad E_1}^2 + \abs{\grad E_2}^2}} {2 \sqrt{2} \beta d_i}, \quad
@@ -78,7 +78,7 @@ To reduce this effect, the gradients are projected in the direction of the separ
 \end{figure}
 
 The constant parameters $\alpha$ and $\beta$ still must be chosen.
-To this end we have tested different parameter choices using the seven-particle cluster and cylindrical buckling examples.
+To this end we have tested different parameter choices using the seven-particle cluster and cylindrical buckling examples, with fractional separation decreases per BITSS step of $f=0.5$ and $f=0.4$, respectively.
 \Cref{fig:paramtest} shows which choices lead to convergence and the speed at which this occurs.
 The parameters $\alpha = 10$ and $\beta = 0.1$ are chosen for both converging quickly and being situated far from the regions of non-convergence in both test cases.
 Hence, this choice is likely to still succeed even if the boudaries of the regions were to shift under different systems.
@@ -151,14 +151,28 @@ The positions of the nodes on the new grid, $\{\bm{n}_i\}$, are determined by li
 For each node of the new grid, $\bm{n'}_i$, the triangle that contains it is first identified, which we will denote $\{\bm{p'}_1,\bm{p'}_2,\bm{p'}_3\}$, and the barycentric coordinates of the point are computed, $\{\lambda_1,\lambda_2,\lambda_3\}$.
 The new position is then given by $\bm{n}_i = \lambda_1 \bm{p}_1 + \lambda_2 \bm{p}_2 + \lambda_3 \bm{p}_3$.
 
-In the example with different resolutions for the two states, the distance is obtained by mapping the phase field from the higher resolution grid to the low resolution grid, and then using the 2-norm.
-Because a square grid is used with a resolution ratio of two, the mapping involves averaging each 2x2 block to a single point.
-Finally, the gradient with respect to each point must be mapped back to the higher-resolution grid, which is done by assigning a quarter of each component back to its the original four points.
+In the example with different resolutions for the two states, the distance is obtained by first mapping the phase field from the higher resolution grid, $\{\phi_{k,l} | k,l \in \{0,1,\cdots,399\}\}$, to the low resolution grid, $\{\phi'_{i,j} | i,j \in \{0,1,\cdots,199\}$.
+Because a square grid is used with a resolution ratio of two, the mapping involves averaging each 2x2 block to a single point:
+\begin{equation}
+  \phi'_{i,j} = \frac{1}{4} \left( \phi_{2i,2j} + \phi_{2i+1,2j} + \phi_{2i,2j+1} + \phi_{2i+1,2j+1} \right)
+\end{equation}
+Then the separation from the other state, $\{\widetilde{\phi}_{i,j}\}$ is computed using the 2-norm,
+\begin{equation}
+  d = \sqrt{\sum_{i,j} \left( \phi'_{i,j} - \widetilde{\phi}_{i,j} \right)^2}.
+\end{equation}
+Finally, the gradient of the distance with respect to each point must be mapped back to the higher-resolution grid, which is done by assigning a quarter of each component back to its the original four points:
+\begin{equation}
+  \frac{\partial d}{\partial \phi_{k,l}} =
+    \frac{\partial \phi'_{i,j}}{\partial \phi_{k,l}} \frac{\partial d}{\partial \phi'_{i,j}} =
+    \frac{1}{4} \frac{\partial d}{\partial \phi'_{i,j}} =
+    \frac{1}{4} \frac{\phi'_{i,j} - \widetilde{\phi}_{i,j}}{d},
+\end{equation}
+where $k \in \{2i, 2i+1\}$, and $l \in \{2j, 2j+1\}$.
 
 
 \section{Additional results: DNEB speed comparison}
 \Cref{fig:DNEBspeedtest} shows the results for the speed test in comparison with DNEB.
-Much the same as the string method, the slope of BITSS is greater than DNEB with 10 or 20 states, indicating a faster convergence.
+Similar to the results for the string method, the slope of BITSS is greater than DNEB with 10 or 20 states, indicating a faster convergence.
 Furthermore, with the exception of the seven-particle cluster, DNEB is also much less accurate at approximating the transition state, even with a large number of images.
 So it will require a secondary method to accurately locate the transition state, while BITSS does not.
 
@@ -166,7 +180,7 @@ So it will require a secondary method to accurately locate the transition state,
   \includegraphics{fig/DNEBspeedtest.pdf}
   \caption{\label{fig:DNEBspeedtest}
     The convergence to the transition state as a function of the number of gradient calculations using the BITSS (black line) and DNEB for (a) a Lennard-Jones seven-particle cluster, (b) cylindrical shell buckling, and (c) wetting of a chemically-striped surface.
-    The string method is repeated with a differing number of images along the string, the number of which is listed in the legend in (c).
+    DNEB is repeated with a differing number of images along the chain, the number of which is listed in the legend in (c).
     The shown configurations correspond to the two minimum energy states and the transition state, marked by an asterisk.
   }
 \end{figure}
