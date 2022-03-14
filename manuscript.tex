@@ -40,12 +40,12 @@
 %\section{Introduction \& Method}
 Transition states are central to the description of reconfiguration mechanisms for systems in chemistry, condensed matter physics, and engineering.
 Historically, many computational methods for locating transition states have grown from an atomistic or particulate perspective.
-These have proven to be important tools for understanding, for example, protein folding \cite{Bryngelson1995,Onuchic1997}, biological and industrial catalysis \cite{Boehr2006,Kerns2015,Guo2018a}, quantum tunneling \cite{Richardson2016,Vaillant2019}, crystallisation [cite], and cluster formation \cite{Wales1998,Wales2012}.
+These have proven to be important tools for understanding, for example, protein folding \cite{Bryngelson1995,Onuchic1997}, biological and industrial catalysis \cite{Boehr2006,Kerns2015,Guo2018a}, quantum tunneling \cite{Richardson2016,Vaillant2019}, crystallisation \cite{Richard2018}, and cluster formation \cite{Wales1998,Wales2012}.
 
 More recently, it is increasingly being recognised that transition states are useful in mesoscale or macroscale systems.
 Here, the minimum energy barriers provide important lower bounds to the energy input required for transitions to occur.
 This has been used to understand failure in structural engineering applications \cite{Panter2019,Hutchinson2018}, for the development of super liquid-repellent surfaces \cite{Zhang2014,Panter2019b}, and investigating locomotion through complex terrain for robotics \cite{Othayoth2020}.
-Moreover, it is becoming desirable to tailor elastic deformation transitions to enable technologies such as advanced deployable structures \cite{Filipov2015,Zhai2018}, mechanical sensors and actuators [cite], and energy absorption \cite{Shan2015} to name but a few.
+Moreover, it is becoming desirable to tailor elastic deformation transitions to enable technologies such as advanced deployable structures \cite{Filipov2015,Zhai2018}, mechanical sensors and actuators \cite{Bertoldi2017,Truby2016,Chi2022,Bonfanti2020}, and energy absorbers \cite{Shan2015,Giri2021} to name but a few.
 
 Existing transition state search methods generally fall into two categories, single- and double-ended methods.
 Single-ended methods are initialised at a single state and attempt to climb to a nearby saddle point.
@@ -58,7 +58,7 @@ One key problem arises from the push towards larger and more complex systems \ci
 Current double-ended methods require a chain of tens of states to gain an accurate approximation, and have issues with remeshing resulting in a different number of degrees of freedom for each state.
 Single-ended methods are not well suited for identifying specific pathways and can spend a large amount of time searching for undesired transition states.
 Another major challenge in studying complex energy landscapes relates to the presence of locally flat or discontinous regions.
-Both of which can be relevent when considering contact forces for macroscopic objects [cite], or hard-body interactions in atomistic systems [cite].
+Both of which can be relevent when considering patchy \cite{McMullen2018,Nguemaha2018,Chen2018b} and hard-body \cite{Richard2018,Santra2018} interactions in atomistic systems, or collision constraints for macroscopic objects \cite{Wriggers2006}.
 Flat zero-modes in the landscape pose issues for single-ended search methods that rely only upon local information.
 Specialist treatment can sometimes be used such as in the case of global rotation and translation \cite{Page1988}, but they are thwarted by local zero-modes.
 Meanwhile, current methods cannot typically be applied in the case of discontinuous potentials, or where the gradient is prohibitively expensive to compute, because they require continuous, differentiable optimisation functions.
@@ -75,7 +75,7 @@ Meanwhile, current methods cannot typically be applied in the case of discontinu
 
 In this work we introduce a new method, the Binary Image Transition State Search (BITSS).
 This is a double-ended method that uses two states that converge toward a transition state from either side, therefore combining aspects of the two traditional transition state search categories.
-We will demonstrate how it addresses each of the above challenges using a range of different applications.
+We demonstrate how it addresses each of the above challenges using a range of different applications.
 
 
 %\section{Method}
@@ -267,12 +267,12 @@ This method will enable the analysis of energy landscapes for new systems in bot
 \section{}
 
 \begin{acknowledgments}
-  S.~J.~A. is supported by a studentship from the Engineering and Physical Sciences Research Council [EP/R513039/1].
-  H.~K. and J.~R.~P. acknowledge funding from the Engineering and Physical Sciences Research Council [EP/V034154/1].
+  S.~J.~A. is supported by a studentship from the Engineering and Physical Sciences Research Council [Grant No. EP/R513039/1].
+  H.~K. and J.~R.~P. acknowledge funding from the Engineering and Physical Sciences Research Council [Grant No. EP/V034154/1].
 \end{acknowledgments}
 
 \bibliographystyle{apsrev4-2}
-% \bibliography{bibexport.bib}
-\bibliography{../../library.bib}
+\bibliography{bibexport.bib}
+% \bibliography{../../library.bib}
 
 \end{document}
