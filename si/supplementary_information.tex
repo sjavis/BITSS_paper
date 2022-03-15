@@ -40,10 +40,10 @@ In this case the total gradient is approximated by
   \grad E_\text{BITSS} = \left[ 1 - 2 \kappa_e (E_1 - E_2) \right] \grad E_2.
 \end{equation}
 Therefore, when not at a transition state or a minimum in the landscape ($\abs{\grad E_2} \neq 0$) convergence will occur when the term in the square brackets is zero, resulting in $E_1 - E_2 = 1 / 2 \kappa_e$.
-This energy difference should be less than current energy barrier, so we can substitute it with $\upDelta E / \alpha$, where $\upDelta E$ is the energy barrier estimate described in the main paper and $\alpha$ is a constant greater than one.
+This energy difference should be less than current energy barrier, so we can substitute it with $E_B / \alpha$, where $E_B$ is the energy barrier estimate described in the main paper and $\alpha$ is a constant greater than one.
 This leaves us with the expression,
 \begin{equation}
-  \kappa_e = \frac {\alpha} {2 \upDelta E}.
+  \kappa_e = \frac {\alpha} {2 E_B}.
 \end{equation}
 
 The distance coefficient is determined by assuming that the energies are equal and thus the energy constraint can be ignored.
@@ -53,11 +53,11 @@ It is then possible to find the value of $\kappa_d$ for which the magnitude of e
   \kappa_d = \frac {\sqrt{\abs{\grad E_1}^2 + \abs{\grad E_2}^2}} {2 \sqrt{2} \beta d_i}.
 \end{equation}
 (Note: The gradient of the distance with respect to a single state has a magnitude of 1, thus the magnitude of the gradient for the pair of states is $\abs{\grad d} = \sqrt{1^2+1^2} = \sqrt{2}$.)
-To ensure that the coefficient is not too small if the gradient is close to zero, such as when the states are initialised at the minima, a lower bound is set by replacing $\abs{\grad E_1}$ and $\abs{\grad E_2}$ with $2 \upDelta E / d_i$. This gives the expression,
+To ensure that the coefficient is not too small if the gradient is close to zero, such as when the states are initialised at the minima, a lower bound is set by replacing $\abs{\grad E_1}$ and $\abs{\grad E_2}$ with $2 E_B / d_i$. This gives the expression,
 \begin{equation}
   \kappa_d = \mathrm{max} \! \left(
   \frac {\sqrt{\abs{\grad E_1}^2 + \abs{\grad E_2}^2}} {2 \sqrt{2} \beta d_i}, \quad
-  \frac{\upDelta E}{\beta d_i^2} \right).
+  \frac{E_B}{\beta d_i^2} \right).
 \end{equation}
 
 In practice, when numerically minimising, the states will jump about slightly which can result in large gradients perpendicular to the optimal movement direction.
@@ -121,10 +121,10 @@ The gradients of the bending energy of the hinge, with equilibium angle $\theta^
 \subsection{Striped wetting}
 The four sections of the phase-field model detailed in \namecref{eq:gradBITSS}~(7) are obtained using the following equations,
 \begin{align}
-  E_B[\phi] &= \sum_i \frac{1}{\epsilon} \left( \frac{{\phi_i}^4}{4} - \frac{{\phi_i}^2}{2} + \frac{1}{4} \right) \upDelta V,\\
-  E_I[\phi] &= \sum_i \frac{\epsilon}{2} \abs{\grad \phi_i}^2 \upDelta V,\\
-  E_S[\phi] &= \sum_j \sqrt{2}\cos\theta_j \left( \frac{{\phi_j}^3}{6} - \frac{\phi_j}{2} - \frac{1}{3} \right) \upDelta S,\\
-  E_V[\phi] &= k_V \left[ \sum_i \frac{\phi_i + 1}{2} \upDelta V - V_0 \right]^2,
+  E^B[\phi] &= \sum_i \frac{1}{\epsilon} \left( \frac{{\phi_i}^4}{4} - \frac{{\phi_i}^2}{2} + \frac{1}{4} \right) \upDelta V,\\
+  E^I[\phi] &= \sum_i \frac{\epsilon}{2} \abs{\grad \phi_i}^2 \upDelta V,\\
+  E^S[\phi] &= \sum_j \sqrt{2}\cos\theta_j \left( \frac{{\phi_j}^3}{6} - \frac{\phi_j}{2} - \frac{1}{3} \right) \upDelta S,\\
+  E^V[\phi] &= k_V \left[ \sum_i \frac{\phi_i + 1}{2} \upDelta V - V_0 \right]^2,
 \end{align}
 where the index $i$ includes all of the nodes, while $j$ represents the nodes along the solid surface.
 $\upDelta V$ and $\upDelta S$ are, respectively, the volume and solid surface areas contained by each individual node.
@@ -132,12 +132,12 @@ $\epsilon$ is the liquid-gas interface width, $\theta_j$ is the contact-angle wi
 The strength of the volume constraint is parametrised by $k_V$ for which we use a value of $10^4$.
 The gradients of these terms are given by,
 \begin{align}
-  \frac{\partial E_B}{\partial \phi_i} &= \frac{1}{\epsilon} \left( {\phi_i}^3 - \phi_i \right) \upDelta V,\\
-  \frac{\partial E_I}{\partial \phi_i} &= \frac{\epsilon}{2} \left[
+  \frac{\partial E^B}{\partial \phi_i} &= \frac{1}{\epsilon} \left( {\phi_i}^3 - \phi_i \right) \upDelta V,\\
+  \frac{\partial E^I}{\partial \phi_i} &= \frac{\epsilon}{2} \left[
     \frac{\partial \abs{\grad \phi_i}^2}{\partial \phi_i} +
     \sum_k\frac{\partial \abs{\grad \phi_k}^2}{\partial \phi_i} \right] \upDelta V,\\
-  \frac{\partial E_S}{\partial \phi_j} &= \sqrt{2}\cos\theta_j \left( \frac{{\phi_j}^2}{2} - \frac{1}{2} \right) \upDelta S,\\
-  \frac{\partial E_V}{\partial \phi_i} &= k_V \left[ \sum_{i'} \frac{\phi_{i'} + 1}{2} \upDelta V - V_0 \right] \upDelta V,
+  \frac{\partial E^S}{\partial \phi_j} &= \sqrt{2}\cos\theta_j \left( \frac{{\phi_j}^2}{2} - \frac{1}{2} \right) \upDelta S,\\
+  \frac{\partial E^V}{\partial \phi_i} &= k_V \left[ \sum_{i'} \frac{\phi_{i'} + 1}{2} \upDelta V - V_0 \right] \upDelta V,
 \end{align}
 where index $k$ denotes neighboring nodes at which the evaluation of the gradient uses $\phi_i$.
 
