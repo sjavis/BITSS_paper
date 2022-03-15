@@ -15,6 +15,8 @@
 \usepackage{cleveref}
 \Crefname{figure}{Fig.}{Figs.}
 
+\usepackage{color,soul}
+
 
 \begin{document}
 \title{Locating saddle points in complex and memory intensive landscapes}
@@ -27,7 +29,7 @@
 \affiliation{Department of Physics, Durham University, South Road, Durham DH1 3LE, UK}
 
 \begin{abstract}
-  Locating transition states is crucial for investigating transition mechanisms in wide-ranging, from atomistic tomacroscale systems.
+  Locating transition states is crucial for investigating transition mechanisms in wide-ranging phenomena, from atomistic to macroscale systems.
   Existing methods, however, can struggle in problems with a large number of degrees of freedom, on-the-fly adaptive remeshing and coarse-graining, and energy landscapes that are locally flat or discontinuous.
   To resolve these challenges, we introduce a new double-ended method, the Binary Image Transition State Search (BITSS).
   It uses just two states that converge to the transition state, resulting in a flexible, fast, and memory-efficient method.
@@ -54,11 +56,11 @@ Double-ended methods, such as the string method \cite{E2002,E2007} and doubly-nu
 In addition to approximating the transition state, these are useful for obtaining an estimate for the full transition pathway.
 
 However, a large range of landscapes prove challenging or impossible to explore via these methods.
-One key problem arises from the push towards larger and more complex systems \cite{Trefethen2013,Shalf2020,Alexander2020}, resulting in the need to develop algorithms that are more memory and computationally efficient, and can incorporate optimisation strategies such as on-the-fly adaptive remeshing and coarse-graining.
+One key problem arises from the push towards larger and more complex systems \cite{Trefethen2013,Shalf2020,Alexander2020}, resulting in the need to develop algorithms that are more memory and computationally efficient, and can incorporate advanced optimisation strategies such as on-the-fly adaptive remeshing and coarse-graining.
 Current double-ended methods require a chain of tens of states to gain an accurate approximation, and have issues with remeshing resulting in a different number of degrees of freedom for each state.
 Single-ended methods are not well suited for identifying specific pathways and can spend a large amount of time searching for undesired transition states.
 Another major challenge in studying complex energy landscapes relates to the presence of locally flat or discontinous regions.
-Both of which can be relevent when considering patchy \cite{McMullen2018,Nguemaha2018,Chen2018b} and hard-body \cite{Richard2018,Santra2018} interactions in atomistic systems, or collision constraints for macroscopic objects \cite{Wriggers2006}.
+\hl{Such as} when considering patchy \cite{McMullen2018,Nguemaha2018,Chen2018b} and hard-body \cite{Richard2018,Santra2018} interactions in atomistic systems, or collision constraints for macroscopic objects \cite{Wriggers2006}.
 Flat zero-modes in the landscape pose issues for single-ended search methods that rely only upon local information.
 Specialist treatment can sometimes be used such as in the case of global rotation and translation \cite{Page1988}, but they are thwarted by local zero-modes.
 Meanwhile, current methods cannot typically be applied in the case of discontinuous potentials, or where the gradient is prohibitively expensive to compute, because they require continuous, differentiable optimisation functions.
@@ -66,8 +68,8 @@ Meanwhile, current methods cannot typically be applied in the case of discontinu
 \begin{figure}[htb]
   \includegraphics{fig/toy2d.pdf}
   \caption{\label{fig:toy2d}
-    (a) The trajectories of the two states under the BITSS method for a simple 2D potential with two minima (blue dots).
-        The transition state is shown by an red dot, and the minimum energy pathway by the dashed line.
+    (a) The trajectories of the two states under the BITSS method (orange line) for a simple 2D potential with two minima (blue dots).
+        The transition state is shown by a red dot, and the minimum energy pathway by the dashed line.
     (b) A snapshot of the BITSS minimisation showing the driving forces on each state due to the energy constraint, $\bm{F}_E$, and distance constraint, $\bm{F}_D$, with $E_1 < E_2$ and $\mathrm{d}(\bm{x}_1,\bm{x}_2) < d_i$.
     (c) The final configuration of the BITSS method showing the two states in orange, the transition state in red, and the negative curvature eigenvector, $\bm{\hat{\tau}}$.
   }
@@ -83,7 +85,7 @@ The method begins by first initialising the states, $\bm{x}_1$ and $\bm{x}_2$, i
 These can be set to the minima, but this is not a necessary requirement.
 The BITSS method then leads these states to meet at the lowest point on the ridge between the basins of attraction - the transition state.
 This is done by minimising the energy of the pair while constraining their separation.
-The separation $d_i$ is incrementally reduced, such that at iteration $i$,
+The separation constraint $d_i$ is incrementally reduced, such that at iteration $i$,
 \begin{equation}\label{eq:diteration}
   d_i = (1 - f) d_{i-1},
 \end{equation}
@@ -92,7 +94,7 @@ A factor of $f = 0.5$ is succesful for most applications, but this can be made s
 A secondary constraint that sets the energies of the two states equal is also used to ensure that neither state is pulled over the ridge.
 
 The two constraints are implemented using energy penalty terms, which, if the constraints are not met, result in driving forces on the two states, such as in \cref{fig:toy2d}b.
-The total energy of the pair of states is therefore given by,
+The total energy of the pair of states is therefore given by
 \begin{multline}\label{eq:bitss}
   E_\text{BITSS}(\bm{x}_1, \bm{x}_2) = E_1 + E_2
     + \kappa_e \left( E_1 - E_2 \right) ^2 \\
@@ -121,7 +123,7 @@ They are set using the following equations such that each term in the gradient o
     \frac{\Delta E}{\beta d_i^2} \right),
   \label{eq:kd}
 \end{gather}
-where $\alpha$ and $\beta$ are parameters with recommended values of $\alpha = 10$ and $\beta = 0.1$ (see supplementary information \footnote{See Supplemental Material at [URL] for derivations of the constraint coefficients, extra details for the example systems, results for the speed test against DNEB, and a comparison of the discontinuous energy landscape with the standard Lennard-Jones cluster}).
+where $\alpha$ and $\beta$ are parameters with recommended values of $\alpha = 10$ and $\beta = 0.1$ (see supplementary information \footnote{\hl{See Supplemental Material at [URL] for derivations of the constraint coefficients, extra details for the example systems, results for the speed test against DNEB, and a comparison of the discontinuous energy landscape with the standard Lennard-Jones cluster}}).
 Here, $\Delta E$ is an estimation for the current energy barrier evaluated by linearly interpolating between the two states.
 For systems where the interpolation deviates significantly from the pathway the estimate can be too large.
 In this case, a maximum estimated value can be provided, which then decreases proportionally with $d_i$.
@@ -133,7 +135,7 @@ In summary, the method involves iteratively performing the following three steps
   \item Minimise the potential, \cref{eq:bitss}, and recompute the coefficients every 100 iterations of the minimisation.
 \end{enumerate}
 This process is completed once a convergence criterion is reached that can be based upon either the separation between the states, or the size of gradient at the midpoint between the two states.
-Once BITSS has identified the transition state it is possible to find the full minimum energy pathway.
+Once BITSS has identified the transition state, it is possible to find the full minimum energy pathway.
 This is done by tracing the trajectory of downhill minimisations from the two final states either side of the transition state.
 
 
@@ -196,10 +198,10 @@ These techniques cause issues for existing double-ended methods because the coup
 However, in BITSS the only direct coupling is in the distance measure, $\mathrm{d}(\bm{x}_1,\bm{x}_2)$, which is relatively easy to adapt.
 Here we demonstrate the use of adaptive remeshing by considering two separate issues.
 
-Firstly, we show in \cref{fig:adaptivemesh}a that BITSS is able to handle the discretisation changing as the method runs.
+Firstly, we show in \cref{fig:adaptivemesh}a that BITSS is able to handle the discretisation adapting as the method runs \hl{(changing number of degrees of freedom)}.
 For this we use the cylindrical buckling example with the resolution increasing from 40 to 100 triangles around the cylinder.
 These changes are performed after the minimisation step in each iteration of the BITSS method.
-This demonstrates that BITSS is able to converge to the transition state so long as the remeshing does not significantly change the landscape.
+This demonstrates that BITSS is able to converge to the transition state so long as the remeshing does not change the energy landscape of interest.
 
 In the second test, \cref{fig:adaptivemesh}b, we demonstrate the use of different meshes for the two states in the striped wetting example.
 In this case, the distance measure is adapted by interpolating one state onto the other mesh and computing the Euclidean distance.
@@ -799,10 +801,11 @@ This method will enable the analysis of energy landscapes for new systems in bot
   (\bibinfo {year} {1989})}\BibitemShut {NoStop}%
 \bibitem [{Note1()}]{Note1}%
   \BibitemOpen
-  \bibinfo {note} {See Supplemental Material at [URL] for derivations of the
-  constraint coefficients, extra details for the example systems, results for
-  the speed test against DNEB, and a comparison of the discontinuous energy
-  landscape with the standard Lennard-Jones cluster}\BibitemShut {NoStop}%
+  \bibinfo {note} {\protect \texthl {See Supplemental Material at [URL] for
+  derivations of the constraint coefficients, extra details for the example
+  systems, results for the speed test against DNEB, and a comparison of the
+  discontinuous energy landscape with the standard Lennard-Jones
+  cluster}}\BibitemShut {NoStop}%
 \bibitem [{\citenamefont {Kirkpatrick}\ \emph {et~al.}(1983)\citenamefont
   {Kirkpatrick}, \citenamefont {Gelatt},\ and\ \citenamefont
   {Vecchi}}]{Kirkpatrick1983}%

@@ -263,6 +263,7 @@ def plot_discontinuous(fig, hsize):
     
     dg = make_dgraph(nodes, ts)
     dg.plot(axes=ax, linewidth=1)
+    ax.tick_params(which='both', direction='in')
     # Plot clusters on dgraph
     ybot, ytop = ax.get_ylim()
     dy = (ytop - ybot) / 4
