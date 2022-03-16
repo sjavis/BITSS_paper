@@ -2,6 +2,7 @@
 *.pdf
 *.pgf
 *.aux
+*.dvi
 *.bbl
 *.blg
 *.log

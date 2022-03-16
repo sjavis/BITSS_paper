@@ -146,12 +146,12 @@ where index $k$ denotes neighboring nodes at which the evaluation of the gradien
 \section{Details for the adaptive discretisation tests}
 Here we provide the details for the interpolations and mapping involved in the two examples demonstrating the feasibility of using an adaptive discretisation method.
 For the cylindrical buckling example with a changing mesh, the resolution is refined each time the separation between the two states is halved. 
-This involves the number of triangles around the circumference of the cylinder increasing along the sequence, $40 \rightarrow 60 \rightarrow 80 \rightarrow 100$.
+This involves the number of triangles around the circumference of the cylinder increasing along the sequence: $40 \rightarrow 60 \rightarrow 80 \rightarrow 100$; with the number of degrees of freedom increasing by: $1760 \rightarrow 3960 \rightarrow 7040 \rightarrow 11000$.
 The positions of the nodes on the new grid, $\{\bm{n}_i\}$, are determined by linear interpolation from the previous grid $\{\bm{p}_i\}$, using the positions of the unbuckled meshes, $\{\bm{n'}_i\}$ and $\{\bm{p'}_i\}$.
 For each node of the new grid, $\bm{n'}_i$, the triangle that contains it is first identified, which we will denote $\{\bm{p'}_1,\bm{p'}_2,\bm{p'}_3\}$, and the barycentric coordinates of the point are computed, $\{\lambda_1,\lambda_2,\lambda_3\}$.
 The new position is then given by $\bm{n}_i = \lambda_1 \bm{p}_1 + \lambda_2 \bm{p}_2 + \lambda_3 \bm{p}_3$.
 
-In the example with different resolutions for the two states, the distance is obtained by first mapping the phase field from the higher resolution grid, $\{\phi_{k,l} | k,l \in \{0,1,\cdots,399\}\}$, to the low resolution grid, $\{\phi'_{i,j} | i,j \in \{0,1,\cdots,199\}\}$.
+In the wetting example with different resolutions for the two states, the distance is obtained by first mapping the phase field from the higher resolution grid, $\{\phi_{k,l} | k,l \in \{0,1,\cdots,399\}\}$, to the low resolution grid, $\{\phi'_{i,j} | i,j \in \{0,1,\cdots,199\}\}$.
 Because a square grid is used with a resolution ratio of two, the mapping involves averaging each 2x2 block to a single point:
 \begin{equation}
   \phi'_{i,j} = \frac{1}{4} \left( \phi_{2i,2j} + \phi_{2i+1,2j} + \phi_{2i,2j+1} + \phi_{2i+1,2j+1} \right)

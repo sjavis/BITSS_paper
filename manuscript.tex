@@ -54,7 +54,7 @@ In addition to approximating the transition state, these are useful for obtainin
 
 However, a large range of landscapes prove challenging or impossible to explore via these methods.
 One key problem arises from the push towards larger and more complex systems \cite{Trefethen2013,Shalf2020,Alexander2020}, resulting in the need to develop algorithms that are more memory and computationally efficient, and can incorporate advanced optimisation strategies such as on-the-fly adaptive remeshing and coarse-graining.
-Current double-ended methods require a chain of tens of states to gain an accurate approximation, and have issues with remeshing resulting in a different number of degrees of freedom for each state.
+Current double-ended methods require a chain of tens of states to gain an accurate approximation, and have issues with remeshing due to the different number of degrees of freedom for each state.
 Single-ended methods are not well suited for identifying specific pathways and can spend a large amount of time searching for undesired transition states.
 Another major challenge in studying complex energy landscapes relates to the presence of locally flat or discontinous regions.
 Such as when considering patchy \cite{McMullen2018,Nguemaha2018,Chen2018b} and hard-body \cite{Richard2018,Santra2018} interactions in atomistic systems, or collision constraints for macroscopic objects \cite{Wriggers2006}.
@@ -80,7 +80,7 @@ We demonstrate how it addresses each of the above challenges using a range of di
 %\section{Method}
 The method begins by first initialising the states, $\bm{x}_1$ and $\bm{x}_2$, in the basins of attraction of different local minima.
 These can be set to the minima, but this is not a necessary requirement.
-The BITSS method then leads these states to meet at the lowest point on the ridge between the basins of attraction - the transition state.
+The BITSS method then leads these states to meet at the lowest point on the ridge between the basins of attraction - the transition state, as shown in \cref{fig:toy2d}a.
 This is done by minimising the energy of the pair while constraining their separation and energy difference.
 The separation constraint $d_i$ is incrementally reduced, such that at iteration $i$,
 \begin{equation}\label{eq:diteration}
@@ -109,7 +109,7 @@ Furthermore, the final two states are positioned either side of the transition s
 So, BITSS automatically identifies the `reactive mode' and associated eigenvalue in addition to the transition state.
 
 To ensure that the transition state is located successfully, the constraint strengths $\kappa_d$ and $\kappa_e$ are updated as the algorithm proceeds using information from the system.
-They are initially calculated at the start of each minimisation, and regularly recalculated throughout (once per 100 iterations are used in this work).
+They are initially calculated at the start of each minimisation, and regularly recalculated throughout (once per 100 iterations is used in this work).
 They are set using the following equations such that each term in the gradient of \cref{eq:bitss} is of a similar size,
 \begin{gather}
   \kappa_e = \frac {\alpha} {2 E_B},
@@ -127,15 +127,14 @@ In summary, the method involves iteratively performing the following three steps
 \begin{enumerate}[noitemsep,nolistsep]
   \item Reduce the target separation using \cref{eq:diteration}.
   \item Compute the constraint coefficients using \cref{eq:ke,eq:kd}.
-  \item Minimise the potential, \cref{eq:bitss}, and recompute the coefficients every 100 iterations of the minimisation.
+  \item Minimise the potential, \cref{eq:bitss}, and recompute the coefficients regularly throughout the minimisation.
 \end{enumerate}
 This process is completed once a convergence criterion is reached that can be based upon either the separation between the states, or the size of gradient at the midpoint between the two states.
 
 Once BITSS has identified the transition state, it is possible to find the full minimum energy pathway.
 This is done by tracing the trajectory of downhill minimisations from the two final states either side of the transition state.
-In the case where there is a chain of transition states between the two starting minima, BITSS will identify the transition state with the highest energy.
-If, instead, all of transition states or the full pathway are desired, BITSS can be continually repeated from one of the minima downhill from the located transition state and one of the initial minima until the desired minima are connected.
-However, chain-of-states methods are likely more efficient for this as they compute the entire pathway at once.
+In the case where there is a chain of transition states between the two starting minima, BITSS will identify the transition state with the highest energy in the chain.
+If, instead, all of transition states or the full pathway are desired, BITSS can be continually repeated from one of the minima downhill from the located transition state and one of the initial minima until the desired minima are piecewise connected.
 
 
 %\section{Speed Comparison}
