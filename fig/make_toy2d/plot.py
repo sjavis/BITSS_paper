@@ -11,6 +11,8 @@ from mpl_toolkits.axes_grid1.inset_locator import mark_inset
 import sys; sys.path.insert(0, '..')
 import style
 
+# Data generated using energyLandscapes/bits_test/2peaks/view.py
+
 ### Plot parameters
 dt = 0.06
 de = 0.02
