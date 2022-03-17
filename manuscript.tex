@@ -30,7 +30,7 @@
   Locating transition states is crucial for investigating transition mechanisms in wide-ranging phenomena, from atomistic to macroscale systems.
   Existing methods, however, can struggle in problems with a large number of degrees of freedom, on-the-fly adaptive remeshing and coarse-graining, and energy landscapes that are locally flat or discontinuous.
   To resolve these challenges, we introduce a new double-ended method, the Binary Image Transition State Search (BITSS).
-  It uses just two states that converge to the transition state, resulting in a flexible, fast, and memory-efficient method.
+  It uses just two states that converge to the transition state, resulting in a fast, flexible, and memory-efficient method.
   We demonstate its versatility by applying BITSS to three very different classes of problems: Lennard-Jones clusters, shell buckling, and multiphase phase-field models.
 \end{abstract}
 
@@ -51,8 +51,8 @@ Existing transition state search methods generally fall into two categories, sin
 Single-ended methods are initialised at a single state and attempt to climb to a nearby saddle point.
 Examples include eigenvector following \cite{Cerjan1981}, the dimer method \cite{Heyden2005,Kastner2008,Zhang2016}, and climbing image methods \cite{E2007,Ren2013}.
 Double-ended methods, such as the string method \cite{E2002,E2007} and doubly-nudged elastic band (DNEB) \cite{Trygubenko2004}, involve initialising a chain of states between two minima and then minimising the total energy of the chain.
-The initial chain must use an appropriate interpolation, which can sometimes be complicated to produce \cite{Wales2012a}.
-In addition to approximating the transition state, these double-ended methods also provide an estimate for the full transition pathway.
+An appropriate interpolation must be used for the initialisation, which can be challenging to produce \cite{Wales2012a}.
+These double-ended methods also provide an estimate for the full transition pathway in addition to approximating the transition state.
 
 However, a large range of landscapes prove challenging or impossible to explore via these methods.
 One key problem arises from the push towards larger and more complex systems \cite{Trefethen2013,Shalf2020,Alexander2020}, resulting in the need to develop algorithms that are more memory and computationally efficient, and can incorporate advanced optimisation strategies such as on-the-fly adaptive remeshing and coarse-graining.
@@ -61,7 +61,7 @@ Single-ended methods are not well suited for identifying specific pathways and c
 Another major challenge in studying complex energy landscapes relates to the presence of locally flat or discontinous regions, such as when considering patchy \cite{McMullen2018,Nguemaha2018,Chen2018b} and hard-body \cite{Richard2018,Santra2018} interactions in atomistic simulations, systems of polymer chains \cite{Mokkonen2016}, or collision constraints for macroscopic objects \cite{Wriggers2006}.
 Flat zero-modes in the landscape pose issues for single-ended search methods that rely only upon local information.
 Specialist treatment can sometimes be used such as in the case of global rotation and translation \cite{Page1988}, but they are thwarted by local zero-modes.
-Meanwhile, current methods cannot typically be applied in the case of discontinuous potentials, or where the gradient is prohibitively expensive to compute, because they require continuous, differentiable optimisation functions.
+Meanwhile, current methods cannot typically be applied in the case of discontinuous potentials, or where the gradient is prohibitively expensive to compute, because continuous, differentiable optimisation functions are required.
 
 \begin{figure}[htb]
   \includegraphics{toy2d.pdf}
@@ -73,10 +73,9 @@ Meanwhile, current methods cannot typically be applied in the case of discontinu
   }
 \end{figure}
 
-In this work we introduce a new method, the Binary Image Transition State Search (BITSS).
-This is a double-ended method that uses two states that converge toward a transition state from either side, therefore combining aspects of the two traditional transition state search categories.
-This has the advantage of not requiring an initial interpolation, unlike other double-ended methods.
-Using a range of different applications, we will demonstrate how BITSS addresses each of the above challenges.
+In this work we introduce a new method, the Binary Image Transition State Search (BITSS), and using a range of different applications, we will demonstrate how BITSS addresses each of the above challenges.
+BITSS is a double-ended method that uses just two states that converge toward a transition state from either side, therefore combining aspects of the two traditional transition state search categories.
+Importantly, unlike other double-ended methods, BITSS does not require any initial interpolation.
 
 
 %\section{Method}
@@ -200,7 +199,7 @@ Similar results are also found when comparing against against DNEB, which can be
         The radial displacement relative the unbuckled cylinder is shown, as well as the underlying triangular mesh.
     (b) BITSS applied to the striped wetting example with different resolutions for the two states.
         Each grid cell denotes 50x50 lattice nodes.
-        The zoomed axes shows the difference in the fluid interface between the two final states, as well as the approximated transition state (solid black line).
+        The zoomed axis shows the difference in the fluid interface between the two final states, as well as the approximated transition state (solid black line).
         This is compared to the transition state found using a high resolution (dashed line).
   }
 \end{figure}
@@ -219,7 +218,7 @@ In the second test, \cref{fig:adaptivemesh}b, we demonstrate the use of differen
 In this case, the distance measure is adapted by interpolating one state onto the other mesh and computing the Euclidean distance.
 However, for some applications a simpler measure may be sufficient, such as the difference between average values of the system.
 Using this approach, BITSS is able to closely approach the transition state.
-The convergence precision is now limited by the transition state energy differing slightly on each grid, but this effect is reduced when using an adaptive method or a higher resolution.
+The precision of this convergence is now limited by the transition state energy differing slightly on each grid, but this effect will be reduced when using an adaptive method or a higher resolution.
 
 
 %\section{Zero-curvature modes}
