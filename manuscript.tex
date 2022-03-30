@@ -1,4 +1,4 @@
-\documentclass[aps,prl,twocolumn,10pt,groupedaddress]{revtex4-2}
+\documentclass[twocolumn,10pt]{revtex4-2}
 
 % Maths
 \usepackage{bm}
@@ -37,7 +37,7 @@
 \maketitle
 
 
-%\section{Introduction \& Method}
+\section{Introduction}
 Transition states are central to the description of reconfiguration mechanisms for systems in chemistry, condensed matter physics, and engineering.
 Historically, many computational methods for locating transition states have grown from an atomistic or particulate perspective.
 These have proven to be important tools for understanding, for example, protein folding \cite{Bryngelson1995,Onuchic1997}, biological and industrial catalysis \cite{Boehr2006,Kerns2015,Guo2018a}, quantum tunneling \cite{Richardson2016,Vaillant2019}, crystallisation \cite{Richard2018}, and cluster formation \cite{Wales1998,Wales2012}.
@@ -78,7 +78,7 @@ BITSS is a double-ended method that uses just two states that converge toward a 
 Importantly, unlike other double-ended methods, BITSS does not require any initial interpolation.
 
 
-%\section{Method}
+\section{Method}
 The method begins by first initialising the states, $\bm{x}_1$ and $\bm{x}_2$, in the basins of attraction of different local minima.
 These can be set to the minima, but this is not a necessary requirement.
 The BITSS method then leads these states to meet at the lowest point on the ridge between the basins of attraction - the transition state, as shown in \cref{fig:toy2d}a.
@@ -138,13 +138,15 @@ In the case where there is a chain of transition states between the two starting
 If, instead, all of transition states or the full pathway are desired, BITSS can be continually repeated from one of the minima downhill from the located transition state and one of the initial minima until the desired minima are piecewise connected.
 
 
-%\section{Speed Comparison}
+\section{Results}
+\subsection{Speed Comparison}
 \begin{figure*}[tb]
   \includegraphics{speedtest.pdf}
   \caption{\label{fig:speedtest}
-    The convergence to the transition state as a function of the number of gradient calculations using the BITSS (black line) and string methods for (a) a Lennard-Jones seven-particle cluster, (b) cylindrical shell buckling, and (c) wetting of a chemically-striped surface.
-    The string method is repeated with a differing number of images along the string, the number of which is listed in the legend in (c).
-    The shown configurations correspond to the two minimum energy states and the transition state, marked by an asterisk.
+    Comparisons between BITSS, DNEB, and the string method in the convergence to the transition state as a function of the number of calculations of the energy gradient.
+    Three test systems are used: (a) a Lennard-Jones seven-particle cluster, (b) cylindrical shell buckling, and (c) wetting of a chemically-striped surface.
+    The configurations shown correspond to the two minimum energy states and the transition state, marked by an asterisk.
+    The string method and DNEB are repeated with a differing number of images, as listed in the legend in (c).
   }
 \end{figure*}
 As a result of the BITSS method using only two states it has the potential to be significantly faster than chain-of-states approaches which typically use tens of states.
@@ -191,7 +193,7 @@ Therefore, unlike the string method, BITSS does not require a second approach to
 Similar results are also found when comparing against against DNEB, which can be seen in the supplementary information \cite{Note1}.
 
 
-%\section{Adaptive mesh}
+\subsection{Adaptive discretisation}
 \begin{figure}[tb]
   \includegraphics{adaptivemesh.pdf}
   \caption{\label{fig:adaptivemesh}
@@ -221,7 +223,7 @@ Using this approach, BITSS is able to closely approach the transition state.
 The precision of this convergence is now limited by the transition state energy differing slightly on each grid, but this effect will be reduced when using an adaptive method or a higher resolution.
 
 
-%\section{Zero-curvature modes}
+\subsection{Locally flat landscapes}
 \begin{figure}[tb]
   \includegraphics{flatdiscontinuous.pdf}
   \caption{\label{fig:flatdiscontinuous}
@@ -230,7 +232,8 @@ The precision of this convergence is now limited by the transition state energy 
         Points of interest are labelled by i--iii (see text).
         Top inset: A zoomed in view around the transition state.
         Bottom inset: The pathway taken, with the edges of the flat regions marked by dashed lines.
-    (b) Disconnectivity graph of the energy landscape for a seven-particle cluster with a discontinuous hard-core pair potential.
+    (b) Disconnectivity graph of the energy landscape for a seven-particle cluster with a discontinuous hard-core pair potential (orange), and a standard Lennard-Jones potnetial (gray).
+        The two graphs are offset for visibility.
     (c) Plot of the discontinuous potential.
         The repulsive section of the standard Lennard-Jones potential is also shown in grey.
   }
@@ -245,7 +248,7 @@ However, the distance constraint continues to pull the states together, preventi
 When only a single state has a zero-gradient mode then the other is likely to slide down the potential slightly (iii), but the two states still remain either side of the dividing ridge and so the result is unaffected.
 
 
-%\section{Gradient-free problems}
+\subsection{Undefined gradients}
 Finally, we investigate the application of BITSS to systems with undefined gradients, such as when the landscape is discontinuous.
 In this case a couple of alterations to the method must be made.
 First, the gradients in \cref{eq:kd} are ill-defined, so $\kappa_d$ can be calculated using just the second term in the equation.
@@ -257,7 +260,7 @@ A comparison with the results for the standard Lennard-Jones cluster is given in
 It is worth noting, however, that a gradient-based approach is significantly more efficient, and so should be preferred if possible.
 
 
-%\section{Conclusion}
+\section{Conclusion}
 In conclusion, we have demonstrated a novel method for finding transition states that tackles problems not currently addressed by existing methods.
 The method is shown to be more efficient than existing double-ended methods, both in memory and computational cost, with further reductions possible by utilising adaptive remeshing techniques.
 It can also be adapted to problems with complex energy landscapes, including those with flat or discontinuous regions.
@@ -265,7 +268,6 @@ This method will enable the analysis of energy landscapes for new systems in bot
 
 
 \appendix
-\section{}
 
 \begin{acknowledgments}
   S.~J.~A. is supported by a studentship from the Engineering and Physical Sciences Research Council [Grant No. EP/R513039/1].

@@ -10,7 +10,7 @@ plt.rc('axes', labelsize=9)
 c1 = 'tab:orange'
 c2 = 'tab:red'
 c3 = 'tab:blue'
-colors = [c1, c2, c3]
+colors = [c2, c1, c3]
 
 
 ### Make sure this is reloaded by IPython ###
