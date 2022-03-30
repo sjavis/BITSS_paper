@@ -167,6 +167,8 @@ def plot_discontinuous(fig, hsize):
     h1 = 0.9
     h2 = 0.7
     y2 = 0.2
+    c1 = style.c1
+    c2 = 'dimgrey'
     
     class Node:
         def __init__(self, i, e, x):
@@ -196,15 +198,15 @@ def plot_discontinuous(fig, hsize):
         def __lt__(self, other):
             return hash(self) < hash(other)
     
-    def load_data():
+    def load_data(potential):
         # minima
-        minima = pd.read_csv('discont_min.data')
+        minima = pd.read_csv(f'{potential}-min.data')
         min_e = np.array(minima['energy'])
         min_x = minima[[f'x{i}' for i in range(14)]].to_numpy()
         nodes = [Node(i, min_e[i], min_x[i]) for i in range(len(minima))]
         # TS
-        e_ts = np.loadtxt('discont_ts.data', usecols=0)
-        pairs = np.loadtxt('discont_ts.data', usecols=[3,4], dtype=int) - 1
+        e_ts = np.loadtxt(f'{potential}-ts.data', usecols=0)
+        pairs = np.loadtxt(f'{potential}-ts.data', usecols=[3,4], dtype=int) - 1
         ts = [TS(nodes[pair[0]], nodes[pair[1]], e_ts[i]) for i, pair in enumerate(pairs)]
         return nodes, ts
 
@@ -223,9 +225,16 @@ def plot_discontinuous(fig, hsize):
         g.add_nodes_from(nodes)
         for t in ts:
             g.add_edge(t.minimum1, t.minimum2, ts=t)
-        dg = DisconnectivityGraph(g, Emax=-10.5)
+        dg = DisconnectivityGraph(g, Emax=-10.5, order_by_value=lambda m: -m.i)
         dg.calculate()
         return dg
+
+    def offset_graph(dg, offset):
+        def recursive_offset(tree):
+            tree.data['x'] += offset
+            for subtree in tree.get_branches():
+                recursive_offset(subtree)
+        recursive_offset(dg.tree_graph)
     
     def plot_cluster(x, ax):
         rad = 1.1225 / 2
@@ -249,10 +258,10 @@ def plot_discontinuous(fig, hsize):
         r0 = 2**(1/6)
         x = np.linspace(0.9, 2.5, 100)
         y = lj(x)
-        ax.plot(x[x<=r0], y[x<=r0], c='grey')
-        ax.plot(x[x>=r0], y[x>=r0], c=c)
-        ax.plot([r0,r0], [-1,0.9], ls='--', c=c)
-        ax.arrow(r0, 0.8, 0, arrow_len, ec='none', fc=c, width=arrow_width, head_length=arrow_len, length_includes_head=True)
+        ax.plot(x[x<=r0], y[x<=r0], c=c2)
+        ax.plot(x[x>=r0], y[x>=r0], c=c1)
+        ax.plot([r0,r0], [-1,0.9], ls='--', c=c1)
+        ax.arrow(r0, 0.8, 0, arrow_len, ec='none', fc=c1, width=arrow_width, head_length=arrow_len, length_includes_head=True)
         ax.set_xlim(0.8, 2.6)
         ax.set_ylim(-1.3, 1.3)
         ax.set_xticks([1, 1.5, 2, 2.5])
@@ -260,16 +269,25 @@ def plot_discontinuous(fig, hsize):
         ax.set_ylabel(r'$V(r)$ / $\epsilon$', labelpad=ypad)
         ax.minorticks_off()
     
-    nodes, ts = load_data()
+    nodes1, ts1 = load_data('discont')
+    nodes2, ts2 = load_data('lj')
+    dg1 = make_dgraph(nodes1, ts1)
+    dg2 = make_dgraph(nodes2, ts2)
+    offset_graph(dg1, -0.04)
+    offset_graph(dg2, 0.04)
+    dg1.color_by_group([[0,1,2,3]], [c1])
+    dg2.color_by_group([[0,1,2,3]], [c2])
+
+    # Plot
     ax, pot_ax = make_axes()
-    
-    dg = make_dgraph(nodes, ts)
-    dg.plot(axes=ax, linewidth=1)
+    dg2.plot(axes=ax, linewidth=1)
+    dg1.plot(axes=ax, linewidth=1)
     ax.tick_params(which='both', direction='in')
+
     # Plot clusters on dgraph
     ybot, ytop = ax.get_ylim()
     dy = (ytop - ybot) / 4
-    xpos, nodes = dg.get_minima_layout()
+    xpos, nodes = dg1.get_minima_layout()
     ypos = [n.energy for n in nodes]
     for i in range(len(xpos)):
         tmp_ax = ax.inset_axes([xpos[i]-0.5, ypos[i]-dy, 1, dy], transform=ax.transData)
