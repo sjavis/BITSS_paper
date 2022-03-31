@@ -199,14 +199,12 @@ When only a single state has a zero-gradient mode then the other is likely to sl
 
 
 Finally, we investigate the application of BITSS to systems with undefined gradients, such as when the landscape is discontinuous.
-In this case a couple of alterations to the method must be made.
-First, the gradients in \cref{eq:kd} are ill-defined, so $\kappa_d$ can be calculated using just the second term in the equation.
-Next we must use a minimiser that does not require a differentiable optimisation function; for this we use simulated annealing \cite{Kirkpatrick1983}.
-This has a chance of randomly jumping one state over the dividing barrier, but we can reduce this probability by limiting the initial temparature and maximum random displacement. We typically employ $T_0 = E_B / 10$, and $d_\text{max} = d(\bm{x}_1, \bm{x}_2) / 100$.
+A couple of changes are necessary to account for this, as detailed in the methods section.
 This has been tested using a Lennard-Jones 7-particle cluster with hard cores, resulting in a discontinuous landscape.
 Using the gradient-free approach, BITSS is able to successfully find the transition states, allowing us to plot the disconnectivity graph of the system, shown in \cref{fig:flatdiscontinuous}b.
-A comparison with the results for the standard Lennard-Jones cluster is given in the supplementary information \cite{Note1}.
-It is worth noting, however, that a gradient-based approach is significantly more efficient, and so should be preferred if possible.
+Compared with the results for the standard Lennard-Jones cluster, the energies of the minima are largely unchanged, but the energies of the transition states are found to be slightly higher.
+This indicates that the particles in the Lennard-Jones cluster cut the corner slightly as they transition, whereas this is not possible using the discontinuous potential, resulting in higher energies.
+Despite this gradient-free method being feasible, it is worth noting that a gradient-based approach is significantly more efficient, and so should be preferred if possible.
 
 
 \section{Conclusion}
@@ -260,6 +258,13 @@ To reduce this effect, the gradients used in \cref{eq:kd} are projected in the d
 \end{equation}
 
 \subsection{BITSS: Changes for undefined gradients}
+A couple of alterations to the method must be made to account for situations where the gradients are unknown.
+First, the gradients in \cref{eq:kd} are ill-defined.
+Instead, $\kappa_d$ can be calculated using just the second term in the equation.
+Secondly, L-BFGS can no longer be used because it requires knowledge of the gradients.
+We must instead use a minimiser that does not require a differentiable optimisation function, for which we use simulated annealing \cite{Kirkpatrick1983}.
+This has a chance of randomly jumping one state over the dividing barrier, but we can reduce this probability by limiting the initial temparature and maximum random displacement.
+We typically employ $T_0 = E_B / 10$, and $d_\text{max} = d(\bm{x}_1, \bm{x}_2) / 100$.
 
 \subsection{Adaptive discretisation test details}
 Here we provide the details for the interpolations and mapping involved in the two examples demonstrating the feasibility of using an adaptive discretisation method.
