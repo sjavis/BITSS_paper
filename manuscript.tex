@@ -3,6 +3,9 @@
 % Maths
 \usepackage{bm}
 \usepackage{amsmath}
+\newcommand{\abs}[1]{\left| #1 \right|}
+\newcommand{\grad}{\bm{\nabla}}
+\newcommand{\upDelta}{\mathop{}\!\Delta}
 
 % Text
 \usepackage{siunitx}
@@ -82,33 +85,18 @@ Importantly, unlike other double-ended methods, BITSS does not require any initi
 \subsection{BITSS method in a nutshell}
 The method begins by first initialising the states, $\bm{x}_1$ and $\bm{x}_2$, in the basins of attraction of different local minima.
 These can be set to the minima, but this is not a necessary requirement.
-The BITSS method then leads these states to meet at the lowest point on the ridge between the basins of attraction - the transition state, as shown in \cref{fig:toy2d}a.
-This is done by minimising the energy of the pair while constraining their separation and energy difference.
-The separation constraint $d_i$ is incrementally reduced, such that at iteration $i$,
-\begin{equation}\label{eq:diteration}
-  d_i = (1 - f) d_{i-1},
-\end{equation}
-with $d_0$ the separation between the initial states.
-A factor of $f = 0.5$ is succesful for most applications, but this can be made smaller to ensure that the states do not slide off the ridge.
-The secondary constraint sets the energies of the two states equal to ensure that neither state is pulled over the ridge.
-
-The two constraints are implemented using energy penalty terms, which result in driving forces on the two states if the constraints are not met, such as in \cref{fig:toy2d}b.
-The total energy of the pair of states is therefore given by
-\begin{multline}\label{eq:bitss}
-  E_\text{BITSS}(\bm{x}_1, \bm{x}_2) = E_1 + E_2
-    + \kappa_e \left( E_1 - E_2 \right) ^2 \\
-    + \kappa_d \left( \mathrm{d}(\bm{x}_1, \bm{x}_2) - d_i \right) ^2,
-\end{multline}
-where $E_1$ and $E_2$ are the single state energies, $\kappa_e$ and $\kappa_d$ parametrise the strengths of the energy and distance constraints, and $\mathrm{d}(\bm{x}_1, \bm{x}_2)$ is the measure of distance between the two states.
-In this work the L-BFGS algorithm is chosen to minimise the energy, owing to its fast convergence and low memory requirement for large numbers of degrees of freedom \cite{Liu1989}.
-However, any other minimisation method can be used instead.
+The energies of these two states are then minimised, while constraining their separation, which is iteratively reduced to zero.
+This results in the two states meeting at the lowest point on the ridge between the two basin of attraction - the transition state.
+To ensure that neither state is pulled over the ridge, a secondary constraint enforces equal energies for the two states.
+These two constraints are implemented using energy penalty terms, which result in driving forces on the two states if the constraints are not met, such as in \cref{fig:toy2d}b.
 
 In summary, the method involves iteratively performing the following three steps:
 \begin{enumerate}[noitemsep,nolistsep]
-  \item Reduce the target separation using \cref{eq:diteration}.
-  \item Compute the constraint coefficients using \cref{eq:ke,eq:kd}.
-  \item Minimise the potential given by \cref{eq:bitss}, and recompute the coefficients at regular intervals.
+  \item Reduce the constrained separation.
+  \item Compute the constraint coefficients.
+  \item Minimise the potential of the pair of states, including energy penalty terms, while recomputing the coefficients at regular intervals.
 \end{enumerate}
+See the methods section for further details of each step.
 This process is completed once a suitable convergence criterion is reached.
 This can either be based upon the separation between the states, or the size of gradient at the midpoint between the states.
 
@@ -137,45 +125,22 @@ If, instead, all of transition states or the full pathway are desired, BITSS can
 \end{figure*}
 As a result of the BITSS method using only two states it has the potential to be significantly faster than chain-of-states approaches which typically use tens of states.
 This is tested here by measuring the speed of convergence to the transition state for BITSS in comparison with the string method and DNEB for several representative examples.
-
-The first system to be tested is a two-dimensional, seven-particle cluster, with the transition from a hexagonal cluster to a higher energy configuration.
-The interaction between each pair of particles uses the Lennard-Jones potential,
-\begin{equation}
-  E = 4\epsilon \left[ \left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{r}\right)^6 \right],
-\end{equation}
-where $r$ is the particle separation, $\epsilon$ is the interaction strength, and $\sigma$ is the particle size.
-
-The second system is an elastic cylindrical shell under an applied strain.
+The first is a two-dimensional, seven-particle cluster, with a transition from a hexagonal cluster to a higher energy configuration.
+The second system is an elastic cylindrical shell with an applied axial strain.
 This undergoes a transition from an unbuckled state to a singly-dimpled state, which defines the minimum energy required for the cylinder to buckle \cite{Panter2019}.
-A 2D triangular mesh with 35400 degrees of freedom is used to model this system, with the following energy function,
-\begin{equation}
-  E = \sum_i k^S_i (r_i - r^0_i)^2 + \sum_j k^B_j [1 + \cos(\theta_j - \theta^0_j)].
-\end{equation}
-The first term provides the stretching energy for the system using a sum over all the bonds, where $r_i$ is the length, $r^0_i$ is the equilibrium length, and $k^S_i$ is the stretching rigidity of bond $i$.
-The second term models the bending energy by representing each pair of adjacent triangles as an elastic hinge.
-For hinge $j$, $\theta_j$ is the dihedral angle, $\theta^0_j$ is the equilibrium angle, and $k^B_j$ is the bending rigidity.
-
 The final system involves a droplet situated on a chemically striped surface with both hydrophilic and hydrophobic regions.
 This has two possible states, with the droplet either upon one hydrophilic stripe, or straddling across two.
-This is modelled on a 200x200 2D grid using a phase-field model \cite{Panter2019b}, which has an order parameter, $\phi(\bm{r})$, representing the phase of the liquid ($\phi=-1$ for gas, $\phi=1$ for liquid).
-The energy functional has four separate terms,
-\begin{equation} \label{eq:phasefield}
-  E[\phi] = E^B[\phi] + E^I[\phi] + E^S[\phi] + E^V[\phi].
-\end{equation}
-The first term, $E^B$, uses a double well potential to set values of $\phi=\pm1$ in the bulk.
-The second term then provides the interfacial energy between the liquid and gas by imposing an energy penalty to gradients in $\phi$.
-$E^S$ is the solid-liquid interaction energy, which sets the contact angles of the hydrophilic and hydrophobic regions to 60\si{\degree} and 110\si{\degree}, respectively.
-Finally, $E^V$ constrains the volume of the liquid drop by penalising any variation from the target volume.
-For further details and the gradients of the potentials see the supplementary information \cite{Note1}.
+The details about how these systems are modelled are included in the methods section.
 
-Convergence is measured using the distance from the transition state as a function of number of evaluations to the gradient of the system's potential.
-The transition state is compared to the average of the two states for BITSS, whereas for the chain-of-states methods, the closest point on a cubic spline is used.
+Convergence is measured using the distance from the transition state.
+For BITSS, the average of the two states is used for this, whereas for the chain-of-states methods, the closest point on a cubic spline interpolation is used.
+The speed of this convergence is evaluated through comparison with the number of calculations of the potential gradient for a single state.
 
 The results for this test, shown in \cref{fig:speedtest}, demonstrate two main advantages for the BITSS method.
 Firstly, the slope illustrates that the rate of convergence is indeed much greater for the BITSS method.
 It is matched only by the initial rate of the string method using less than ten images, however these soon slow and are relatively inaccurate.
 Secondly, the BITSS method can more accurately approximate the transition state by orders of magnitude, particularly for the wetting example where the string method does not significantly improve upon the initial pathway estimate.
-Therefore, unlike the string method, BITSS does not require a second approach to accurately locate the transition state.
+Therefore, unlike these other double-ended methods, BITSS does not require a second approach to accurately locate the transition state.
 
 
 \subsection{Adaptive discretisation}
@@ -252,9 +217,25 @@ This method will enable the analysis of energy landscapes for new systems in bot
 
 
 \section{Methods}
-\subsection{BITSS: Target distance}
+\subsection{BITSS: Distance constraint}
+The value of the separation constraint is incrementally reduced such that, at iteration $i$, it is given by
+\begin{equation}\label{eq:diteration}
+  d_i = (1 - f) d_{i-1},
+\end{equation}
+with $d_0$ the separation between the two initial states.
+This fractional reduction ensures that as the two states approach the transition state they are not likely to undergo a sudden jump that will send them into the opposite basin.
+A factor of $f = 0.5$ is succesful for most applications, but this can be made smaller to ensure that the states do not slide off the ridge.
 
 \subsection{BITSS: Total potential}
+The total energy of the pair of states, including energy penalty terms for the constraints, is given by
+\begin{multline}\label{eq:bitss}
+  E_\text{BITSS}(\bm{x}_1, \bm{x}_2) = E_1 + E_2
+    + \kappa_e \left( E_1 - E_2 \right) ^2 \\
+    + \kappa_d \left( \mathrm{d}(\bm{x}_1, \bm{x}_2) - d_i \right) ^2,
+\end{multline}
+where $E_1$ and $E_2$ are the single state energies, $\kappa_e$ and $\kappa_d$ parametrise the strengths of the energy and distance constraints, and $\mathrm{d}(\bm{x}_1, \bm{x}_2)$ is the measure of distance between the two states.
+In this work the L-BFGS algorithm is chosen to minimise this energy, owing to its fast convergence and low memory requirement for large numbers of degrees of freedom \cite{Liu1989}.
+However, any other minimisation method can be used instead.
 
 \subsection{BITSS: Constraint coefficients}
 To ensure that the transition state is located successfully, the constraint strengths $\kappa_d$ and $\kappa_e$ are updated as the algorithm proceeds using information from the system.
@@ -265,22 +246,75 @@ They are set using the following equations such that each term in the gradient o
   \label{eq:ke}
   \\
   \kappa_d = \max \left(
-    \frac {\sqrt{|\bm{\nabla} E_1|^2 + |\bm{\nabla} E_2|^2}} {2\sqrt{2} \beta d_i} \; , \;
+    \frac {\sqrt{\abs{\grad E_1}^2 + \abs{\grad E_2}^2}} {2\sqrt{2} \beta d_i} \; , \;
     \frac{E_B}{\beta d_i^2} \right),
   \label{eq:kd}
 \end{gather}
-where $\bm{\nabla} E_1$ and $\bm{\nabla} E_2$ are the gradients of the energies of the two states, and $\alpha$ and $\beta$ are parameters with recommended values of $\alpha = 10$ and $\beta = 0.1$ (see supplementary information \footnote{See Supplemental Material at [URL] for derivations of the constraint coefficients, and extra details for the example systems}).
+where $\grad E_1$ and $\grad E_2$ are the gradients of the energies of the two states, and $\alpha$ and $\beta$ are parameters with recommended values of $\alpha = 10$ and $\beta = 0.1$ (see supplementary information \footnote{See Supplemental Material at [URL] for derivations of the constraint coefficients, and extra details for the example systems}).
 Here, $E_B$ is an estimation for the current energy barrier; evaluated using the difference between the highest energy along a linear interpolation between the two states and the average energy of the two states.
+
+In practice, when numerically minimising, the states will jump about slightly which can result in large gradients perpendicular to the optimal movement direction.
+To reduce this effect, the gradients used in \cref{eq:kd} are projected in the direction of the separation between the two states:
+\begin{equation}
+  \abs{\grad E_n} \approx \frac {\abs{(\bm{x}_1 - \bm{x}_2) \cdot \grad E_n}} {\abs{\bm{x}_1 - \bm{x}_2}}.
+\end{equation}
 
 \subsection{BITSS: Changes for undefined gradients}
 
 \subsection{Adaptive discretisation test details}
+Here we provide the details for the interpolations and mapping involved in the two examples demonstrating the feasibility of using an adaptive discretisation method.
+In the examples demonstrating the feasibility of using adaptive 
+For the cylindrical buckling example with a changing mesh, the resolution is refined each time the separation between the two states is halved. 
+This involves the number of triangles around the circumference of the cylinder increasing along the sequence: $40 \rightarrow 60 \rightarrow 80 \rightarrow 100$; with the number of degrees of freedom increasing by: $1760 \rightarrow 3960 \rightarrow 7040 \rightarrow 11000$.
+The positions of the nodes on the new grid, $\{\bm{n}_i\}$, are determined by linear interpolation from the previous grid $\{\bm{p}_i\}$, using the positions of the unbuckled meshes, $\{\bm{n'}_i\}$ and $\{\bm{p'}_i\}$.
+For each node of the new grid, $\bm{n'}_i$, the triangle that contains it is first identified, which we will denote $\{\bm{p'}_1,\bm{p'}_2,\bm{p'}_3\}$, and the barycentric coordinates of the point are computed, $\{\lambda_1,\lambda_2,\lambda_3\}$.
+The new position is then given by $\bm{n}_i = \lambda_1 \bm{p}_1 + \lambda_2 \bm{p}_2 + \lambda_3 \bm{p}_3$.
+
+In the wetting example with different resolutions for the two states, the distance is obtained by first mapping the phase field from the higher resolution grid, $\{\phi_{k,l} | k,l \in \{0,1,\cdots,399\}\}$, to the low resolution grid, $\{\phi'_{i,j} | i,j \in \{0,1,\cdots,199\}\}$.
+Because a square grid is used with a resolution ratio of two, the mapping involves averaging each 2x2 block to a single point:
+\begin{equation}
+  \phi'_{i,j} = \frac{1}{4} \left( \phi_{2i,2j} + \phi_{2i+1,2j} + \phi_{2i,2j+1} + \phi_{2i+1,2j+1} \right)
+\end{equation}
+Then the separation from the other state, $\{\widetilde{\phi}_{i,j}\}$ is computed using the 2-norm,
+\begin{equation}
+  d = \sqrt{\sum_{i,j} \left( \phi'_{i,j} - \widetilde{\phi}_{i,j} \right)^2}.
+\end{equation}
+Finally, the gradient of the distance with respect to each point must be mapped back to the higher-resolution grid, which is done by assigning a quarter of each component back to its the original four points:
+\begin{equation}
+  \frac{\partial d}{\partial \phi_{k,l}} =
+    \frac{\partial \phi'_{i,j}}{\partial \phi_{k,l}} \frac{\partial d}{\partial \phi'_{i,j}} =
+    \frac{1}{4} \frac{\partial d}{\partial \phi'_{i,j}} =
+    \frac{1}{4} \frac{\phi'_{i,j} - \widetilde{\phi}_{i,j}}{d},
+\end{equation}
+where $k \in \{2i, 2i+1\}$, and $l \in \{2j, 2j+1\}$.
 
 \subsection{Particle cluster system}
+The interaction between each pair of particles uses the Lennard-Jones potential,
+\begin{equation}
+  E = 4\epsilon \left[ \left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{r}\right)^6 \right],
+\end{equation}
+where $r$ is the particle separation, $\epsilon$ is the interaction strength, and $\sigma$ is the particle size.
 
 \subsection{Cylindrical buckling system}
+A 2D triangular mesh with 35400 degrees of freedom is used to model this system, with the following energy function,
+\begin{equation}
+  E = \sum_i k^S_i (r_i - r^0_i)^2 + \sum_j k^B_j [1 + \cos(\theta_j - \theta^0_j)].
+\end{equation}
+The first term provides the stretching energy for the system using a sum over all the bonds, where $r_i$ is the length, $r^0_i$ is the equilibrium length, and $k^S_i$ is the stretching rigidity of bond $i$.
+The second term models the bending energy by representing each pair of adjacent triangles as an elastic hinge.
+For hinge $j$, $\theta_j$ is the dihedral angle, $\theta^0_j$ is the equilibrium angle, and $k^B_j$ is the bending rigidity.
 
 \subsection{Striped wetting system}
+This is modelled on a 200x200 2D grid using a phase-field model \cite{Panter2019b}, which has an order parameter, $\phi(\bm{r})$, representing the phase of the liquid ($\phi=-1$ for gas, $\phi=1$ for liquid).
+The energy functional has four separate terms,
+\begin{equation} \label{eq:phasefield}
+  E[\phi] = E^B[\phi] + E^I[\phi] + E^S[\phi] + E^V[\phi].
+\end{equation}
+The first term, $E^B$, uses a double well potential to set values of $\phi=\pm1$ in the bulk.
+The second term then provides the interfacial energy between the liquid and gas by imposing an energy penalty to gradients in $\phi$.
+$E^S$ is the solid-liquid interaction energy, which sets the contact angles of the hydrophilic and hydrophobic regions to 60\si{\degree} and 110\si{\degree}, respectively.
+Finally, $E^V$ constrains the volume of the liquid drop by penalising any variation from the target volume.
+For further details and the gradients of the potentials see the supplementary information \cite{Note1}.
 
 
 \appendix
