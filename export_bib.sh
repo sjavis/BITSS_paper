@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Extract bibliography into separate bib file
+
 AUXFILE="${1%.tex}.aux"
 if [ ! -f "$1" ]; then
   echo "File not found"
@@ -9,7 +11,8 @@ elif [ ! -f "$AUXFILE" ]; then
   exit 1
 fi
 
-bibexport -ns $AUXFILE
+# bibexport -ns $AUXFILE
+bibexport $AUXFILE
 # Remove empty lines, abstract, url, etc
 sed -i '/^\s*$/d' bibexport.bib
 remove_fields=('abstract' 'url' 'issn' 'isbn' 'annote' 'month')
