@@ -21,7 +21,7 @@
 
 
 \begin{document}
-\title{Binary Image Transition State Search Method}
+\title{A Binary-Image Transition State Search Method}
 \author{Samuel J. Avis}
 \author{Jack R. Panter}
 \email[]{j.r.panter@durham.ac.uk}
@@ -32,7 +32,7 @@
 \begin{abstract}
   Locating transition states is crucial for investigating transition mechanisms in wide-ranging phenomena, from atomistic to macroscale systems.
   Existing methods, however, can struggle in problems with a large number of degrees of freedom, on-the-fly adaptive remeshing and coarse-graining, and energy landscapes that are locally flat or discontinuous.
-  To resolve these challenges, we introduce a new double-ended method, the Binary Image Transition State Search (BITSS).
+  To resolve these challenges, we introduce a new double-ended method, the Binary-Image Transition State Search (BITSS).
   It uses just two states that converge to the transition state, resulting in a fast, flexible, and memory-efficient method.
   We demonstate its versatility by applying BITSS to three very different classes of problems: Lennard-Jones clusters, shell buckling, and multiphase phase-field models.
 \end{abstract}
@@ -66,6 +66,14 @@ Flat zero-modes in the landscape pose issues for single-ended search methods tha
 Specialist treatment can sometimes be used such as in the case of global rotation and translation \cite{Page1988}, but they are thwarted by local zero-modes.
 Meanwhile, current methods cannot typically be applied in the case of discontinuous potentials, or where the gradient is prohibitively expensive to compute, because continuous, differentiable optimisation functions are required.
 
+In this work we introduce a new method, the Binary-Image Transition State Search (BITSS), and using a range of different applications, we will demonstrate how BITSS addresses each of the above challenges.
+BITSS is a double-ended method that uses just two states that converge toward a transition state from either side, therefore combining aspects of the two traditional transition state search categories.
+Importantly, unlike other double-ended methods, BITSS does not require any initial interpolation.
+
+
+\section{Results and discussion}
+\subsection{BITSS method in a nutshell}
+
 \begin{figure}[htb]
   \includegraphics{toy2d.pdf}
   \caption{\label{fig:toy2d}
@@ -76,29 +84,38 @@ Meanwhile, current methods cannot typically be applied in the case of discontinu
   }
 \end{figure}
 
-In this work we introduce a new method, the Binary Image Transition State Search (BITSS), and using a range of different applications, we will demonstrate how BITSS addresses each of the above challenges.
-BITSS is a double-ended method that uses just two states that converge toward a transition state from either side, therefore combining aspects of the two traditional transition state search categories.
-Importantly, unlike other double-ended methods, BITSS does not require any initial interpolation.
-
-
-\section{Results and discussion}
-\subsection{BITSS method in a nutshell}
-The method begins by first initialising the states, $\bm{x}_1$ and $\bm{x}_2$, in the basins of attraction of different local minima.
+The method begins by first initialising the states, $\bm{x}_1$ and $\bm{x}_2$, in the basins of attraction of different local minima, such as the two blue spots in the 2d example potential in \cref{fig:toy2d}a.
 These can be set to the minima, but this is not a necessary requirement.
-The energies of these two states are then minimised, while constraining their separation, which is iteratively reduced to zero.
-This results in the two states meeting at the lowest point on the ridge between the two basin of attraction - the transition state.
-To ensure that neither state is pulled over the ridge, a secondary constraint enforces equal energies for the two states.
-These two constraints are implemented using energy penalty terms, which result in driving forces on the two states if the constraints are not met, such as in \cref{fig:toy2d}b.
+The energies of these two states are then minimised, while constraining their separation.
+This is iteratively reduced to zero, such that, at iteration $i$, their separation is
+\begin{equation}\label{eq:diteration}
+  d_i = (1 - f) d_{i-1}.
+\end{equation}
+With $d_0$ as the separation between the two initial states.
+A reduction factor of $f = 0.5$ is succesful for most applications, but this can be made smaller to ensure that the states do not slide off the ridge between the two basin of attraction.
+To further ensure that neither state is pulled over the ridge, a secondary constraint enforces equal energies for the two states.
+Using this strategy, the two states will meet at the lowest point on the ridge - the transition state.
+
+The two constraints are implemented using energy penalty terms, which result in driving forces on the two states if the constraints are not met, such as in \cref{fig:toy2d}b.
+Including these energy penalty terms gives the following total energy for the pair of states,
+\begin{multline}\label{eq:bitss}
+  E_\text{BITSS}(\bm{x}_1, \bm{x}_2) = E_1 + E_2
+    + \kappa_e \left( E_1 - E_2 \right) ^2 \\
+    + \kappa_d \left( \mathrm{d}(\bm{x}_1, \bm{x}_2) - d_i \right) ^2,
+\end{multline}
+where $E_1$ and $E_2$ are the single state energies, $\kappa_e$ and $\kappa_d$ parametrise the strengths of the energy and distance constraints, and $\mathrm{d}(\bm{x}_1, \bm{x}_2)$ is the measure of distance between the two states.
+In this work the L-BFGS algorithm is chosen to minimise this energy, owing to its fast convergence and low memory requirement for large numbers of degrees of freedom \cite{Liu1989}.
+However, any other minimisation method can be used instead.
 
 In summary, the method involves iteratively performing the following three steps:
 \begin{enumerate}[noitemsep,nolistsep]
-  \item Reduce the constrained separation.
+  \item Reduce the constrained separation, according to \cref{eq:diteration}.
   \item Compute the constraint coefficients.
-  \item Minimise the potential of the pair of states, including energy penalty terms, while recomputing the coefficients at regular intervals.
+  \item Minimise the potential of the pair of states, \cref{eq:bitss}, while recomputing the coefficients at regular intervals.
 \end{enumerate}
-See the methods section for further details of each step.
+For details about computing the constraint coefficients see the methods section.
 This process is completed once a suitable convergence criterion is reached.
-This can either be based upon the separation between the states, or the size of gradient at the midpoint between the states.
+This can either be based upon the separation between the states, or the size of gradient at the midpoint between them.
 
 Using this approach, the typical trajectories of the states are demonstrated for a simple 2D potential in \cref{fig:toy2d}a.
 Initially, the lower energy state jumps up to satisfy the equal energy constraint and then moves to minimise the separation without increasing its energy.
@@ -107,10 +124,9 @@ Consequently, if there are multiple possible pathways between two states, BITSS 
 Furthermore, the final two states are positioned either side of the transition state in the direction of the negative curvature eigenvector, $\bm{\hat{\tau}}$ (\cref{fig:toy2d}c).
 So, BITSS automatically identifies the `reactive mode' and associated eigenvalue in addition to the transition state.
 
-Once BITSS has identified the transition state, it is possible to find the full minimum energy pathway.
-This is done by tracing the trajectory of downhill minimisations from the two final states either side of the transition state.
+Once BITSS has identified the transition state, it is possible to find the full minimum energy pathway by tracing the trajectory of downhill minimisations from the two final states, either side of the transition state.
 In the case where there is a chain of transition states between the two starting minima, BITSS will identify the transition state with the highest energy in the chain.
-If, instead, all of transition states or the full pathway are desired, BITSS can be continually repeated from one of the minima downhill from the located transition state and one of the initial minima until the desired minima are piecewise connected.
+If all of transition states or the full pathway are desired instead, BITSS can be continually repeated from one of the minima downhill from the located transition state and one of the initial minima until the initial minima are piecewise connected by a full pathway.
 
 
 \subsection{Speed Comparison}
@@ -130,8 +146,8 @@ The second system is an elastic cylindrical shell with an applied axial strain.
 This undergoes a transition from an unbuckled state to a singly-dimpled state, which defines the minimum energy required for the cylinder to buckle \cite{Panter2019}.
 The final system involves a droplet situated on a chemically striped surface with both hydrophilic and hydrophobic regions.
 This has two possible states, with the droplet either upon one hydrophilic stripe, or straddling across two.
-These systems have 14, 35400, and 40000 degrees of freedom, respectively.
-Details about how they are modelled are included in the methods section.
+Each of these are modelled using very different systems with \num{14}, \num{35400}, and \num{40000} degrees of freedom, respectively.
+The details about how they are modelled are included in the methods section.
 
 Convergence is measured using the distance from the transition state.
 For BITSS, the average of the two states is used for this, whereas for the chain-of-states methods, the closest point on a cubic spline interpolation is used.
@@ -162,12 +178,11 @@ These techniques cause issues for existing double-ended methods because the coup
 However, in BITSS the only direct coupling is in the distance measure, $\mathrm{d}(\bm{x}_1,\bm{x}_2)$, which is relatively easy to adapt.
 Here we demonstrate the use of adaptive remeshing by considering two separate issues.
 
-Firstly, we show in \cref{fig:adaptivemesh}a that BITSS is able to handle the discretisation adapting as the method runs (changing number of degrees of freedom).
-For this we use the cylindrical buckling example with the resolution increasing from 40 to 100 triangles around the cylinder.
-These changes are performed after the minimisation step in each iteration of the BITSS method.
-This demonstrates that BITSS is able to converge to the transition state so long as the remeshing does not change the energy landscape of interest.
+Firstly, we show in \cref{fig:adaptivemesh}a that BITSS is able to handle the discretisation adapting, and the number of degrees of freedom changing, as the method runs.
+For this we use the cylindrical buckling example with the resolution increasing from 40 to 100 triangles around the cylinder, corresponding to an increase from \num{1760} to \num{11000} degrees of freedom.
+This demonstrates that BITSS is able to converge to the transition state so long as the remeshing is not so significant as to shift a state into the basin of attraction of the other minima.
 
-In the second test, \cref{fig:adaptivemesh}b, we demonstrate the use of different meshes for the two states in the striped wetting example.
+In the second test, shown in \cref{fig:adaptivemesh}b, we demonstrate the use of different meshes for the two states in the striped wetting example.
 In this case, the distance measure is adapted by interpolating one state onto the other mesh and computing the Euclidean distance.
 However, for some applications a simpler measure may be sufficient, such as the difference between average values of the system.
 Using this approach, BITSS is able to closely approach the transition state.
@@ -190,7 +205,7 @@ The precision of this convergence is now limited by the transition state energy 
   }
 \end{figure}
 
-The final challenges we will address are those related to complex landscapes.
+The final challenges we will address are those related to complex landscapes that prove challenging for previous algorithms.
 The first is the presence of flat regions in the landscape.
 \Cref{fig:flatdiscontinuous}a shows BITSS applied to a 2D landscape with two such regions (i \& ii) that are flat in the $x$-direction.
 We see BITSS is able to successfully converge past these flat regions, even with one very close to the transition state (ii).
@@ -200,7 +215,8 @@ When only a single state has a zero-gradient mode then the other is likely to sl
 
 
 Finally, we investigate the application of BITSS to systems with undefined gradients, such as when the landscape is discontinuous.
-A couple of changes are necessary to account for this, as detailed in the methods section.
+To account for this, the equations for the coefficients must be adapted to not depend upon the gradients, and a gradient-free minimiser (simulated annealing) is used.
+These changes are detailed in the methods section.
 This has been tested using a Lennard-Jones 7-particle cluster with hard cores, resulting in a discontinuous landscape.
 Using the gradient-free approach, BITSS is able to successfully find the transition states, allowing us to plot the disconnectivity graph of the system, shown in \cref{fig:flatdiscontinuous}b.
 Compared with the results for the standard Lennard-Jones cluster, the energies of the minima are largely unchanged, but the energies of the transition states are found to be slightly higher.
@@ -210,32 +226,12 @@ Despite this gradient-free method being feasible, it is worth noting that a grad
 
 \section{Conclusion}
 In conclusion, we have demonstrated a novel method for finding transition states that tackles problems not currently addressed by existing methods.
-The method is shown to be more efficient than existing double-ended methods, both in memory and computational cost, with further reductions possible by utilising adaptive remeshing techniques.
+The method is shown to be more efficient than existing double-ended methods, both in memory and computational cost, and we have demonstrated that it is possible to utilise adaptive remeshing techniques to further reduce the computational cost.
 It can also be adapted to problems with complex energy landscapes, including those with flat or discontinuous regions.
 This method will enable the analysis of energy landscapes for new systems in both particulate and continuum applications, and increase the feasibility of such methods for large-scale, complex systems.
 
 
 \section{Methods}
-\subsection{BITSS: Distance constraint}
-The value of the separation constraint is incrementally reduced such that, at iteration $i$, it is given by
-\begin{equation}\label{eq:diteration}
-  d_i = (1 - f) d_{i-1},
-\end{equation}
-with $d_0$ the separation between the two initial states.
-This fractional reduction ensures that as the two states approach the transition state they are not likely to undergo a sudden jump that will send them into the opposite basin.
-A factor of $f = 0.5$ is succesful for most applications, but this can be made smaller to ensure that the states do not slide off the ridge.
-
-\subsection{BITSS: Total potential}
-The total energy of the pair of states, including energy penalty terms for the constraints, is given by
-\begin{multline}\label{eq:bitss}
-  E_\text{BITSS}(\bm{x}_1, \bm{x}_2) = E_1 + E_2
-    + \kappa_e \left( E_1 - E_2 \right) ^2 \\
-    + \kappa_d \left( \mathrm{d}(\bm{x}_1, \bm{x}_2) - d_i \right) ^2,
-\end{multline}
-where $E_1$ and $E_2$ are the single state energies, $\kappa_e$ and $\kappa_d$ parametrise the strengths of the energy and distance constraints, and $\mathrm{d}(\bm{x}_1, \bm{x}_2)$ is the measure of distance between the two states.
-In this work the L-BFGS algorithm is chosen to minimise this energy, owing to its fast convergence and low memory requirement for large numbers of degrees of freedom \cite{Liu1989}.
-However, any other minimisation method can be used instead.
-
 \subsection{BITSS: Constraint coefficients}
 To ensure that the transition state is located successfully, the constraint strengths $\kappa_d$ and $\kappa_e$ are updated as the algorithm proceeds using information from the system.
 They are initially calculated at the start of each minimisation, and regularly recalculated throughout (once per 100 iterations is used in this work).
@@ -269,8 +265,7 @@ We typically employ $T_0 = E_B / 10$, and $d_\text{max} = d(\bm{x}_1, \bm{x}_2) 
 
 \subsection{Adaptive discretisation test details}
 Here we provide the details for the interpolations and mapping involved in the two examples demonstrating the feasibility of using an adaptive discretisation method.
-In the examples demonstrating the feasibility of using adaptive 
-For the cylindrical buckling example with a changing mesh, the resolution is refined each time the separation between the two states is halved. 
+For the cylindrical buckling example with a changing mesh, the resolution is refined each time the separation between the two states has halved, and is performed at the end of each iteration of the BITSS method. 
 This involves the number of triangles around the circumference of the cylinder increasing along the sequence: $40 \rightarrow 60 \rightarrow 80 \rightarrow 100$; with the number of degrees of freedom increasing by: $1760 \rightarrow 3960 \rightarrow 7040 \rightarrow 11000$.
 The positions of the nodes on the new grid, $\{\bm{n}_i\}$, are determined by linear interpolation from the previous grid $\{\bm{p}_i\}$, using the positions of the unbuckled meshes, $\{\bm{n'}_i\}$ and $\{\bm{p'}_i\}$.
 For each node of the new grid, $\bm{n'}_i$, the triangle that contains it is first identified, which we will denote $\{\bm{p'}_1,\bm{p'}_2,\bm{p'}_3\}$, and the barycentric coordinates of the point are computed, $\{\lambda_1,\lambda_2,\lambda_3\}$.
