@@ -21,7 +21,7 @@
 
 
 \begin{document}
-\title{A Binary-Image Transition State Search Method}
+\title{A fast and memory-efficient transition state search method for complex energy landscapes}
 \author{Samuel J. Avis}
 \author{Jack R. Panter}
 \email[]{j.r.panter@durham.ac.uk}
@@ -43,7 +43,7 @@
 \section{Introduction}
 Transition states are central to the description of reconfiguration mechanisms for systems in chemistry, condensed matter physics, and engineering.
 Historically, many computational methods for locating transition states have grown from an atomistic or particulate perspective.
-These have proven to be important tools for understanding, for example, protein folding \cite{Bryngelson1995,Onuchic1997}, biological and industrial catalysis \cite{Boehr2006,Kerns2015,Guo2018a}, quantum tunneling \cite{Richardson2016,Vaillant2019}, crystallisation \cite{Richard2018}, and cluster formation \cite{Wales1998,Wales2012}.
+These have proven to be important tools for understanding, for example, protein folding \cite{Bryngelson1995,Onuchic1997}, biological and industrial catalysis \cite{Boehr2006,Kerns2015,Guo2018a}, quantum tunnelling \cite{Richardson2016,Vaillant2019}, crystallisation \cite{Richard2018}, and cluster formation \cite{Wales1998,Wales2012}.
 
 More recently, it is increasingly being recognised that transition states are useful in mesoscale or macroscale systems.
 Here, the minimum energy barriers provide important lower bounds to the energy input required for transitions to occur.
@@ -61,7 +61,7 @@ However, a large range of landscapes prove challenging or impossible to explore 
 One key problem arises from the push towards larger and more complex systems \cite{Trefethen2013,Shalf2020,Alexander2020}, resulting in the need to develop algorithms that are more memory and computationally efficient, and can incorporate advanced optimisation strategies such as on-the-fly adaptive remeshing and coarse-graining.
 Current double-ended methods require a chain of tens of states to gain an accurate approximation, and have issues with remeshing due to the different number of degrees of freedom for each state.
 Single-ended methods are not well suited for identifying specific pathways and can spend a large amount of time searching for undesired transition states.
-Another major challenge in studying complex energy landscapes relates to the presence of locally flat or discontinous regions, such as when considering patchy \cite{McMullen2018,Nguemaha2018,Chen2018b} and hard-body \cite{Richard2018,Santra2018} interactions in atomistic simulations, systems of polymer chains \cite{Mokkonen2016}, or collision constraints for macroscopic objects \cite{Wriggers2006}.
+Another major challenge in studying complex energy landscapes relates to the presence of locally flat or discontinuous regions, such as when considering patchy \cite{McMullen2018,Nguemaha2018,Chen2018b} and hard-body \cite{Richard2018,Santra2018} interactions in atomistic simulations, systems of polymer chains \cite{Mokkonen2016}, or collision constraints for macroscopic objects \cite{Wriggers2006}.
 Flat zero-modes in the landscape pose issues for single-ended search methods that rely only upon local information.
 Specialist treatment can sometimes be used such as in the case of global rotation and translation \cite{Page1988}, but they are thwarted by local zero-modes.
 Meanwhile, current methods cannot typically be applied in the case of discontinuous potentials, or where the gradient is prohibitively expensive to compute, because continuous, differentiable optimisation functions are required.
@@ -92,7 +92,7 @@ This is iteratively reduced to zero, such that, at iteration $i$, their separati
   d_i = (1 - f) d_{i-1}.
 \end{equation}
 With $d_0$ as the separation between the two initial states.
-A reduction factor of $f = 0.5$ is succesful for most applications, but this can be made smaller to ensure that the states do not slide off the ridge between the two basin of attraction.
+A reduction factor of $f = 0.5$ is successful for most applications, but this can be made smaller to ensure that the states do not slide off the ridge between the two basin of attraction.
 To further ensure that neither state is pulled over the ridge, a secondary constraint enforces equal energies for the two states.
 Using this strategy, the two states will meet at the lowest point on the ridge - the transition state.
 
@@ -104,8 +104,30 @@ Including these energy penalty terms gives the following total energy for the pa
     + \kappa_d \left( \mathrm{d}(\bm{x}_1, \bm{x}_2) - d_i \right) ^2,
 \end{multline}
 where $E_1$ and $E_2$ are the single state energies, $\kappa_e$ and $\kappa_d$ parametrise the strengths of the energy and distance constraints, and $\mathrm{d}(\bm{x}_1, \bm{x}_2)$ is the measure of distance between the two states.
+
 In this work the L-BFGS algorithm is chosen to minimise this energy, owing to its fast convergence and low memory requirement for large numbers of degrees of freedom \cite{Liu1989}.
 However, any other minimisation method can be used instead.
+
+To ensure that the transition state is located successfully, the constraint strengths $\kappa_d$ and $\kappa_e$ are updated as the algorithm proceeds using information from the system.
+They are initially calculated at the start of each minimisation, and regularly recalculated throughout (once per 100 iterations is used in this work).
+They are set using the following equations such that each term in the gradient of \cref{eq:bitss} is of a similar size,
+\begin{gather}
+  \kappa_e = \frac {\alpha} {2 E_B},
+  \label{eq:ke}
+  \\
+  \kappa_d = \max \left(
+    \frac {\sqrt{\abs{\grad E_1}^2 + \abs{\grad E_2}^2}} {2\sqrt{2} \beta d_i} \; , \;
+    \frac{E_B}{\beta d_i^2} \right),
+  \label{eq:kd}
+\end{gather}
+where $\grad E_1$ and $\grad E_2$ are the gradients of the energies of the two states, and $\alpha$ and $\beta$ are parameters with recommended values of $\alpha = 10$ and $\beta = 0.1$ (see supplementary information).
+Here, $E_B$ is an estimation for the current energy barrier; evaluated using the difference between the highest energy along a linear interpolation between the two states and the average energy of the two states.
+
+In practice, when numerically minimising, the states will jump about slightly which can result in large gradients perpendicular to the optimal movement direction.
+To reduce this effect, the gradients used in \cref{eq:kd} are projected in the direction of the separation between the two states:
+\begin{equation}
+  \abs{\grad E_n} \approx \frac {\abs{(\bm{x}_1 - \bm{x}_2) \cdot \grad E_n}} {\abs{\bm{x}_1 - \bm{x}_2}}.
+\end{equation}
 
 In summary, the method involves iteratively performing the following three steps:
 \begin{enumerate}[noitemsep,nolistsep]
@@ -139,15 +161,25 @@ If all of transition states or the full pathway are desired instead, BITSS can b
     The string method and DNEB are repeated with a differing number of images, as listed in the legend in (c).
   }
 \end{figure*}
-As a result of the BITSS method using only two states it has the potential to be significantly faster than chain-of-states approaches which typically use tens of states.
-This is tested here by measuring the speed of convergence to the transition state for BITSS in comparison with the string method and DNEB for several representative examples.
-The first is a two-dimensional, seven-particle cluster, with a transition from a hexagonal cluster to a higher energy configuration.
-The second system is an elastic cylindrical shell with an applied axial strain.
-This undergoes a transition from an unbuckled state to a singly-dimpled state, which defines the minimum energy required for the cylinder to buckle \cite{Panter2019}.
+
+As a result of the BITSS method using only two states, it has the potential to be significantly faster than chain-of-states approaches which typically use tens of states.
+This is tested here by measuring the speed of convergence to the transition state for BITSS in comparison with the string method and DNEB for three diverse systems, exhibiting a broad range of energy landscapes.
+Details of each are presented in the methods section.
+
+The first system is a two-dimensional, seven-particle cluster, interacting via a Lennard-Jones pair potential.
+This is a frequently used test system for studying transition rates \cite{Wales2002,Passerone2001}.
+Here, the \num{14} degrees of freedom are the particle coordinates.
+The characteristic transition shown in \cref{fig:speedtest}a sees a particle rearrangement between two close-packed clusters.
+
+The second system is an elastic cylindrical shell, modelled by a triangulated mesh of nodes, which interact via extensional and angular springs.
+The \num{35400} degrees of freedom are the node coordinates in three-dimensional space.
+The characteristic transition in \cref{fig:speedtest}b shows the formation of a stable dimple from an initially unbuckled cylinder.
+This transition is essential to capture to predict mechanical failure under strain \cite{Panter2019,Virot2017}.
+
 The final system involves a droplet situated on a chemically striped surface with both hydrophilic and hydrophobic regions.
-This has two possible states, with the droplet either upon one hydrophilic stripe, or straddling across two.
-Each of these are modelled using very different systems with \num{14}, \num{35400}, and \num{40000} degrees of freedom, respectively.
-The details about how they are modelled are included in the methods section.
+Droplet transitions on patterned surfaces are vital to understand as powerful bio-inspired liquid manipulation strategies  \cite{Kusumaatmaja2006,Brown2016}.
+In the example shown in \cref{fig:speedtest}c, a droplet transitions from two hydrophilic patches to one patch.
+Here, the system is represented by a diffuse-interface model, in which the \num{40000} degrees of freedom are the local fluid compositions at each site of the discretised domain.
 
 Convergence is measured using the distance from the transition state.
 For BITSS, the average of the two states is used for this, whereas for the chain-of-states methods, the closest point on a cubic spline interpolation is used.
@@ -225,34 +257,23 @@ Despite this gradient-free method being feasible, it is worth noting that a grad
 
 
 \section{Conclusion}
-In conclusion, we have demonstrated a novel method for finding transition states that tackles problems not currently addressed by existing methods.
-The method is shown to be more efficient than existing double-ended methods, both in memory and computational cost, and we have demonstrated that it is possible to utilise adaptive remeshing techniques to further reduce the computational cost.
-It can also be adapted to problems with complex energy landscapes, including those with flat or discontinuous regions.
-This method will enable the analysis of energy landscapes for new systems in both particulate and continuum applications, and increase the feasibility of such methods for large-scale, complex systems.
+Overall, we have developed the binary image transition state search (BITSS) algorithm for the efficient location of transition states in traditionally challenging landscapes.
+Principally, the demonstrated speed and memory-efficiency will be key as we move towards simulating systems with increasingly large numbers of degrees of freedom, such as in large biomolecules, or with increasingly fine resolution, such as in finite element domains.
+
+A second source of efficiency in the BITSS method comes from the ability to adaptively change the degrees of freedom as the algorithm proceeds.
+We demonstrated how transition states could be found by both increasing the resolution upon convergence, and coupling systems with different discretisations.
+The ease of coupling two copies of a system and adaptive remeshing, now leads to the possibility of incorporating BITSS into existing optimisation methods, such as surface evolver or finite element analysis software, to provide important energy barrier functionality. 
+
+Finally, we showed how BITSS can be used to survey discontinuous energy landscapes, demonstrated for a system of attractive hard-core particles.
+This opens up possibilities for studying a broad range of systems previously out of reach of conventional landscape methods, but where transition information is valuable.
+These include systems with very short range interactions or contact forces, such as in colloidal clusters, wrinkling and buckling of elastic materials, or locomotion and environmental interaction in robotics.
+
+The distance metric between the two BITSS images proves interesting to analyse further in the future.
+One question that emerges is whether transition states can be located by coupling two images through a small number of collective properties, rather than the total distance between all degrees of freedom in the system.
+A second question is that for landscapes with multiple pathways between states, how can the distance metric be biased to access transition states different from the most direct one? Overall, these will enable BITSS to access even more challenging landscapes, and those not yet amenable to traditional landscape exploration techniques.
 
 
 \section{Methods}
-\subsection{BITSS: Constraint coefficients}
-To ensure that the transition state is located successfully, the constraint strengths $\kappa_d$ and $\kappa_e$ are updated as the algorithm proceeds using information from the system.
-They are initially calculated at the start of each minimisation, and regularly recalculated throughout (once per 100 iterations is used in this work).
-They are set using the following equations such that each term in the gradient of \cref{eq:bitss} is of a similar size,
-\begin{gather}
-  \kappa_e = \frac {\alpha} {2 E_B},
-  \label{eq:ke}
-  \\
-  \kappa_d = \max \left(
-    \frac {\sqrt{\abs{\grad E_1}^2 + \abs{\grad E_2}^2}} {2\sqrt{2} \beta d_i} \; , \;
-    \frac{E_B}{\beta d_i^2} \right),
-  \label{eq:kd}
-\end{gather}
-where $\grad E_1$ and $\grad E_2$ are the gradients of the energies of the two states, and $\alpha$ and $\beta$ are parameters with recommended values of $\alpha = 10$ and $\beta = 0.1$ (see supplementary information).
-Here, $E_B$ is an estimation for the current energy barrier; evaluated using the difference between the highest energy along a linear interpolation between the two states and the average energy of the two states.
-
-In practice, when numerically minimising, the states will jump about slightly which can result in large gradients perpendicular to the optimal movement direction.
-To reduce this effect, the gradients used in \cref{eq:kd} are projected in the direction of the separation between the two states:
-\begin{equation}
-  \abs{\grad E_n} \approx \frac {\abs{(\bm{x}_1 - \bm{x}_2) \cdot \grad E_n}} {\abs{\bm{x}_1 - \bm{x}_2}}.
-\end{equation}
 
 \subsection{BITSS: Changes for undefined gradients}
 A couple of alterations to the method must be made to account for situations where the gradients are unknown.
@@ -375,7 +396,7 @@ where index $k$ denotes neighboring nodes at which the evaluation of the gradien
 % \bibliography{bibexport.bib}
 % % \bibliography{../../library.bib}
 %% mid bib
-\begin{thebibliography}{45}%
+\begin{thebibliography}{50}%
 \makeatletter
 \providecommand \@ifxundefined [1]{%
  \@ifx{#1\undefined}
@@ -938,6 +959,55 @@ where index $k$ denotes neighboring nodes at which the evaluation of the gradien
   }\href@noop {} {\bibfield  {journal} {\bibinfo  {journal} {Mathematical
   Programming}\ }\textbf {\bibinfo {volume} {45}},\ \bibinfo {pages} {503}
   (\bibinfo {year} {1989})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Wales}(2002)}]{Wales2002}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {D.~J.}\ \bibnamefont
+  {Wales}},\ }\href {https://doi.org/10.1080/00268970210162691} {\bibfield
+  {journal} {\bibinfo  {journal} {Molecular Physics}\ }\textbf {\bibinfo
+  {volume} {100}},\ \bibinfo {pages} {3285} (\bibinfo {year}
+  {2002})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Passerone}\ and\ \citenamefont
+  {Parrinello}(2001)}]{Passerone2001}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {D.}~\bibnamefont
+  {Passerone}}\ and\ \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
+  {Parrinello}},\ }\href {https://doi.org/10.1103/PhysRevLett.87.108302}
+  {\bibfield  {journal} {\bibinfo  {journal} {Physical Review Letters}\
+  }\textbf {\bibinfo {volume} {87}},\ \bibinfo {pages} {108302} (\bibinfo
+  {year} {2001})}\BibitemShut {NoStop}%
+\bibitem [{\citenamefont {Virot}\ \emph {et~al.}(2017)\citenamefont {Virot},
+  \citenamefont {Kreilos}, \citenamefont {Schneider},\ and\ \citenamefont
+  {Rubinstein}}]{Virot2017}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {E.}~\bibnamefont
+  {Virot}}, \bibinfo {author} {\bibfnamefont {T.}~\bibnamefont {Kreilos}},
+  \bibinfo {author} {\bibfnamefont {T.~M.}\ \bibnamefont {Schneider}},\ and\
+  \bibinfo {author} {\bibfnamefont {S.~M.}\ \bibnamefont {Rubinstein}},\ }\href
+  {https://doi.org/10.1103/PhysRevLett.119.224101} {\bibfield  {journal}
+  {\bibinfo  {journal} {Physical Review Letters}\ }\textbf {\bibinfo {volume}
+  {119}},\ \bibinfo {pages} {224101} (\bibinfo {year} {2017})}\BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Kusumaatmaja}\ \emph {et~al.}(2006)\citenamefont
+  {Kusumaatmaja}, \citenamefont {L{\'{e}}opold{\`{e}}s}, \citenamefont
+  {Dupuis},\ and\ \citenamefont {Yeomans}}]{Kusumaatmaja2006}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {H.}~\bibnamefont
+  {Kusumaatmaja}}, \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
+  {L{\'{e}}opold{\`{e}}s}}, \bibinfo {author} {\bibfnamefont {A.}~\bibnamefont
+  {Dupuis}},\ and\ \bibinfo {author} {\bibfnamefont {J.~M.}\ \bibnamefont
+  {Yeomans}},\ }\href {https://doi.org/10.1209/epl/i2005-10452-0} {\bibfield
+  {journal} {\bibinfo  {journal} {Europhysics Letters}\ }\textbf {\bibinfo
+  {volume} {73}},\ \bibinfo {pages} {740} (\bibinfo {year} {2006})}\BibitemShut
+  {NoStop}%
+\bibitem [{\citenamefont {Brown}\ and\ \citenamefont
+  {Bhushan}(2016)}]{Brown2016}%
+  \BibitemOpen
+  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {P.~S.}\ \bibnamefont
+  {Brown}}\ and\ \bibinfo {author} {\bibfnamefont {B.}~\bibnamefont
+  {Bhushan}},\ }\href {https://doi.org/10.1098/rsta.2016.0135} {\bibfield
+  {journal} {\bibinfo  {journal} {Philosophical Transactions of the Royal
+  Society A}\ }\textbf {\bibinfo {volume} {374}},\ \bibinfo {pages} {20160135}
+  (\bibinfo {year} {2016})}\BibitemShut {NoStop}%
 \bibitem [{\citenamefont {Kirkpatrick}\ \emph {et~al.}(1983)\citenamefont
   {Kirkpatrick}, \citenamefont {Gelatt},\ and\ \citenamefont
   {Vecchi}}]{Kirkpatrick1983}%
