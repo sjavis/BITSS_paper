@@ -1,4 +1,4 @@
-\documentclass[twocolumn,10pt]{revtex4-2}
+\documentclass[twocolumn,10pt]{revtex4}
 
 % Maths
 \usepackage{bm}
@@ -68,12 +68,11 @@ Meanwhile, current methods cannot typically be applied in the case of discontinu
 
 In this work we introduce a new method, the Binary-Image Transition State Search (BITSS), and using a range of different applications, we will demonstrate how BITSS addresses each of the above challenges.
 BITSS is a double-ended method that uses just two states that converge toward a transition state from either side, therefore combining aspects of the two traditional transition state search categories.
-Importantly, unlike other double-ended methods, BITSS does not require any initial interpolation.
+In addition, unlike other double-ended methods, BITSS does not require any initial interpolation.
 
 
 \section{Results and discussion}
-\subsection{BITSS method in a nutshell}
-
+\subsection{BITSS method}
 \begin{figure}[htb]
   \includegraphics{toy2d.pdf}
   \caption{\label{fig:toy2d}
@@ -84,7 +83,7 @@ Importantly, unlike other double-ended methods, BITSS does not require any initi
   }
 \end{figure}
 
-The method begins by first initialising the states, $\bm{x}_1$ and $\bm{x}_2$, in the basins of attraction of different local minima, such as the two blue spots in the 2d example potential in \cref{fig:toy2d}a.
+The method begins by first initialising the states, $\bm{x}_1$ and $\bm{x}_2$, in the basins of attraction of different local minima, such as the two blue spots in the 2d potential in \cref{fig:toy2d}a.
 These can be set to the minima, but this is not a necessary requirement.
 The energies of these two states are then minimised, while constraining their separation.
 This is iteratively reduced to zero, such that, at iteration $i$, their separation is
@@ -92,12 +91,14 @@ This is iteratively reduced to zero, such that, at iteration $i$, their separati
   d_i = (1 - f) d_{i-1}.
 \end{equation}
 With $d_0$ as the separation between the two initial states.
-A reduction factor of $f = 0.5$ is successful for most applications, but this can be made smaller to ensure that the states do not slide off the ridge between the two basin of attraction.
+A reduction factor of $f = 0.5$ is successful for most applications, but this can be made smaller to ensure that the states do not slide off the ridge between the two basins of attraction.
+Different metrics may be used to compute the distance.
+%######
 To further ensure that neither state is pulled over the ridge, a secondary constraint enforces equal energies for the two states.
 Using this strategy, the two states will meet at the lowest point on the ridge - the transition state.
 
 The two constraints are implemented using energy penalty terms, which result in driving forces on the two states if the constraints are not met, such as in \cref{fig:toy2d}b.
-Including these energy penalty terms gives the following total energy for the pair of states,
+Including these energy penalty terms gives the total BITSS energy for the pair of states,
 \begin{multline}\label{eq:bitss}
   E_\text{BITSS}(\bm{x}_1, \bm{x}_2) = E_1 + E_2
     + \kappa_e \left( E_1 - E_2 \right) ^2 \\
@@ -132,10 +133,9 @@ To reduce this effect, the gradients used in \cref{eq:kd} are projected in the d
 In summary, the method involves iteratively performing the following three steps:
 \begin{enumerate}[noitemsep,nolistsep]
   \item Reduce the constrained separation, according to \cref{eq:diteration}.
-  \item Compute the constraint coefficients.
-  \item Minimise the potential of the pair of states, \cref{eq:bitss}, while recomputing the coefficients at regular intervals.
+  \item Minimise the potential of the pair of states, \cref{eq:bitss}.
+  \item Recompute the constraint coefficients, $\kappa_e$ and $\kappa_d$, at regular intervals using \cref{eq:ke,eq:kd}.
 \end{enumerate}
-For details about computing the constraint coefficients see the methods section.
 This process is completed once a suitable convergence criterion is reached.
 This can either be based upon the separation between the states, or the size of gradient at the midpoint between them.
 
@@ -187,12 +187,13 @@ The speed of this convergence is evaluated through comparison with the number of
 
 The results for this test, shown in \cref{fig:speedtest}, demonstrate two main advantages for the BITSS method.
 Firstly, the slope illustrates that the rate of convergence is indeed much greater for the BITSS method.
-It is matched only by the initial rate of the string method using less than ten images, however these soon slow and are relatively inaccurate.
-Secondly, the BITSS method can more accurately approximate the transition state by orders of magnitude, particularly for the wetting example where the string method does not significantly improve upon the initial pathway estimate.
+It is matched only by the initial rates of DNEB and the string method using fewer than ten images, however these soon slow and are relatively inaccurate.
+Secondly, the BITSS method can more accurately approximate the transition state by orders of magnitude, particularly for the wetting example where the other methods do not significantly improve upon the initial pathway estimate.
 Therefore, unlike these other double-ended methods, BITSS does not require a second approach to accurately locate the transition state.
 
 
 \subsection{Adaptive discretisation}
+\label{sec:adaptive}
 \begin{figure}[tb]
   \includegraphics{adaptivemesh.pdf}
   \caption{\label{fig:adaptivemesh}
@@ -277,8 +278,8 @@ A second question is that for landscapes with multiple pathways between states, 
 
 \subsection{BITSS: Changes for undefined gradients}
 A couple of alterations to the method must be made to account for situations where the gradients are unknown.
-First, the gradients in \cref{eq:kd} are ill-defined.
-Instead, $\kappa_d$ can be calculated using just the second term in the equation.
+First, the calculation of $\kappa_d$ in \cref{eq:kd} must be adapted to avoid the use of gradients.
+This can be done by simply removing the first term and just using the second term in the equation.
 Secondly, L-BFGS can no longer be used because it requires knowledge of the gradients.
 We must instead use a minimiser that does not require a differentiable optimisation function, for which we use simulated annealing \cite{Kirkpatrick1983}.
 This has a chance of randomly jumping one state over the dividing barrier, but we can reduce this probability by limiting the initial temparature and maximum random displacement.
@@ -295,9 +296,9 @@ The new position is then given by $\bm{n}_i = \lambda_1 \bm{p}_1 + \lambda_2 \bm
 In the wetting example with different resolutions for the two states, the distance is obtained by first mapping the phase field from the higher resolution grid, $\{\phi_{k,l} | k,l \in \{0,1,\cdots,399\}\}$, to the low resolution grid, $\{\phi'_{i,j} | i,j \in \{0,1,\cdots,199\}\}$.
 Because a square grid is used with a resolution ratio of two, the mapping involves averaging each 2x2 block to a single point:
 \begin{equation}
-  \phi'_{i,j} = \frac{1}{4} \left( \phi_{2i,2j} + \phi_{2i+1,2j} + \phi_{2i,2j+1} + \phi_{2i+1,2j+1} \right)
+  \phi'_{i,j} = \frac{1}{4} \left( \phi_{2i,2j} + \phi_{2i+1,2j} + \phi_{2i,2j+1} + \phi_{2i+1,2j+1} \right).
 \end{equation}
-Then the separation from the other state, $\{\widetilde{\phi}_{i,j}\}$ is computed using the 2-norm,
+Then the separation from the other state, $\{\widetilde{\phi}_{i,j}\}$, is computed using the 2-norm,
 \begin{equation}
   d = \sqrt{\sum_{i,j} \left( \phi'_{i,j} - \widetilde{\phi}_{i,j} \right)^2}.
 \end{equation}
@@ -310,7 +311,8 @@ Finally, the gradient of the distance with respect to each point must be mapped 
 \end{equation}
 where $k \in \{2i, 2i+1\}$, and $l \in \{2j, 2j+1\}$.
 
-\subsection{Particle cluster system}
+\subsection{Energy and gradient expressions for the example systems}
+\subsubsection{Particle cluster system}
 In the particle cluster example system, the Lennard-Jones potential is used for the interaction between each pair of particles.
 Therefore, the potential and its gradient for each pair of particles are
 \begin{gather}
@@ -320,9 +322,10 @@ Therefore, the potential and its gradient for each pair of particles are
 \end{gather}
 where $\bm{x}_1$ and $\bm{x}_2$ are the positions of the two particles, $r$ is their separation, $\epsilon$ is the interaction strength, and $\sigma$ is the particle radius.
 
-\subsection{Cylindrical buckling system}
+\subsubsection{Cylindrical buckling system}
 A 2D triangular mesh is used to model the cylindrical buckling system, with the ends of the cylinder fixed in place to apply an axial compression of 0.14\%.
 The energy of the system is evaluated by treating all bonds in the mesh as an elastic spring to obtain the stretching energy, and all pairs of adjacent triangles to be connected by elastic hinges, providing the bending energy.
+Their expressions are given by
 \begin{equation}
   E = \sum_i k^S_i (r_i - r^0_i)^2 + \sum_j k^B_j [1 + \cos(\theta_j - \theta^0_j)].
 \end{equation}
@@ -336,13 +339,13 @@ The second term provides the bending energy, where $\theta_j$ is the dihedral an
   }
 \end{figure}
 The gradient of the energy can be obtained by individually considering the stretching and bending energies of a single bond and hinge.
-For simplicity we will ignore the index for the bond and hinge.
+For simplicity, we will ignore the index for the bond and hinge.
 Using the variables shown in the schematic in \cref{fig:BAHschematic}, the gradient of the stretching energy of the bond between $\bm{x}_2$ and $\bm{x}_3$ is given by,
 \begin{equation}
   \frac{\partial E^S}{\partial \bm{x}_2} = - \frac{\partial E^S}{\partial \bm{x}_3} = 
     2 k^S (r - r^0) (\bm{x_2} - \bm{x_3}).
 \end{equation}
-The gradients of the bending energy of the hinge are,
+The gradients of the bending energy of the hinge are
 \begin{align}
   \frac{\partial E^B}{\partial \bm{x}_1} &= k^B \sin(\theta - \theta^0) \frac{\bm{\hat{n}}_a}{h_a}, \\
   \frac{\partial E^B}{\partial \bm{x}_2} &= - k^B \sin(\theta - \theta^0) \left[\frac{\bm{\hat{n}}_a}{h_a} + \frac{\bm{\hat{n}}_a + \bm{\hat{n}}_b}{r}\right], \\
@@ -350,8 +353,8 @@ The gradients of the bending energy of the hinge are,
   \frac{\partial E^B}{\partial \bm{x}_4} &= k^B \sin(\theta - \theta^0) \frac{\bm{\hat{n}}_b}{h_b}.
 \end{align}
 
-\subsection{Striped wetting system}
-The  is modelled on a 200x200 2D grid using a phase-field model \cite{Panter2019b}, which has an order parameter, $\phi(\bm{r})$, representing the phase of the liquid ($\phi=-1$ for gas, $\phi=1$ for liquid).
+\subsubsection{Striped wetting system}
+This modelled on a 200x200 2D grid (and 400x400 in \cref{sec:adaptive}) using a phase-field model \cite{Panter2019b}, which has an order parameter, $\phi(\bm{r})$, representing the phase of the liquid ($\phi=-1$ for gas, $\phi=1$ for liquid).
 The energy functional has four separate terms,
 \begin{equation} \label{eq:phasefield}
   E[\phi] = E^B[\phi] + E^I[\phi] + E^S[\phi] + E^V[\phi].
@@ -370,7 +373,7 @@ These four sections of the phase-field model are obtained using the following eq
 \end{align}
 where the index $i$ includes all of the nodes, while $j$ represents the nodes along the solid surface.
 $\upDelta V$ and $\upDelta S$ are, respectively, the volume and solid surface areas contained by each individual node.
-$\epsilon$ is the liquid-gas interface width, $\theta_j$ is the contact-angle with the solid surface, and $V_0$ is the constrained volume of the liquid drop.
+$\epsilon$ is the liquid-gas interface width (set to 2.5 lattice units), $\theta_j$ is the contact-angle with the solid surface, and $V_0$ is the constrained volume of the liquid drop.
 The strength of the volume constraint is parametrised by $k_V$ for which we use a value of $10^4$.
 The gradients of these terms are given by,
 \begin{align}
@@ -385,641 +388,454 @@ where index $k$ denotes neighboring nodes at which the evaluation of the gradien
 
 
 \appendix
-
+\section*{}
 \begin{acknowledgments}
   S.~J.~A. is supported by a studentship from the Engineering and Physical Sciences Research Council [Grant No. EP/R513039/1].
   H.~K. and J.~R.~P. acknowledge funding from the Engineering and Physical Sciences Research Council [Grant No. EP/V034154/1].
 \end{acknowledgments}
 
 %% start bib
-% \bibliographystyle{apsrev4-2}
 % \bibliography{bibexport.bib}
 % % \bibliography{../../library.bib}
+% % \bibliographystyle{apsrev4}
 %% mid bib
-\begin{thebibliography}{50}%
-\makeatletter
-\providecommand \@ifxundefined [1]{%
- \@ifx{#1\undefined}
-}%
-\providecommand \@ifnum [1]{%
- \ifnum #1\expandafter \@firstoftwo
- \else \expandafter \@secondoftwo
- \fi
-}%
-\providecommand \@ifx [1]{%
- \ifx #1\expandafter \@firstoftwo
- \else \expandafter \@secondoftwo
- \fi
-}%
-\providecommand \natexlab [1]{#1}%
-\providecommand \enquote  [1]{``#1''}%
-\providecommand \bibnamefont  [1]{#1}%
-\providecommand \bibfnamefont [1]{#1}%
-\providecommand \citenamefont [1]{#1}%
-\providecommand \href@noop [0]{\@secondoftwo}%
-\providecommand \href [0]{\begingroup \@sanitize@url \@href}%
-\providecommand \@href[1]{\@@startlink{#1}\@@href}%
-\providecommand \@@href[1]{\endgroup#1\@@endlink}%
-\providecommand \@sanitize@url [0]{\catcode `\\12\catcode `\$12\catcode
-  `\&12\catcode `\#12\catcode `\^12\catcode `\_12\catcode `\%12\relax}%
-\providecommand \@@startlink[1]{}%
-\providecommand \@@endlink[0]{}%
-\providecommand \url  [0]{\begingroup\@sanitize@url \@url }%
-\providecommand \@url [1]{\endgroup\@href {#1}{\urlprefix }}%
-\providecommand \urlprefix  [0]{URL }%
-\providecommand \Eprint [0]{\href }%
-\providecommand \doibase [0]{https://doi.org/}%
-\providecommand \selectlanguage [0]{\@gobble}%
-\providecommand \bibinfo  [0]{\@secondoftwo}%
-\providecommand \bibfield  [0]{\@secondoftwo}%
-\providecommand \translation [1]{[#1]}%
-\providecommand \BibitemOpen [0]{}%
-\providecommand \bibitemStop [0]{}%
-\providecommand \bibitemNoStop [0]{.\EOS\space}%
-\providecommand \EOS [0]{\spacefactor3000\relax}%
-\providecommand \BibitemShut  [1]{\csname bibitem#1\endcsname}%
-\let\auto@bib@innerbib\@empty
-\bibitem [{\citenamefont {Bryngelson}\ \emph {et~al.}(1995)\citenamefont
-  {Bryngelson}, \citenamefont {Onuchic}, \citenamefont {Socci},\ and\
-  \citenamefont {Wolynes}}]{Bryngelson1995}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.~D.}\ \bibnamefont
-  {Bryngelson}}, \bibinfo {author} {\bibfnamefont {J.~N.}\ \bibnamefont
-  {Onuchic}}, \bibinfo {author} {\bibfnamefont {N.~D.}\ \bibnamefont {Socci}},\
-  and\ \bibinfo {author} {\bibfnamefont {P.~G.}\ \bibnamefont {Wolynes}},\
-  }\href {https://doi.org/10.1002/prot.340210302} {\bibfield  {journal}
-  {\bibinfo  {journal} {Proteins: Structure, Function, and Bioinformatics}\
-  }\textbf {\bibinfo {volume} {21}},\ \bibinfo {pages} {167} (\bibinfo {year}
-  {1995})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Onuchic}\ \emph {et~al.}(1997)\citenamefont
-  {Onuchic}, \citenamefont {Luthey-Schulten},\ and\ \citenamefont
-  {Wolynes}}]{Onuchic1997}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.~N.}\ \bibnamefont
-  {Onuchic}}, \bibinfo {author} {\bibfnamefont {Z.}~\bibnamefont
-  {Luthey-Schulten}},\ and\ \bibinfo {author} {\bibfnamefont {P.~G.}\
-  \bibnamefont {Wolynes}},\ }\href
-  {https://doi.org/10.1146/annurev.physchem.48.1.545} {\bibfield  {journal}
-  {\bibinfo  {journal} {Annual Review of Physical Chemistry}\ }\textbf
-  {\bibinfo {volume} {48}},\ \bibinfo {pages} {545} (\bibinfo {year}
-  {1997})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Boehr}\ \emph {et~al.}(2006)\citenamefont {Boehr},
-  \citenamefont {McElheny}, \citenamefont {Dyson},\ and\ \citenamefont
-  {Wrightt}}]{Boehr2006}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {D.~D.}\ \bibnamefont
-  {Boehr}}, \bibinfo {author} {\bibfnamefont {D.}~\bibnamefont {McElheny}},
-  \bibinfo {author} {\bibfnamefont {H.~J.}\ \bibnamefont {Dyson}},\ and\
-  \bibinfo {author} {\bibfnamefont {P.~E.}\ \bibnamefont {Wrightt}},\ }\href
-  {https://doi.org/10.1126/science.1130258} {\bibfield  {journal} {\bibinfo
-  {journal} {Science}\ }\textbf {\bibinfo {volume} {313}},\ \bibinfo {pages}
-  {1638} (\bibinfo {year} {2006})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Kerns}\ \emph {et~al.}(2015)\citenamefont {Kerns},
-  \citenamefont {Agafonov}, \citenamefont {Cho}, \citenamefont {Pontiggia},
-  \citenamefont {Otten}, \citenamefont {Pachov}, \citenamefont {Kutter},
-  \citenamefont {Phung}, \citenamefont {Murphy}, \citenamefont {Thai},
-  \citenamefont {Alber}, \citenamefont {Hagan},\ and\ \citenamefont
-  {Kern}}]{Kerns2015}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {S.~J.}\ \bibnamefont
-  {Kerns}}, \bibinfo {author} {\bibfnamefont {R.~V.}\ \bibnamefont {Agafonov}},
-  \bibinfo {author} {\bibfnamefont {Y.~J.}\ \bibnamefont {Cho}}, \bibinfo
-  {author} {\bibfnamefont {F.}~\bibnamefont {Pontiggia}}, \bibinfo {author}
-  {\bibfnamefont {R.}~\bibnamefont {Otten}}, \bibinfo {author} {\bibfnamefont
-  {D.~V.}\ \bibnamefont {Pachov}}, \bibinfo {author} {\bibfnamefont
-  {S.}~\bibnamefont {Kutter}}, \bibinfo {author} {\bibfnamefont {L.~A.}\
-  \bibnamefont {Phung}}, \bibinfo {author} {\bibfnamefont {P.~N.}\ \bibnamefont
-  {Murphy}}, \bibinfo {author} {\bibfnamefont {V.}~\bibnamefont {Thai}},
-  \bibinfo {author} {\bibfnamefont {T.}~\bibnamefont {Alber}}, \bibinfo
-  {author} {\bibfnamefont {M.~F.}\ \bibnamefont {Hagan}},\ and\ \bibinfo
-  {author} {\bibfnamefont {D.}~\bibnamefont {Kern}},\ }\href
-  {https://doi.org/10.1038/nsmb.2941} {\bibfield  {journal} {\bibinfo
-  {journal} {Nature Structural and Molecular Biology}\ }\textbf {\bibinfo
-  {volume} {22}},\ \bibinfo {pages} {124} (\bibinfo {year} {2015})}\BibitemShut
-  {NoStop}%
-\bibitem [{\citenamefont {Guo}\ \emph {et~al.}(2018)\citenamefont {Guo},
-  \citenamefont {Wang}, \citenamefont {Wang}, \citenamefont {Wang},\ and\
-  \citenamefont {Hu}}]{Guo2018a}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {C.}~\bibnamefont
-  {Guo}}, \bibinfo {author} {\bibfnamefont {Z.}~\bibnamefont {Wang}}, \bibinfo
-  {author} {\bibfnamefont {D.}~\bibnamefont {Wang}}, \bibinfo {author}
-  {\bibfnamefont {H.~F.}\ \bibnamefont {Wang}},\ and\ \bibinfo {author}
-  {\bibfnamefont {P.}~\bibnamefont {Hu}},\ }\href
-  {https://doi.org/10.1021/acs.jpcc.8b06782} {\bibfield  {journal} {\bibinfo
-  {journal} {Journal of Physical Chemistry C}\ }\textbf {\bibinfo {volume}
-  {122}},\ \bibinfo {pages} {21478} (\bibinfo {year} {2018})}\BibitemShut
-  {NoStop}%
-\bibitem [{\citenamefont {Richardson}\ \emph {et~al.}(2016)\citenamefont
-  {Richardson}, \citenamefont {P{\'{e}}rez}, \citenamefont {Lobsiger},
-  \citenamefont {Reid}, \citenamefont {Temelso}, \citenamefont {Shields},
-  \citenamefont {Kisiel}, \citenamefont {Wales}, \citenamefont {Pate},\ and\
-  \citenamefont {Althorpe}}]{Richardson2016}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.~O.}\ \bibnamefont
-  {Richardson}}, \bibinfo {author} {\bibfnamefont {C.}~\bibnamefont
-  {P{\'{e}}rez}}, \bibinfo {author} {\bibfnamefont {S.}~\bibnamefont
-  {Lobsiger}}, \bibinfo {author} {\bibfnamefont {A.~A.}\ \bibnamefont {Reid}},
-  \bibinfo {author} {\bibfnamefont {B.}~\bibnamefont {Temelso}}, \bibinfo
-  {author} {\bibfnamefont {G.~C.}\ \bibnamefont {Shields}}, \bibinfo {author}
-  {\bibfnamefont {Z.}~\bibnamefont {Kisiel}}, \bibinfo {author} {\bibfnamefont
-  {D.~J.}\ \bibnamefont {Wales}}, \bibinfo {author} {\bibfnamefont {B.~H.}\
-  \bibnamefont {Pate}},\ and\ \bibinfo {author} {\bibfnamefont {S.~C.}\
-  \bibnamefont {Althorpe}},\ }\href@noop {} {\bibfield  {journal} {\bibinfo
-  {journal} {Science}\ }\textbf {\bibinfo {volume} {351}},\ \bibinfo {pages}
-  {1310} (\bibinfo {year} {2016})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Vaillant}\ \emph {et~al.}(2019)\citenamefont
-  {Vaillant}, \citenamefont {Althorpe},\ and\ \citenamefont
-  {Wales}}]{Vaillant2019}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {C.~L.}\ \bibnamefont
-  {Vaillant}}, \bibinfo {author} {\bibfnamefont {S.~C.}\ \bibnamefont
-  {Althorpe}},\ and\ \bibinfo {author} {\bibfnamefont {D.~J.}\ \bibnamefont
-  {Wales}},\ }\href {https://doi.org/10.1021/acs.jctc.8b00675} {\bibfield
-  {journal} {\bibinfo  {journal} {Journal of Chemical Theory and Computation}\
-  }\textbf {\bibinfo {volume} {15}},\ \bibinfo {pages} {33} (\bibinfo {year}
-  {2019})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Richard}\ and\ \citenamefont
-  {Speck}(2018)}]{Richard2018}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {D.}~\bibnamefont
-  {Richard}}\ and\ \bibinfo {author} {\bibfnamefont {T.}~\bibnamefont
-  {Speck}},\ }\href {https://doi.org/10.1063/1.5016277} {\bibfield  {journal}
-  {\bibinfo  {journal} {The Journal of Chemical Physics}\ }\textbf {\bibinfo
-  {volume} {148}},\ \bibinfo {pages} {124110} (\bibinfo {year}
-  {2018})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Wales}\ \emph {et~al.}(1998)\citenamefont {Wales},
-  \citenamefont {Miller},\ and\ \citenamefont {Walsh}}]{Wales1998}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {D.~J.}\ \bibnamefont
-  {Wales}}, \bibinfo {author} {\bibfnamefont {M.~A.}\ \bibnamefont {Miller}},\
-  and\ \bibinfo {author} {\bibfnamefont {T.~R.}\ \bibnamefont {Walsh}},\ }\href
-  {https://doi.org/10.1038/29487} {\bibfield  {journal} {\bibinfo  {journal}
-  {Nature}\ }\textbf {\bibinfo {volume} {394}},\ \bibinfo {pages} {758}
-  (\bibinfo {year} {1998})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Wales}(2012)}]{Wales2012}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {D.~J.}\ \bibnamefont
-  {Wales}},\ }\href {https://doi.org/10.1098/rsta.2011.0208} {\bibfield
-  {journal} {\bibinfo  {journal} {Philosophical Transactions of the Royal
-  Society A: Mathematical, Physical and Engineering Sciences}\ }\textbf
-  {\bibinfo {volume} {370}},\ \bibinfo {pages} {2877} (\bibinfo {year}
-  {2012})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Panter}\ \emph
-  {et~al.}(2019{\natexlab{a}})\citenamefont {Panter}, \citenamefont {Chen},
-  \citenamefont {Zhang},\ and\ \citenamefont {Kusumaatmaja}}]{Panter2019}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.~R.}\ \bibnamefont
-  {Panter}}, \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont {Chen}},
-  \bibinfo {author} {\bibfnamefont {T.}~\bibnamefont {Zhang}},\ and\ \bibinfo
-  {author} {\bibfnamefont {H.}~\bibnamefont {Kusumaatmaja}},\ }\href
-  {https://doi.org/10.1038/s42005-019-0251-4} {\bibfield  {journal} {\bibinfo
-  {journal} {Communications Physics}\ }\textbf {\bibinfo {volume} {2}},\
-  \bibinfo {pages} {151} (\bibinfo {year} {2019}{\natexlab{a}})}\BibitemShut
-  {NoStop}%
-\bibitem [{\citenamefont {Hutchinson}\ and\ \citenamefont
-  {Thompson}(2018)}]{Hutchinson2018}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.~W.}\ \bibnamefont
-  {Hutchinson}}\ and\ \bibinfo {author} {\bibfnamefont {J.~M.~T.}\ \bibnamefont
-  {Thompson}},\ }\href {https://doi.org/10.1016/j.ijsolstr.2018.01.030}
-  {\bibfield  {journal} {\bibinfo  {journal} {International Journal of Solids
-  and Structures}\ }\textbf {\bibinfo {volume} {148-149}},\ \bibinfo {pages}
-  {157} (\bibinfo {year} {2018})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Zhang}\ and\ \citenamefont {Ren}(2014)}]{Zhang2014}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Y.}~\bibnamefont
-  {Zhang}}\ and\ \bibinfo {author} {\bibfnamefont {W.}~\bibnamefont {Ren}},\
-  }\href {https://doi.org/10.1063/1.4904947} {\bibfield  {journal} {\bibinfo
-  {journal} {The Journal of Chemical Physics}\ }\textbf {\bibinfo {volume}
-  {141}},\ \bibinfo {pages} {244705} (\bibinfo {year} {2014})}\BibitemShut
-  {NoStop}%
-\bibitem [{\citenamefont {Panter}\ \emph
-  {et~al.}(2019{\natexlab{b}})\citenamefont {Panter}, \citenamefont {Gizaw},\
-  and\ \citenamefont {Kusumaatmaja}}]{Panter2019b}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.~R.}\ \bibnamefont
-  {Panter}}, \bibinfo {author} {\bibfnamefont {Y.}~\bibnamefont {Gizaw}},\ and\
-  \bibinfo {author} {\bibfnamefont {H.}~\bibnamefont {Kusumaatmaja}},\ }\href
-  {https://doi.org/10.1126/sciadv.aav7328} {\bibfield  {journal} {\bibinfo
-  {journal} {Science Advances}\ }\textbf {\bibinfo {volume} {5}},\ \bibinfo
-  {pages} {eaav7328} (\bibinfo {year} {2019}{\natexlab{b}})}\BibitemShut
-  {NoStop}%
-\bibitem [{\citenamefont {Amabili}\ \emph {et~al.}(2017)\citenamefont
-  {Amabili}, \citenamefont {Giacomello}, \citenamefont {Meloni},\ and\
-  \citenamefont {Casciola}}]{Amabili2017}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
-  {Amabili}}, \bibinfo {author} {\bibfnamefont {A.}~\bibnamefont {Giacomello}},
-  \bibinfo {author} {\bibfnamefont {S.}~\bibnamefont {Meloni}},\ and\ \bibinfo
-  {author} {\bibfnamefont {C.~M.}\ \bibnamefont {Casciola}},\ }\href
-  {https://doi.org/10.1103/PhysRevFluids.2.034202} {\bibfield  {journal}
-  {\bibinfo  {journal} {Physical Review Fluids}\ }\textbf {\bibinfo {volume}
-  {2}},\ \bibinfo {pages} {034202} (\bibinfo {year} {2017})}\BibitemShut
-  {NoStop}%
-\bibitem [{\citenamefont {Othayoth}\ \emph {et~al.}(2020)\citenamefont
-  {Othayoth}, \citenamefont {Thoms},\ and\ \citenamefont {Li}}]{Othayoth2020}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {R.}~\bibnamefont
-  {Othayoth}}, \bibinfo {author} {\bibfnamefont {G.}~\bibnamefont {Thoms}},\
-  and\ \bibinfo {author} {\bibfnamefont {C.}~\bibnamefont {Li}},\ }\href
-  {https://doi.org/10.1073/pnas.1918297117} {\bibfield  {journal} {\bibinfo
-  {journal} {Proceedings of the National Academy of Sciences}\ }\textbf
-  {\bibinfo {volume} {117}},\ \bibinfo {pages} {14987} (\bibinfo {year}
-  {2020})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Filipov}\ \emph {et~al.}(2015)\citenamefont
-  {Filipov}, \citenamefont {Tachi}, \citenamefont {Paulino},\ and\
-  \citenamefont {Weitz}}]{Filipov2015}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {E.~T.}\ \bibnamefont
-  {Filipov}}, \bibinfo {author} {\bibfnamefont {T.}~\bibnamefont {Tachi}},
-  \bibinfo {author} {\bibfnamefont {G.~H.}\ \bibnamefont {Paulino}},\ and\
-  \bibinfo {author} {\bibfnamefont {D.~A.}\ \bibnamefont {Weitz}},\ }\href
-  {https://doi.org/10.1073/pnas.1509465112} {\bibfield  {journal} {\bibinfo
-  {journal} {Proceedings of the National Academy of Sciences of the United
-  States of America}\ }\textbf {\bibinfo {volume} {112}},\ \bibinfo {pages}
-  {12321} (\bibinfo {year} {2015})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Zhai}\ \emph {et~al.}(2018)\citenamefont {Zhai},
-  \citenamefont {Wang},\ and\ \citenamefont {Jiang}}]{Zhai2018}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Z.}~\bibnamefont
-  {Zhai}}, \bibinfo {author} {\bibfnamefont {Y.}~\bibnamefont {Wang}},\ and\
-  \bibinfo {author} {\bibfnamefont {H.}~\bibnamefont {Jiang}},\ }\href
-  {https://doi.org/10.1073/pnas.1720171115} {\bibfield  {journal} {\bibinfo
-  {journal} {Proceedings of the National Academy of Sciences of the United
-  States of America}\ }\textbf {\bibinfo {volume} {115}},\ \bibinfo {pages}
-  {2032} (\bibinfo {year} {2018})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Bertoldi}\ \emph {et~al.}(2017)\citenamefont
-  {Bertoldi}, \citenamefont {Vitelli}, \citenamefont {Christensen},\ and\
-  \citenamefont {{Van Hecke}}}]{Bertoldi2017}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {K.}~\bibnamefont
-  {Bertoldi}}, \bibinfo {author} {\bibfnamefont {V.}~\bibnamefont {Vitelli}},
-  \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont {Christensen}},\ and\
-  \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont {{Van Hecke}}},\ }\href
-  {https://doi.org/10.1038/natrevmats.2017.66} {\bibfield  {journal} {\bibinfo
-  {journal} {Nature Reviews Materials}\ }\textbf {\bibinfo {volume} {2}},\
-  \bibinfo {pages} {17066} (\bibinfo {year} {2017})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Truby}\ and\ \citenamefont
-  {Lewis}(2016)}]{Truby2016}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {R.~L.}\ \bibnamefont
-  {Truby}}\ and\ \bibinfo {author} {\bibfnamefont {J.~A.}\ \bibnamefont
-  {Lewis}},\ }\href {https://doi.org/10.1038/nature21003} {\bibfield  {journal}
-  {\bibinfo  {journal} {Nature}\ }\textbf {\bibinfo {volume} {540}},\ \bibinfo
-  {pages} {371} (\bibinfo {year} {2016})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Chi}\ \emph {et~al.}(2022)\citenamefont {Chi},
-  \citenamefont {Li}, \citenamefont {Zhao}, \citenamefont {Hong}, \citenamefont
-  {Tang},\ and\ \citenamefont {Yin}}]{Chi2022}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {Y.}~\bibnamefont
-  {Chi}}, \bibinfo {author} {\bibfnamefont {Y.}~\bibnamefont {Li}}, \bibinfo
-  {author} {\bibfnamefont {Y.}~\bibnamefont {Zhao}}, \bibinfo {author}
-  {\bibfnamefont {Y.}~\bibnamefont {Hong}}, \bibinfo {author} {\bibfnamefont
-  {Y.}~\bibnamefont {Tang}},\ and\ \bibinfo {author} {\bibfnamefont
-  {J.}~\bibnamefont {Yin}},\ }\bibfield  {journal} {\bibinfo  {journal}
-  {Advanced Materials}\ }\href {https://doi.org/10.1002/adma.202110384}
-  {10.1002/adma.202110384} (\bibinfo {year} {2022})\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Bonfanti}\ \emph {et~al.}(2020)\citenamefont
-  {Bonfanti}, \citenamefont {Guerra}, \citenamefont {Font-Clos}, \citenamefont
-  {Rayneau-Kirkhope},\ and\ \citenamefont {Zapperi}}]{Bonfanti2020}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {S.}~\bibnamefont
-  {Bonfanti}}, \bibinfo {author} {\bibfnamefont {R.}~\bibnamefont {Guerra}},
-  \bibinfo {author} {\bibfnamefont {F.}~\bibnamefont {Font-Clos}}, \bibinfo
-  {author} {\bibfnamefont {D.}~\bibnamefont {Rayneau-Kirkhope}},\ and\ \bibinfo
-  {author} {\bibfnamefont {S.}~\bibnamefont {Zapperi}},\ }\href
-  {https://doi.org/10.1038/s41467-020-17947-2} {\bibfield  {journal} {\bibinfo
-  {journal} {Nature Communications}\ }\textbf {\bibinfo {volume} {11}},\
-  \bibinfo {pages} {4162} (\bibinfo {year} {2020})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Shan}\ \emph {et~al.}(2015)\citenamefont {Shan},
-  \citenamefont {Kang}, \citenamefont {Raney}, \citenamefont {Wang},
-  \citenamefont {Fang}, \citenamefont {Candido}, \citenamefont {Lewis},\ and\
-  \citenamefont {Bertoldi}}]{Shan2015}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {S.}~\bibnamefont
-  {Shan}}, \bibinfo {author} {\bibfnamefont {S.~H.}\ \bibnamefont {Kang}},
-  \bibinfo {author} {\bibfnamefont {J.~R.}\ \bibnamefont {Raney}}, \bibinfo
-  {author} {\bibfnamefont {P.}~\bibnamefont {Wang}}, \bibinfo {author}
-  {\bibfnamefont {L.}~\bibnamefont {Fang}}, \bibinfo {author} {\bibfnamefont
-  {F.}~\bibnamefont {Candido}}, \bibinfo {author} {\bibfnamefont {J.~A.}\
-  \bibnamefont {Lewis}},\ and\ \bibinfo {author} {\bibfnamefont
-  {K.}~\bibnamefont {Bertoldi}},\ }\href
-  {https://doi.org/10.1002/adma.201501708} {\bibfield  {journal} {\bibinfo
-  {journal} {Advanced Materials}\ }\textbf {\bibinfo {volume} {27}},\ \bibinfo
-  {pages} {4296} (\bibinfo {year} {2015})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Giri}\ and\ \citenamefont {Mailen}(2021)}]{Giri2021}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {T.~R.}\ \bibnamefont
-  {Giri}}\ and\ \bibinfo {author} {\bibfnamefont {R.}~\bibnamefont {Mailen}},\
-  }\href {https://doi.org/10.1016/j.ijmecsci.2021.106541} {\bibfield  {journal}
-  {\bibinfo  {journal} {International Journal of Mechanical Sciences}\ }\textbf
-  {\bibinfo {volume} {204}},\ \bibinfo {pages} {106541} (\bibinfo {year}
-  {2021})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Cerjan}\ and\ \citenamefont
-  {Miller}(1981)}]{Cerjan1981}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {C.~J.}\ \bibnamefont
-  {Cerjan}}\ and\ \bibinfo {author} {\bibfnamefont {W.~H.}\ \bibnamefont
-  {Miller}},\ }\href {https://doi.org/10.1063/1.442352} {\bibfield  {journal}
-  {\bibinfo  {journal} {The Journal of Chemical Physics}\ }\textbf {\bibinfo
-  {volume} {75}},\ \bibinfo {pages} {2800} (\bibinfo {year}
-  {1981})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Heyden}\ \emph {et~al.}(2005)\citenamefont {Heyden},
-  \citenamefont {Bell},\ and\ \citenamefont {Keil}}]{Heyden2005}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {A.}~\bibnamefont
-  {Heyden}}, \bibinfo {author} {\bibfnamefont {A.~T.}\ \bibnamefont {Bell}},\
-  and\ \bibinfo {author} {\bibfnamefont {F.~J.}\ \bibnamefont {Keil}},\ }\href
-  {https://doi.org/10.1063/1.2104507} {\bibfield  {journal} {\bibinfo
-  {journal} {Journal of Chemical Physics}\ }\textbf {\bibinfo {volume} {123}},\
-  \bibinfo {pages} {224101} (\bibinfo {year} {2005})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {K{\"{a}}stner}\ and\ \citenamefont
-  {Sherwood}(2008)}]{Kastner2008}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
-  {K{\"{a}}stner}}\ and\ \bibinfo {author} {\bibfnamefont {P.}~\bibnamefont
-  {Sherwood}},\ }\href {https://doi.org/10.1063/1.2815812} {\bibfield
-  {journal} {\bibinfo  {journal} {Journal of Chemical Physics}\ }\textbf
-  {\bibinfo {volume} {128}},\ \bibinfo {pages} {014106} (\bibinfo {year}
-  {2008})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Zhang}\ \emph {et~al.}(2016)\citenamefont {Zhang},
-  \citenamefont {Du},\ and\ \citenamefont {Zheng}}]{Zhang2016}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {L.}~\bibnamefont
-  {Zhang}}, \bibinfo {author} {\bibfnamefont {Q.}~\bibnamefont {Du}},\ and\
-  \bibinfo {author} {\bibfnamefont {Z.}~\bibnamefont {Zheng}},\ }\href
-  {https://doi.org/10.1137/140972676} {\bibfield  {journal} {\bibinfo
-  {journal} {SIAM Journal on Scientific Computing}\ }\textbf {\bibinfo {volume}
-  {38}},\ \bibinfo {pages} {A528} (\bibinfo {year} {2016})}\BibitemShut
-  {NoStop}%
-\bibitem [{\citenamefont {E}\ \emph {et~al.}(2007)\citenamefont {E},
-  \citenamefont {Ren},\ and\ \citenamefont {Vanden-Eijnden}}]{E2007}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {W.}~\bibnamefont {E}},
-  \bibinfo {author} {\bibfnamefont {W.}~\bibnamefont {Ren}},\ and\ \bibinfo
-  {author} {\bibfnamefont {E.}~\bibnamefont {Vanden-Eijnden}},\ }\href
-  {https://doi.org/10.1063/1.2720838} {\bibfield  {journal} {\bibinfo
-  {journal} {The Journal of Chemical Physics}\ }\textbf {\bibinfo {volume}
-  {126}},\ \bibinfo {pages} {164103} (\bibinfo {year} {2007})}\BibitemShut
-  {NoStop}%
-\bibitem [{\citenamefont {Ren}\ and\ \citenamefont
-  {Vanden-Eijnden}(2013)}]{Ren2013}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {W.}~\bibnamefont
-  {Ren}}\ and\ \bibinfo {author} {\bibfnamefont {E.}~\bibnamefont
-  {Vanden-Eijnden}},\ }\href {https://doi.org/10.1063/1.4798344} {\bibfield
-  {journal} {\bibinfo  {journal} {Journal of Chemical Physics}\ }\textbf
-  {\bibinfo {volume} {138}},\ \bibinfo {pages} {134105} (\bibinfo {year}
-  {2013})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {E}\ \emph {et~al.}(2002)\citenamefont {E},
-  \citenamefont {Ren},\ and\ \citenamefont {Vanden-Eijnden}}]{E2002}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {W.}~\bibnamefont {E}},
-  \bibinfo {author} {\bibfnamefont {W.}~\bibnamefont {Ren}},\ and\ \bibinfo
-  {author} {\bibfnamefont {E.}~\bibnamefont {Vanden-Eijnden}},\ }\href
-  {https://doi.org/10.1103/PhysRevB.66.052301} {\bibfield  {journal} {\bibinfo
-  {journal} {Physical Review B}\ }\textbf {\bibinfo {volume} {66}},\ \bibinfo
-  {pages} {052301} (\bibinfo {year} {2002})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Trygubenko}\ and\ \citenamefont
-  {Wales}(2004)}]{Trygubenko2004}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {S.~A.}\ \bibnamefont
-  {Trygubenko}}\ and\ \bibinfo {author} {\bibfnamefont {D.~J.}\ \bibnamefont
-  {Wales}},\ }\href {https://doi.org/10.1063/1.1636455} {\bibfield  {journal}
-  {\bibinfo  {journal} {Journal of Chemical Physics}\ }\textbf {\bibinfo
-  {volume} {120}},\ \bibinfo {pages} {2082} (\bibinfo {year}
-  {2004})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Wales}\ and\ \citenamefont
-  {Carr}(2012)}]{Wales2012a}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {D.~J.}\ \bibnamefont
-  {Wales}}\ and\ \bibinfo {author} {\bibfnamefont {J.~M.}\ \bibnamefont
-  {Carr}},\ }\href {https://doi.org/10.1021/ct3004832} {\bibfield  {journal}
-  {\bibinfo  {journal} {Journal of Chemical Theory and Computation}\ }\textbf
-  {\bibinfo {volume} {8}},\ \bibinfo {pages} {5020} (\bibinfo {year}
-  {2012})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Trefethen}\ and\ \citenamefont
-  {Thiyagalingam}(2013)}]{Trefethen2013}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {A.~E.}\ \bibnamefont
-  {Trefethen}}\ and\ \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
-  {Thiyagalingam}},\ }\href {https://doi.org/10.1016/j.jocs.2013.01.005}
-  {\bibfield  {journal} {\bibinfo  {journal} {Journal of Computational
-  Science}\ }\textbf {\bibinfo {volume} {4}},\ \bibinfo {pages} {444} (\bibinfo
-  {year} {2013})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Shalf}(2020)}]{Shalf2020}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
-  {Shalf}},\ }\href {https://doi.org/10.1098/rsta.2019.0061} {\bibfield
-  {journal} {\bibinfo  {journal} {Philosophical Transactions Royal Society}\
-  }\textbf {\bibinfo {volume} {378}},\ \bibinfo {pages} {20190061} (\bibinfo
-  {year} {2020})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Alexander}\ \emph {et~al.}(2020)\citenamefont
-  {Alexander}, \citenamefont {Almgren}, \citenamefont {Bell}, \citenamefont
-  {Bhattacharjee}, \citenamefont {Chen}, \citenamefont {Colella}, \citenamefont
-  {Daniel}, \citenamefont {DeSlippe}, \citenamefont {Diachin}, \citenamefont
-  {Draeger}, \citenamefont {Dubey}, \citenamefont {Dunning}, \citenamefont
-  {Evans}, \citenamefont {Foster}, \citenamefont {Francois}, \citenamefont
-  {Germann}, \citenamefont {Gordon}, \citenamefont {Habib}, \citenamefont
-  {Halappanavar}, \citenamefont {Hamilton}, \citenamefont {Hart}, \citenamefont
-  {Huang}, \citenamefont {Hungerford}, \citenamefont {Kasen}, \citenamefont
-  {Kent}, \citenamefont {Kolev}, \citenamefont {Kothe}, \citenamefont
-  {Kronfeld}, \citenamefont {Luo}, \citenamefont {Mackenzie}, \citenamefont
-  {McCallen}, \citenamefont {Messer}, \citenamefont {Mniszewski}, \citenamefont
-  {Oehmen}, \citenamefont {Perazzo}, \citenamefont {Perez}, \citenamefont
-  {Richards}, \citenamefont {Rider}, \citenamefont {Rieben}, \citenamefont
-  {Roche}, \citenamefont {Siegel}, \citenamefont {Sprague}, \citenamefont
-  {Steefel}, \citenamefont {Stevens}, \citenamefont {Syamlal}, \citenamefont
-  {Taylor}, \citenamefont {Turner}, \citenamefont {Vay}, \citenamefont {Voter},
-  \citenamefont {Windus},\ and\ \citenamefont {Yelick}}]{Alexander2020}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {F.}~\bibnamefont
-  {Alexander}}, \bibinfo {author} {\bibfnamefont {A.}~\bibnamefont {Almgren}},
-  \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont {Bell}}, \bibinfo {author}
-  {\bibfnamefont {A.}~\bibnamefont {Bhattacharjee}}, \bibinfo {author}
-  {\bibfnamefont {J.}~\bibnamefont {Chen}}, \bibinfo {author} {\bibfnamefont
-  {P.}~\bibnamefont {Colella}}, \bibinfo {author} {\bibfnamefont
-  {D.}~\bibnamefont {Daniel}}, \bibinfo {author} {\bibfnamefont
-  {J.}~\bibnamefont {DeSlippe}}, \bibinfo {author} {\bibfnamefont
-  {L.}~\bibnamefont {Diachin}}, \bibinfo {author} {\bibfnamefont
-  {E.}~\bibnamefont {Draeger}}, \bibinfo {author} {\bibfnamefont
-  {A.}~\bibnamefont {Dubey}}, \bibinfo {author} {\bibfnamefont
-  {T.}~\bibnamefont {Dunning}}, \bibinfo {author} {\bibfnamefont
-  {T.}~\bibnamefont {Evans}}, \bibinfo {author} {\bibfnamefont
-  {I.}~\bibnamefont {Foster}}, \bibinfo {author} {\bibfnamefont
-  {M.}~\bibnamefont {Francois}}, \bibinfo {author} {\bibfnamefont
-  {T.}~\bibnamefont {Germann}}, \bibinfo {author} {\bibfnamefont
-  {M.}~\bibnamefont {Gordon}}, \bibinfo {author} {\bibfnamefont
-  {S.}~\bibnamefont {Habib}}, \bibinfo {author} {\bibfnamefont
-  {M.}~\bibnamefont {Halappanavar}}, \bibinfo {author} {\bibfnamefont
-  {S.}~\bibnamefont {Hamilton}}, \bibinfo {author} {\bibfnamefont
-  {W.}~\bibnamefont {Hart}}, \bibinfo {author} {\bibfnamefont {Z.}~\bibnamefont
-  {Huang}}, \bibinfo {author} {\bibfnamefont {A.}~\bibnamefont {Hungerford}},
-  \bibinfo {author} {\bibfnamefont {D.}~\bibnamefont {Kasen}}, \bibinfo
-  {author} {\bibfnamefont {P.~R.}\ \bibnamefont {Kent}}, \bibinfo {author}
-  {\bibfnamefont {T.}~\bibnamefont {Kolev}}, \bibinfo {author} {\bibfnamefont
-  {D.~B.}\ \bibnamefont {Kothe}}, \bibinfo {author} {\bibfnamefont
-  {A.}~\bibnamefont {Kronfeld}}, \bibinfo {author} {\bibfnamefont
-  {Y.}~\bibnamefont {Luo}}, \bibinfo {author} {\bibfnamefont {P.}~\bibnamefont
-  {Mackenzie}}, \bibinfo {author} {\bibfnamefont {D.}~\bibnamefont {McCallen}},
-  \bibinfo {author} {\bibfnamefont {B.}~\bibnamefont {Messer}}, \bibinfo
-  {author} {\bibfnamefont {S.}~\bibnamefont {Mniszewski}}, \bibinfo {author}
-  {\bibfnamefont {C.}~\bibnamefont {Oehmen}}, \bibinfo {author} {\bibfnamefont
-  {A.}~\bibnamefont {Perazzo}}, \bibinfo {author} {\bibfnamefont
-  {D.}~\bibnamefont {Perez}}, \bibinfo {author} {\bibfnamefont
-  {D.}~\bibnamefont {Richards}}, \bibinfo {author} {\bibfnamefont {W.~J.}\
-  \bibnamefont {Rider}}, \bibinfo {author} {\bibfnamefont {R.}~\bibnamefont
-  {Rieben}}, \bibinfo {author} {\bibfnamefont {K.}~\bibnamefont {Roche}},
-  \bibinfo {author} {\bibfnamefont {A.}~\bibnamefont {Siegel}}, \bibinfo
-  {author} {\bibfnamefont {M.}~\bibnamefont {Sprague}}, \bibinfo {author}
-  {\bibfnamefont {C.}~\bibnamefont {Steefel}}, \bibinfo {author} {\bibfnamefont
-  {R.}~\bibnamefont {Stevens}}, \bibinfo {author} {\bibfnamefont
-  {M.}~\bibnamefont {Syamlal}}, \bibinfo {author} {\bibfnamefont
-  {M.}~\bibnamefont {Taylor}}, \bibinfo {author} {\bibfnamefont
-  {J.}~\bibnamefont {Turner}}, \bibinfo {author} {\bibfnamefont {J.~L.}\
-  \bibnamefont {Vay}}, \bibinfo {author} {\bibfnamefont {A.~F.}\ \bibnamefont
-  {Voter}}, \bibinfo {author} {\bibfnamefont {T.~L.}\ \bibnamefont {Windus}},\
-  and\ \bibinfo {author} {\bibfnamefont {K.}~\bibnamefont {Yelick}},\ }\href
-  {https://doi.org/10.1098/rsta.2019.0056} {\bibfield  {journal} {\bibinfo
-  {journal} {Philosophical Transactions of the Royal Society A}\ }\textbf
-  {\bibinfo {volume} {378}},\ \bibinfo {pages} {20190056} (\bibinfo {year}
-  {2020})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {McMullen}\ \emph {et~al.}(2018)\citenamefont
-  {McMullen}, \citenamefont {Holmes-Cerfon}, \citenamefont {Sciortino},
-  \citenamefont {Grosberg},\ and\ \citenamefont {Brujic}}]{McMullen2018}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {A.}~\bibnamefont
-  {McMullen}}, \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
-  {Holmes-Cerfon}}, \bibinfo {author} {\bibfnamefont {F.}~\bibnamefont
-  {Sciortino}}, \bibinfo {author} {\bibfnamefont {A.~Y.}\ \bibnamefont
-  {Grosberg}},\ and\ \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
-  {Brujic}},\ }\href {https://doi.org/10.1103/PhysRevLett.121.138002}
-  {\bibfield  {journal} {\bibinfo  {journal} {Physical Review Letters}\
-  }\textbf {\bibinfo {volume} {121}},\ \bibinfo {pages} {138002} (\bibinfo
-  {year} {2018})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Nguemaha}\ and\ \citenamefont
-  {Zhou}(2018)}]{Nguemaha2018}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {V.}~\bibnamefont
-  {Nguemaha}}\ and\ \bibinfo {author} {\bibfnamefont {H.~X.}\ \bibnamefont
-  {Zhou}},\ }\href {https://doi.org/10.1038/s41598-018-25132-1} {\bibfield
-  {journal} {\bibinfo  {journal} {Scientific Reports}\ }\textbf {\bibinfo
-  {volume} {8}},\ \bibinfo {pages} {1} (\bibinfo {year} {2018})}\BibitemShut
-  {NoStop}%
-\bibitem [{\citenamefont {Chen}\ \emph {et~al.}(2018)\citenamefont {Chen},
-  \citenamefont {Zhang},\ and\ \citenamefont {Torquato}}]{Chen2018b}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {D.}~\bibnamefont
-  {Chen}}, \bibinfo {author} {\bibfnamefont {G.}~\bibnamefont {Zhang}},\ and\
-  \bibinfo {author} {\bibfnamefont {S.}~\bibnamefont {Torquato}},\ }\href
-  {https://doi.org/10.1021/acs.jpcb.8b05627} {\bibfield  {journal} {\bibinfo
-  {journal} {Journal of Physical Chemistry B}\ }\textbf {\bibinfo {volume}
-  {122}},\ \bibinfo {pages} {8462} (\bibinfo {year} {2018})}\BibitemShut
-  {NoStop}%
-\bibitem [{\citenamefont {Santra}\ \emph {et~al.}(2018)\citenamefont {Santra},
-  \citenamefont {Singh},\ and\ \citenamefont {Bagchi}}]{Santra2018}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
-  {Santra}}, \bibinfo {author} {\bibfnamefont {R.~S.}\ \bibnamefont {Singh}},\
-  and\ \bibinfo {author} {\bibfnamefont {B.}~\bibnamefont {Bagchi}},\ }\href
-  {https://doi.org/10.1103/PhysRevE.98.032606} {\bibfield  {journal} {\bibinfo
-  {journal} {Physical Review E}\ }\textbf {\bibinfo {volume} {98}},\ \bibinfo
-  {pages} {032606} (\bibinfo {year} {2018})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {M{\"{o}}kk{\"{o}}nen}\ \emph
-  {et~al.}(2016)\citenamefont {M{\"{o}}kk{\"{o}}nen}, \citenamefont
-  {Ala-Nissila},\ and\ \citenamefont {J{\'{o}}nsson}}]{Mokkonen2016}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {H.}~\bibnamefont
-  {M{\"{o}}kk{\"{o}}nen}}, \bibinfo {author} {\bibfnamefont {T.}~\bibnamefont
-  {Ala-Nissila}},\ and\ \bibinfo {author} {\bibfnamefont {H.}~\bibnamefont
-  {J{\'{o}}nsson}},\ }\href {https://doi.org/10.1063/1.4962167} {\bibfield
-  {journal} {\bibinfo  {journal} {The Journal of Chemical Physics}\ }\textbf
-  {\bibinfo {volume} {145}},\ \bibinfo {pages} {094901} (\bibinfo {year}
-  {2016})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Wriggers}(2006)}]{Wriggers2006}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {P.}~\bibnamefont
-  {Wriggers}},\ }\href {https://doi.org/10.1007/978-3-540-32609-0} {\emph
-  {\bibinfo {title} {{Computational Contact Mechanics}}}}\ (\bibinfo
-  {publisher} {Springer Berlin Heidelberg},\ \bibinfo {address} {Berlin,
-  Heidelberg},\ \bibinfo {year} {2006})\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Page}\ and\ \citenamefont {McIver}(1988)}]{Page1988}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
-  {Page}}\ and\ \bibinfo {author} {\bibfnamefont {J.~W.}\ \bibnamefont
-  {McIver}},\ }\href {https://doi.org/10.1063/1.454172} {\bibfield  {journal}
-  {\bibinfo  {journal} {The Journal of Chemical Physics}\ }\textbf {\bibinfo
-  {volume} {88}},\ \bibinfo {pages} {922} (\bibinfo {year} {1988})}\BibitemShut
-  {NoStop}%
-\bibitem [{\citenamefont {Liu}\ and\ \citenamefont {Nocedal}(1989)}]{Liu1989}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {D.~C.}\ \bibnamefont
-  {Liu}}\ and\ \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont {Nocedal}},\
-  }\href@noop {} {\bibfield  {journal} {\bibinfo  {journal} {Mathematical
-  Programming}\ }\textbf {\bibinfo {volume} {45}},\ \bibinfo {pages} {503}
-  (\bibinfo {year} {1989})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Wales}(2002)}]{Wales2002}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {D.~J.}\ \bibnamefont
-  {Wales}},\ }\href {https://doi.org/10.1080/00268970210162691} {\bibfield
-  {journal} {\bibinfo  {journal} {Molecular Physics}\ }\textbf {\bibinfo
-  {volume} {100}},\ \bibinfo {pages} {3285} (\bibinfo {year}
-  {2002})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Passerone}\ and\ \citenamefont
-  {Parrinello}(2001)}]{Passerone2001}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {D.}~\bibnamefont
-  {Passerone}}\ and\ \bibinfo {author} {\bibfnamefont {M.}~\bibnamefont
-  {Parrinello}},\ }\href {https://doi.org/10.1103/PhysRevLett.87.108302}
-  {\bibfield  {journal} {\bibinfo  {journal} {Physical Review Letters}\
-  }\textbf {\bibinfo {volume} {87}},\ \bibinfo {pages} {108302} (\bibinfo
-  {year} {2001})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Virot}\ \emph {et~al.}(2017)\citenamefont {Virot},
-  \citenamefont {Kreilos}, \citenamefont {Schneider},\ and\ \citenamefont
-  {Rubinstein}}]{Virot2017}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {E.}~\bibnamefont
-  {Virot}}, \bibinfo {author} {\bibfnamefont {T.}~\bibnamefont {Kreilos}},
-  \bibinfo {author} {\bibfnamefont {T.~M.}\ \bibnamefont {Schneider}},\ and\
-  \bibinfo {author} {\bibfnamefont {S.~M.}\ \bibnamefont {Rubinstein}},\ }\href
-  {https://doi.org/10.1103/PhysRevLett.119.224101} {\bibfield  {journal}
-  {\bibinfo  {journal} {Physical Review Letters}\ }\textbf {\bibinfo {volume}
-  {119}},\ \bibinfo {pages} {224101} (\bibinfo {year} {2017})}\BibitemShut
-  {NoStop}%
-\bibitem [{\citenamefont {Kusumaatmaja}\ \emph {et~al.}(2006)\citenamefont
-  {Kusumaatmaja}, \citenamefont {L{\'{e}}opold{\`{e}}s}, \citenamefont
-  {Dupuis},\ and\ \citenamefont {Yeomans}}]{Kusumaatmaja2006}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {H.}~\bibnamefont
-  {Kusumaatmaja}}, \bibinfo {author} {\bibfnamefont {J.}~\bibnamefont
-  {L{\'{e}}opold{\`{e}}s}}, \bibinfo {author} {\bibfnamefont {A.}~\bibnamefont
-  {Dupuis}},\ and\ \bibinfo {author} {\bibfnamefont {J.~M.}\ \bibnamefont
-  {Yeomans}},\ }\href {https://doi.org/10.1209/epl/i2005-10452-0} {\bibfield
-  {journal} {\bibinfo  {journal} {Europhysics Letters}\ }\textbf {\bibinfo
-  {volume} {73}},\ \bibinfo {pages} {740} (\bibinfo {year} {2006})}\BibitemShut
-  {NoStop}%
-\bibitem [{\citenamefont {Brown}\ and\ \citenamefont
-  {Bhushan}(2016)}]{Brown2016}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {P.~S.}\ \bibnamefont
-  {Brown}}\ and\ \bibinfo {author} {\bibfnamefont {B.}~\bibnamefont
-  {Bhushan}},\ }\href {https://doi.org/10.1098/rsta.2016.0135} {\bibfield
-  {journal} {\bibinfo  {journal} {Philosophical Transactions of the Royal
-  Society A}\ }\textbf {\bibinfo {volume} {374}},\ \bibinfo {pages} {20160135}
-  (\bibinfo {year} {2016})}\BibitemShut {NoStop}%
-\bibitem [{\citenamefont {Kirkpatrick}\ \emph {et~al.}(1983)\citenamefont
-  {Kirkpatrick}, \citenamefont {Gelatt},\ and\ \citenamefont
-  {Vecchi}}]{Kirkpatrick1983}%
-  \BibitemOpen
-  \bibfield  {author} {\bibinfo {author} {\bibfnamefont {S.}~\bibnamefont
-  {Kirkpatrick}}, \bibinfo {author} {\bibfnamefont {C.~D.}\ \bibnamefont
-  {Gelatt}},\ and\ \bibinfo {author} {\bibfnamefont {M.~P.}\ \bibnamefont
-  {Vecchi}},\ }\href {https://doi.org/10.1126/science.220.4598.671} {\bibfield
-  {journal} {\bibinfo  {journal} {Science}\ }\textbf {\bibinfo {volume}
-  {220}},\ \bibinfo {pages} {671} (\bibinfo {year} {1983})}\BibitemShut
-  {NoStop}%
-\end{thebibliography}%
+\begin{thebibliography}{50}
+\expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
+\expandafter\ifx\csname bibnamefont\endcsname\relax
+  \def\bibnamefont#1{#1}\fi
+\expandafter\ifx\csname bibfnamefont\endcsname\relax
+  \def\bibfnamefont#1{#1}\fi
+\expandafter\ifx\csname citenamefont\endcsname\relax
+  \def\citenamefont#1{#1}\fi
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{\texttt{#1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+\providecommand{\bibinfo}[2]{#2}
+\providecommand{\eprint}[2][]{\url{#2}}
+
+\bibitem[{\citenamefont{Bryngelson et~al.}(1995)\citenamefont{Bryngelson,
+  Onuchic, Socci, and Wolynes}}]{Bryngelson1995}
+\bibinfo{author}{\bibfnamefont{J.~D.} \bibnamefont{Bryngelson}},
+  \bibinfo{author}{\bibfnamefont{J.~N.} \bibnamefont{Onuchic}},
+  \bibinfo{author}{\bibfnamefont{N.~D.} \bibnamefont{Socci}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{P.~G.} \bibnamefont{Wolynes}},
+  \bibinfo{journal}{Proteins: Structure, Function, and Bioinformatics}
+  \textbf{\bibinfo{volume}{21}}, \bibinfo{pages}{167} (\bibinfo{year}{1995}).
+
+\bibitem[{\citenamefont{Onuchic et~al.}(1997)\citenamefont{Onuchic,
+  Luthey-Schulten, and Wolynes}}]{Onuchic1997}
+\bibinfo{author}{\bibfnamefont{J.~N.} \bibnamefont{Onuchic}},
+  \bibinfo{author}{\bibfnamefont{Z.}~\bibnamefont{Luthey-Schulten}},
+  \bibnamefont{and} \bibinfo{author}{\bibfnamefont{P.~G.}
+  \bibnamefont{Wolynes}}, \bibinfo{journal}{Annual Review of Physical
+  Chemistry} \textbf{\bibinfo{volume}{48}}, \bibinfo{pages}{545}
+  (\bibinfo{year}{1997}).
+
+\bibitem[{\citenamefont{Boehr et~al.}(2006)\citenamefont{Boehr, McElheny,
+  Dyson, and Wrightt}}]{Boehr2006}
+\bibinfo{author}{\bibfnamefont{D.~D.} \bibnamefont{Boehr}},
+  \bibinfo{author}{\bibfnamefont{D.}~\bibnamefont{McElheny}},
+  \bibinfo{author}{\bibfnamefont{H.~J.} \bibnamefont{Dyson}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{P.~E.} \bibnamefont{Wrightt}},
+  \bibinfo{journal}{Science} \textbf{\bibinfo{volume}{313}},
+  \bibinfo{pages}{1638} (\bibinfo{year}{2006}).
+
+\bibitem[{\citenamefont{Kerns et~al.}(2015)\citenamefont{Kerns, Agafonov, Cho,
+  Pontiggia, Otten, Pachov, Kutter, Phung, Murphy, Thai et~al.}}]{Kerns2015}
+\bibinfo{author}{\bibfnamefont{S.~J.} \bibnamefont{Kerns}},
+  \bibinfo{author}{\bibfnamefont{R.~V.} \bibnamefont{Agafonov}},
+  \bibinfo{author}{\bibfnamefont{Y.~J.} \bibnamefont{Cho}},
+  \bibinfo{author}{\bibfnamefont{F.}~\bibnamefont{Pontiggia}},
+  \bibinfo{author}{\bibfnamefont{R.}~\bibnamefont{Otten}},
+  \bibinfo{author}{\bibfnamefont{D.~V.} \bibnamefont{Pachov}},
+  \bibinfo{author}{\bibfnamefont{S.}~\bibnamefont{Kutter}},
+  \bibinfo{author}{\bibfnamefont{L.~A.} \bibnamefont{Phung}},
+  \bibinfo{author}{\bibfnamefont{P.~N.} \bibnamefont{Murphy}},
+  \bibinfo{author}{\bibfnamefont{V.}~\bibnamefont{Thai}}, \bibnamefont{et~al.},
+  \bibinfo{journal}{Nature Structural and Molecular Biology}
+  \textbf{\bibinfo{volume}{22}}, \bibinfo{pages}{124} (\bibinfo{year}{2015}).
+
+\bibitem[{\citenamefont{Guo et~al.}(2018)\citenamefont{Guo, Wang, Wang, Wang,
+  and Hu}}]{Guo2018a}
+\bibinfo{author}{\bibfnamefont{C.}~\bibnamefont{Guo}},
+  \bibinfo{author}{\bibfnamefont{Z.}~\bibnamefont{Wang}},
+  \bibinfo{author}{\bibfnamefont{D.}~\bibnamefont{Wang}},
+  \bibinfo{author}{\bibfnamefont{H.~F.} \bibnamefont{Wang}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{P.}~\bibnamefont{Hu}},
+  \bibinfo{journal}{Journal of Physical Chemistry C}
+  \textbf{\bibinfo{volume}{122}}, \bibinfo{pages}{21478}
+  (\bibinfo{year}{2018}).
+
+\bibitem[{\citenamefont{Richardson et~al.}(2016)\citenamefont{Richardson,
+  P{\'{e}}rez, Lobsiger, Reid, Temelso, Shields, Kisiel, Wales, Pate, and
+  Althorpe}}]{Richardson2016}
+\bibinfo{author}{\bibfnamefont{J.~O.} \bibnamefont{Richardson}},
+  \bibinfo{author}{\bibfnamefont{C.}~\bibnamefont{P{\'{e}}rez}},
+  \bibinfo{author}{\bibfnamefont{S.}~\bibnamefont{Lobsiger}},
+  \bibinfo{author}{\bibfnamefont{A.~A.} \bibnamefont{Reid}},
+  \bibinfo{author}{\bibfnamefont{B.}~\bibnamefont{Temelso}},
+  \bibinfo{author}{\bibfnamefont{G.~C.} \bibnamefont{Shields}},
+  \bibinfo{author}{\bibfnamefont{Z.}~\bibnamefont{Kisiel}},
+  \bibinfo{author}{\bibfnamefont{D.~J.} \bibnamefont{Wales}},
+  \bibinfo{author}{\bibfnamefont{B.~H.} \bibnamefont{Pate}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{S.~C.} \bibnamefont{Althorpe}},
+  \bibinfo{journal}{Science} \textbf{\bibinfo{volume}{351}},
+  \bibinfo{pages}{1310} (\bibinfo{year}{2016}).
+
+\bibitem[{\citenamefont{Vaillant et~al.}(2019)\citenamefont{Vaillant, Althorpe,
+  and Wales}}]{Vaillant2019}
+\bibinfo{author}{\bibfnamefont{C.~L.} \bibnamefont{Vaillant}},
+  \bibinfo{author}{\bibfnamefont{S.~C.} \bibnamefont{Althorpe}},
+  \bibnamefont{and} \bibinfo{author}{\bibfnamefont{D.~J.} \bibnamefont{Wales}},
+  \bibinfo{journal}{Journal of Chemical Theory and Computation}
+  \textbf{\bibinfo{volume}{15}}, \bibinfo{pages}{33} (\bibinfo{year}{2019}).
+
+\bibitem[{\citenamefont{Richard and Speck}(2018)}]{Richard2018}
+\bibinfo{author}{\bibfnamefont{D.}~\bibnamefont{Richard}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{T.}~\bibnamefont{Speck}},
+  \bibinfo{journal}{The Journal of Chemical Physics}
+  \textbf{\bibinfo{volume}{148}}, \bibinfo{pages}{124110}
+  (\bibinfo{year}{2018}).
+
+\bibitem[{\citenamefont{Wales et~al.}(1998)\citenamefont{Wales, Miller, and
+  Walsh}}]{Wales1998}
+\bibinfo{author}{\bibfnamefont{D.~J.} \bibnamefont{Wales}},
+  \bibinfo{author}{\bibfnamefont{M.~A.} \bibnamefont{Miller}},
+  \bibnamefont{and} \bibinfo{author}{\bibfnamefont{T.~R.} \bibnamefont{Walsh}},
+  \bibinfo{journal}{Nature} \textbf{\bibinfo{volume}{394}},
+  \bibinfo{pages}{758} (\bibinfo{year}{1998}).
+
+\bibitem[{\citenamefont{Wales}(2012)}]{Wales2012}
+\bibinfo{author}{\bibfnamefont{D.~J.} \bibnamefont{Wales}},
+  \bibinfo{journal}{Philosophical Transactions of the Royal Society A:
+  Mathematical, Physical and Engineering Sciences}
+  \textbf{\bibinfo{volume}{370}}, \bibinfo{pages}{2877} (\bibinfo{year}{2012}).
+
+\bibitem[{\citenamefont{Panter et~al.}(2019{\natexlab{a}})\citenamefont{Panter,
+  Chen, Zhang, and Kusumaatmaja}}]{Panter2019}
+\bibinfo{author}{\bibfnamefont{J.~R.} \bibnamefont{Panter}},
+  \bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Chen}},
+  \bibinfo{author}{\bibfnamefont{T.}~\bibnamefont{Zhang}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{H.}~\bibnamefont{Kusumaatmaja}},
+  \bibinfo{journal}{Communications Physics} \textbf{\bibinfo{volume}{2}},
+  \bibinfo{pages}{151} (\bibinfo{year}{2019}{\natexlab{a}}).
+
+\bibitem[{\citenamefont{Hutchinson and Thompson}(2018)}]{Hutchinson2018}
+\bibinfo{author}{\bibfnamefont{J.~W.} \bibnamefont{Hutchinson}}
+  \bibnamefont{and} \bibinfo{author}{\bibfnamefont{J.~M.~T.}
+  \bibnamefont{Thompson}}, \bibinfo{journal}{International Journal of Solids
+  and Structures} \textbf{\bibinfo{volume}{148-149}}, \bibinfo{pages}{157}
+  (\bibinfo{year}{2018}).
+
+\bibitem[{\citenamefont{Zhang and Ren}(2014)}]{Zhang2014}
+\bibinfo{author}{\bibfnamefont{Y.}~\bibnamefont{Zhang}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{W.}~\bibnamefont{Ren}}, \bibinfo{journal}{The
+  Journal of Chemical Physics} \textbf{\bibinfo{volume}{141}},
+  \bibinfo{pages}{244705} (\bibinfo{year}{2014}).
+
+\bibitem[{\citenamefont{Panter et~al.}(2019{\natexlab{b}})\citenamefont{Panter,
+  Gizaw, and Kusumaatmaja}}]{Panter2019b}
+\bibinfo{author}{\bibfnamefont{J.~R.} \bibnamefont{Panter}},
+  \bibinfo{author}{\bibfnamefont{Y.}~\bibnamefont{Gizaw}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{H.}~\bibnamefont{Kusumaatmaja}},
+  \bibinfo{journal}{Science Advances} \textbf{\bibinfo{volume}{5}},
+  \bibinfo{pages}{eaav7328} (\bibinfo{year}{2019}{\natexlab{b}}).
+
+\bibitem[{\citenamefont{Amabili et~al.}(2017)\citenamefont{Amabili, Giacomello,
+  Meloni, and Casciola}}]{Amabili2017}
+\bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Amabili}},
+  \bibinfo{author}{\bibfnamefont{A.}~\bibnamefont{Giacomello}},
+  \bibinfo{author}{\bibfnamefont{S.}~\bibnamefont{Meloni}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{C.~M.} \bibnamefont{Casciola}},
+  \bibinfo{journal}{Physical Review Fluids} \textbf{\bibinfo{volume}{2}},
+  \bibinfo{pages}{034202} (\bibinfo{year}{2017}).
+
+\bibitem[{\citenamefont{Othayoth et~al.}(2020)\citenamefont{Othayoth, Thoms,
+  and Li}}]{Othayoth2020}
+\bibinfo{author}{\bibfnamefont{R.}~\bibnamefont{Othayoth}},
+  \bibinfo{author}{\bibfnamefont{G.}~\bibnamefont{Thoms}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{C.}~\bibnamefont{Li}},
+  \bibinfo{journal}{Proceedings of the National Academy of Sciences}
+  \textbf{\bibinfo{volume}{117}}, \bibinfo{pages}{14987}
+  (\bibinfo{year}{2020}).
+
+\bibitem[{\citenamefont{Filipov et~al.}(2015)\citenamefont{Filipov, Tachi,
+  Paulino, and Weitz}}]{Filipov2015}
+\bibinfo{author}{\bibfnamefont{E.~T.} \bibnamefont{Filipov}},
+  \bibinfo{author}{\bibfnamefont{T.}~\bibnamefont{Tachi}},
+  \bibinfo{author}{\bibfnamefont{G.~H.} \bibnamefont{Paulino}},
+  \bibnamefont{and} \bibinfo{author}{\bibfnamefont{D.~A.} \bibnamefont{Weitz}},
+  \bibinfo{journal}{Proceedings of the National Academy of Sciences of the
+  United States of America} \textbf{\bibinfo{volume}{112}},
+  \bibinfo{pages}{12321} (\bibinfo{year}{2015}).
+
+\bibitem[{\citenamefont{Zhai et~al.}(2018)\citenamefont{Zhai, Wang, and
+  Jiang}}]{Zhai2018}
+\bibinfo{author}{\bibfnamefont{Z.}~\bibnamefont{Zhai}},
+  \bibinfo{author}{\bibfnamefont{Y.}~\bibnamefont{Wang}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{H.}~\bibnamefont{Jiang}},
+  \bibinfo{journal}{Proceedings of the National Academy of Sciences of the
+  United States of America} \textbf{\bibinfo{volume}{115}},
+  \bibinfo{pages}{2032} (\bibinfo{year}{2018}).
+
+\bibitem[{\citenamefont{Bertoldi et~al.}(2017)\citenamefont{Bertoldi, Vitelli,
+  Christensen, and {Van Hecke}}}]{Bertoldi2017}
+\bibinfo{author}{\bibfnamefont{K.}~\bibnamefont{Bertoldi}},
+  \bibinfo{author}{\bibfnamefont{V.}~\bibnamefont{Vitelli}},
+  \bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Christensen}},
+  \bibnamefont{and} \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{{Van
+  Hecke}}}, \bibinfo{journal}{Nature Reviews Materials}
+  \textbf{\bibinfo{volume}{2}}, \bibinfo{pages}{17066} (\bibinfo{year}{2017}).
+
+\bibitem[{\citenamefont{Truby and Lewis}(2016)}]{Truby2016}
+\bibinfo{author}{\bibfnamefont{R.~L.} \bibnamefont{Truby}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{J.~A.} \bibnamefont{Lewis}},
+  \bibinfo{journal}{Nature} \textbf{\bibinfo{volume}{540}},
+  \bibinfo{pages}{371} (\bibinfo{year}{2016}).
+
+\bibitem[{\citenamefont{Chi et~al.}(2022)\citenamefont{Chi, Li, Zhao, Hong,
+  Tang, and Yin}}]{Chi2022}
+\bibinfo{author}{\bibfnamefont{Y.}~\bibnamefont{Chi}},
+  \bibinfo{author}{\bibfnamefont{Y.}~\bibnamefont{Li}},
+  \bibinfo{author}{\bibfnamefont{Y.}~\bibnamefont{Zhao}},
+  \bibinfo{author}{\bibfnamefont{Y.}~\bibnamefont{Hong}},
+  \bibinfo{author}{\bibfnamefont{Y.}~\bibnamefont{Tang}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Yin}},
+  \bibinfo{journal}{Advanced Materials}  (\bibinfo{year}{2022}).
+
+\bibitem[{\citenamefont{Bonfanti et~al.}(2020)\citenamefont{Bonfanti, Guerra,
+  Font-Clos, Rayneau-Kirkhope, and Zapperi}}]{Bonfanti2020}
+\bibinfo{author}{\bibfnamefont{S.}~\bibnamefont{Bonfanti}},
+  \bibinfo{author}{\bibfnamefont{R.}~\bibnamefont{Guerra}},
+  \bibinfo{author}{\bibfnamefont{F.}~\bibnamefont{Font-Clos}},
+  \bibinfo{author}{\bibfnamefont{D.}~\bibnamefont{Rayneau-Kirkhope}},
+  \bibnamefont{and} \bibinfo{author}{\bibfnamefont{S.}~\bibnamefont{Zapperi}},
+  \bibinfo{journal}{Nature Communications} \textbf{\bibinfo{volume}{11}},
+  \bibinfo{pages}{4162} (\bibinfo{year}{2020}).
+
+\bibitem[{\citenamefont{Shan et~al.}(2015)\citenamefont{Shan, Kang, Raney,
+  Wang, Fang, Candido, Lewis, and Bertoldi}}]{Shan2015}
+\bibinfo{author}{\bibfnamefont{S.}~\bibnamefont{Shan}},
+  \bibinfo{author}{\bibfnamefont{S.~H.} \bibnamefont{Kang}},
+  \bibinfo{author}{\bibfnamefont{J.~R.} \bibnamefont{Raney}},
+  \bibinfo{author}{\bibfnamefont{P.}~\bibnamefont{Wang}},
+  \bibinfo{author}{\bibfnamefont{L.}~\bibnamefont{Fang}},
+  \bibinfo{author}{\bibfnamefont{F.}~\bibnamefont{Candido}},
+  \bibinfo{author}{\bibfnamefont{J.~A.} \bibnamefont{Lewis}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{K.}~\bibnamefont{Bertoldi}},
+  \bibinfo{journal}{Advanced Materials} \textbf{\bibinfo{volume}{27}},
+  \bibinfo{pages}{4296} (\bibinfo{year}{2015}).
+
+\bibitem[{\citenamefont{Giri and Mailen}(2021)}]{Giri2021}
+\bibinfo{author}{\bibfnamefont{T.~R.} \bibnamefont{Giri}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{R.}~\bibnamefont{Mailen}},
+  \bibinfo{journal}{International Journal of Mechanical Sciences}
+  \textbf{\bibinfo{volume}{204}}, \bibinfo{pages}{106541}
+  (\bibinfo{year}{2021}).
+
+\bibitem[{\citenamefont{Cerjan and Miller}(1981)}]{Cerjan1981}
+\bibinfo{author}{\bibfnamefont{C.~J.} \bibnamefont{Cerjan}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{W.~H.} \bibnamefont{Miller}},
+  \bibinfo{journal}{The Journal of Chemical Physics}
+  \textbf{\bibinfo{volume}{75}}, \bibinfo{pages}{2800} (\bibinfo{year}{1981}).
+
+\bibitem[{\citenamefont{Heyden et~al.}(2005)\citenamefont{Heyden, Bell, and
+  Keil}}]{Heyden2005}
+\bibinfo{author}{\bibfnamefont{A.}~\bibnamefont{Heyden}},
+  \bibinfo{author}{\bibfnamefont{A.~T.} \bibnamefont{Bell}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{F.~J.} \bibnamefont{Keil}},
+  \bibinfo{journal}{Journal of Chemical Physics}
+  \textbf{\bibinfo{volume}{123}}, \bibinfo{pages}{224101}
+  (\bibinfo{year}{2005}).
+
+\bibitem[{\citenamefont{K{\"{a}}stner and Sherwood}(2008)}]{Kastner2008}
+\bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{K{\"{a}}stner}}
+  \bibnamefont{and} \bibinfo{author}{\bibfnamefont{P.}~\bibnamefont{Sherwood}},
+  \bibinfo{journal}{Journal of Chemical Physics}
+  \textbf{\bibinfo{volume}{128}}, \bibinfo{pages}{014106}
+  (\bibinfo{year}{2008}).
+
+\bibitem[{\citenamefont{Zhang et~al.}(2016)\citenamefont{Zhang, Du, and
+  Zheng}}]{Zhang2016}
+\bibinfo{author}{\bibfnamefont{L.}~\bibnamefont{Zhang}},
+  \bibinfo{author}{\bibfnamefont{Q.}~\bibnamefont{Du}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{Z.}~\bibnamefont{Zheng}},
+  \bibinfo{journal}{SIAM Journal on Scientific Computing}
+  \textbf{\bibinfo{volume}{38}}, \bibinfo{pages}{A528} (\bibinfo{year}{2016}).
+
+\bibitem[{\citenamefont{E et~al.}(2007)\citenamefont{E, Ren, and
+  Vanden-Eijnden}}]{E2007}
+\bibinfo{author}{\bibfnamefont{W.}~\bibnamefont{E}},
+  \bibinfo{author}{\bibfnamefont{W.}~\bibnamefont{Ren}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{E.}~\bibnamefont{Vanden-Eijnden}},
+  \bibinfo{journal}{The Journal of Chemical Physics}
+  \textbf{\bibinfo{volume}{126}}, \bibinfo{pages}{164103}
+  (\bibinfo{year}{2007}).
+
+\bibitem[{\citenamefont{Ren and Vanden-Eijnden}(2013)}]{Ren2013}
+\bibinfo{author}{\bibfnamefont{W.}~\bibnamefont{Ren}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{E.}~\bibnamefont{Vanden-Eijnden}},
+  \bibinfo{journal}{Journal of Chemical Physics}
+  \textbf{\bibinfo{volume}{138}}, \bibinfo{pages}{134105}
+  (\bibinfo{year}{2013}).
+
+\bibitem[{\citenamefont{E et~al.}(2002)\citenamefont{E, Ren, and
+  Vanden-Eijnden}}]{E2002}
+\bibinfo{author}{\bibfnamefont{W.}~\bibnamefont{E}},
+  \bibinfo{author}{\bibfnamefont{W.}~\bibnamefont{Ren}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{E.}~\bibnamefont{Vanden-Eijnden}},
+  \bibinfo{journal}{Physical Review B} \textbf{\bibinfo{volume}{66}},
+  \bibinfo{pages}{052301} (\bibinfo{year}{2002}).
+
+\bibitem[{\citenamefont{Trygubenko and Wales}(2004)}]{Trygubenko2004}
+\bibinfo{author}{\bibfnamefont{S.~A.} \bibnamefont{Trygubenko}}
+  \bibnamefont{and} \bibinfo{author}{\bibfnamefont{D.~J.} \bibnamefont{Wales}},
+  \bibinfo{journal}{Journal of Chemical Physics}
+  \textbf{\bibinfo{volume}{120}}, \bibinfo{pages}{2082} (\bibinfo{year}{2004}).
+
+\bibitem[{\citenamefont{Wales and Carr}(2012)}]{Wales2012a}
+\bibinfo{author}{\bibfnamefont{D.~J.} \bibnamefont{Wales}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{J.~M.} \bibnamefont{Carr}},
+  \bibinfo{journal}{Journal of Chemical Theory and Computation}
+  \textbf{\bibinfo{volume}{8}}, \bibinfo{pages}{5020} (\bibinfo{year}{2012}).
+
+\bibitem[{\citenamefont{Trefethen and Thiyagalingam}(2013)}]{Trefethen2013}
+\bibinfo{author}{\bibfnamefont{A.~E.} \bibnamefont{Trefethen}}
+  \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Thiyagalingam}},
+  \bibinfo{journal}{Journal of Computational Science}
+  \textbf{\bibinfo{volume}{4}}, \bibinfo{pages}{444} (\bibinfo{year}{2013}).
+
+\bibitem[{\citenamefont{Shalf}(2020)}]{Shalf2020}
+\bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Shalf}},
+  \bibinfo{journal}{Philosophical Transactions Royal Society}
+  \textbf{\bibinfo{volume}{378}}, \bibinfo{pages}{20190061}
+  (\bibinfo{year}{2020}).
+
+\bibitem[{\citenamefont{Alexander et~al.}(2020)\citenamefont{Alexander,
+  Almgren, Bell, Bhattacharjee, Chen, Colella, Daniel, DeSlippe, Diachin,
+  Draeger et~al.}}]{Alexander2020}
+\bibinfo{author}{\bibfnamefont{F.}~\bibnamefont{Alexander}},
+  \bibinfo{author}{\bibfnamefont{A.}~\bibnamefont{Almgren}},
+  \bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Bell}},
+  \bibinfo{author}{\bibfnamefont{A.}~\bibnamefont{Bhattacharjee}},
+  \bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Chen}},
+  \bibinfo{author}{\bibfnamefont{P.}~\bibnamefont{Colella}},
+  \bibinfo{author}{\bibfnamefont{D.}~\bibnamefont{Daniel}},
+  \bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{DeSlippe}},
+  \bibinfo{author}{\bibfnamefont{L.}~\bibnamefont{Diachin}},
+  \bibinfo{author}{\bibfnamefont{E.}~\bibnamefont{Draeger}},
+  \bibnamefont{et~al.}, \bibinfo{journal}{Philosophical Transactions of the
+  Royal Society A} \textbf{\bibinfo{volume}{378}}, \bibinfo{pages}{20190056}
+  (\bibinfo{year}{2020}).
+
+\bibitem[{\citenamefont{McMullen et~al.}(2018)\citenamefont{McMullen,
+  Holmes-Cerfon, Sciortino, Grosberg, and Brujic}}]{McMullen2018}
+\bibinfo{author}{\bibfnamefont{A.}~\bibnamefont{McMullen}},
+  \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Holmes-Cerfon}},
+  \bibinfo{author}{\bibfnamefont{F.}~\bibnamefont{Sciortino}},
+  \bibinfo{author}{\bibfnamefont{A.~Y.} \bibnamefont{Grosberg}},
+  \bibnamefont{and} \bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Brujic}},
+  \bibinfo{journal}{Physical Review Letters} \textbf{\bibinfo{volume}{121}},
+  \bibinfo{pages}{138002} (\bibinfo{year}{2018}).
+
+\bibitem[{\citenamefont{Nguemaha and Zhou}(2018)}]{Nguemaha2018}
+\bibinfo{author}{\bibfnamefont{V.}~\bibnamefont{Nguemaha}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{H.~X.} \bibnamefont{Zhou}},
+  \bibinfo{journal}{Scientific Reports} \textbf{\bibinfo{volume}{8}},
+  \bibinfo{pages}{1} (\bibinfo{year}{2018}).
+
+\bibitem[{\citenamefont{Chen et~al.}(2018)\citenamefont{Chen, Zhang, and
+  Torquato}}]{Chen2018b}
+\bibinfo{author}{\bibfnamefont{D.}~\bibnamefont{Chen}},
+  \bibinfo{author}{\bibfnamefont{G.}~\bibnamefont{Zhang}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{S.}~\bibnamefont{Torquato}},
+  \bibinfo{journal}{Journal of Physical Chemistry B}
+  \textbf{\bibinfo{volume}{122}}, \bibinfo{pages}{8462} (\bibinfo{year}{2018}).
+
+\bibitem[{\citenamefont{Santra et~al.}(2018)\citenamefont{Santra, Singh, and
+  Bagchi}}]{Santra2018}
+\bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Santra}},
+  \bibinfo{author}{\bibfnamefont{R.~S.} \bibnamefont{Singh}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{B.}~\bibnamefont{Bagchi}},
+  \bibinfo{journal}{Physical Review E} \textbf{\bibinfo{volume}{98}},
+  \bibinfo{pages}{032606} (\bibinfo{year}{2018}).
+
+\bibitem[{\citenamefont{M{\"{o}}kk{\"{o}}nen
+  et~al.}(2016)\citenamefont{M{\"{o}}kk{\"{o}}nen, Ala-Nissila, and
+  J{\'{o}}nsson}}]{Mokkonen2016}
+\bibinfo{author}{\bibfnamefont{H.}~\bibnamefont{M{\"{o}}kk{\"{o}}nen}},
+  \bibinfo{author}{\bibfnamefont{T.}~\bibnamefont{Ala-Nissila}},
+  \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{H.}~\bibnamefont{J{\'{o}}nsson}},
+  \bibinfo{journal}{The Journal of Chemical Physics}
+  \textbf{\bibinfo{volume}{145}}, \bibinfo{pages}{094901}
+  (\bibinfo{year}{2016}).
+
+\bibitem[{\citenamefont{Wriggers}(2006)}]{Wriggers2006}
+\bibinfo{author}{\bibfnamefont{P.}~\bibnamefont{Wriggers}},
+  \emph{\bibinfo{title}{{Computational Contact Mechanics}}}
+  (\bibinfo{publisher}{Springer Berlin Heidelberg}, \bibinfo{address}{Berlin,
+  Heidelberg}, \bibinfo{year}{2006}).
+
+\bibitem[{\citenamefont{Page and McIver}(1988)}]{Page1988}
+\bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Page}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{J.~W.} \bibnamefont{McIver}},
+  \bibinfo{journal}{The Journal of Chemical Physics}
+  \textbf{\bibinfo{volume}{88}}, \bibinfo{pages}{922} (\bibinfo{year}{1988}).
+
+\bibitem[{\citenamefont{Liu and Nocedal}(1989)}]{Liu1989}
+\bibinfo{author}{\bibfnamefont{D.~C.} \bibnamefont{Liu}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{Nocedal}},
+  \bibinfo{journal}{Mathematical Programming} \textbf{\bibinfo{volume}{45}},
+  \bibinfo{pages}{503} (\bibinfo{year}{1989}).
+
+\bibitem[{\citenamefont{Wales}(2002)}]{Wales2002}
+\bibinfo{author}{\bibfnamefont{D.~J.} \bibnamefont{Wales}},
+  \bibinfo{journal}{Molecular Physics} \textbf{\bibinfo{volume}{100}},
+  \bibinfo{pages}{3285} (\bibinfo{year}{2002}).
+
+\bibitem[{\citenamefont{Passerone and Parrinello}(2001)}]{Passerone2001}
+\bibinfo{author}{\bibfnamefont{D.}~\bibnamefont{Passerone}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{M.}~\bibnamefont{Parrinello}},
+  \bibinfo{journal}{Physical Review Letters} \textbf{\bibinfo{volume}{87}},
+  \bibinfo{pages}{108302} (\bibinfo{year}{2001}).
+
+\bibitem[{\citenamefont{Virot et~al.}(2017)\citenamefont{Virot, Kreilos,
+  Schneider, and Rubinstein}}]{Virot2017}
+\bibinfo{author}{\bibfnamefont{E.}~\bibnamefont{Virot}},
+  \bibinfo{author}{\bibfnamefont{T.}~\bibnamefont{Kreilos}},
+  \bibinfo{author}{\bibfnamefont{T.~M.} \bibnamefont{Schneider}},
+  \bibnamefont{and} \bibinfo{author}{\bibfnamefont{S.~M.}
+  \bibnamefont{Rubinstein}}, \bibinfo{journal}{Physical Review Letters}
+  \textbf{\bibinfo{volume}{119}}, \bibinfo{pages}{224101}
+  (\bibinfo{year}{2017}).
+
+\bibitem[{\citenamefont{Kusumaatmaja et~al.}(2006)\citenamefont{Kusumaatmaja,
+  L{\'{e}}opold{\`{e}}s, Dupuis, and Yeomans}}]{Kusumaatmaja2006}
+\bibinfo{author}{\bibfnamefont{H.}~\bibnamefont{Kusumaatmaja}},
+  \bibinfo{author}{\bibfnamefont{J.}~\bibnamefont{L{\'{e}}opold{\`{e}}s}},
+  \bibinfo{author}{\bibfnamefont{A.}~\bibnamefont{Dupuis}}, \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{J.~M.} \bibnamefont{Yeomans}},
+  \bibinfo{journal}{Europhysics Letters} \textbf{\bibinfo{volume}{73}},
+  \bibinfo{pages}{740} (\bibinfo{year}{2006}).
+
+\bibitem[{\citenamefont{Brown and Bhushan}(2016)}]{Brown2016}
+\bibinfo{author}{\bibfnamefont{P.~S.} \bibnamefont{Brown}} \bibnamefont{and}
+  \bibinfo{author}{\bibfnamefont{B.}~\bibnamefont{Bhushan}},
+  \bibinfo{journal}{Philosophical Transactions of the Royal Society A}
+  \textbf{\bibinfo{volume}{374}}, \bibinfo{pages}{20160135}
+  (\bibinfo{year}{2016}).
+
+\bibitem[{\citenamefont{Kirkpatrick et~al.}(1983)\citenamefont{Kirkpatrick,
+  Gelatt, and Vecchi}}]{Kirkpatrick1983}
+\bibinfo{author}{\bibfnamefont{S.}~\bibnamefont{Kirkpatrick}},
+  \bibinfo{author}{\bibfnamefont{C.~D.} \bibnamefont{Gelatt}},
+  \bibnamefont{and} \bibinfo{author}{\bibfnamefont{M.~P.}
+  \bibnamefont{Vecchi}}, \bibinfo{journal}{Science}
+  \textbf{\bibinfo{volume}{220}}, \bibinfo{pages}{671} (\bibinfo{year}{1983}).
+
+\end{thebibliography}
 %% end bib
 
 \end{document}
