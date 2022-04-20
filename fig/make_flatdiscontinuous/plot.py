@@ -304,7 +304,7 @@ def main():
     fig = lt.figure(1, h)
     plot_flat(fig, [h2/h, h1/h])
     plot_discontinuous(fig, [0, h2/h])
-    lt.savefig('../flatdiscontinuous.pdf', dpi=500)
+    lt.savefig('../flatdiscontinuous.pdf')
 
 
 if (__name__ == '__main__'):

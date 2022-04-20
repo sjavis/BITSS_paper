@@ -1,12 +1,26 @@
 #!/usr/bin/env python3
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
 import pyutils.latexify as lt
 
-lt.update_width('r4-single')
+lt.dpi = 500
+lt.update_width('natcomm-single')
+
+# Font size
 plt.rc('font', size=9)
 plt.rc('axes', labelsize=9)
 
+# Helvetica font
+mpl.rcParams['font.family'] = 'sans-serif'
+mpl.rcParams['font.sans-serif'] = ['Helvetica']
+mpl.rcParams['text.latex.preamble'] = "\n".join([mpl.rcParams['text.latex.preamble'],
+                                                 r"\usepackage{helvet}",
+                                                 r"\usepackage{sansmath}",
+                                                 r"\sansmath"])
+
+# Colours
+plt.rc('font', size=9)
 c1 = 'tab:orange'
 c2 = 'tab:red'
 c3 = 'tab:blue'

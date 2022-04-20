@@ -61,7 +61,7 @@ fig = plt.figure(frameon=False, figsize=(xlim[1]-xlim[0], ylim[1]-ylim[0]))
 ax = fig.add_axes([0,0,1,1])
 plt.contourf(x, y, e, cmap=cmap, levels=10)
 ax.axis('off')
-plt.savefig(f'potential.png', dpi=500)
+plt.savefig(f'potential.png')
 
 
 ### Read data
@@ -189,4 +189,4 @@ axc.text(0.78, 0.4, r'$\bm{\hat\tau}$', transform=axc.transAxes)#.set_path_effec
 #plt.quiver(bits[i,:,0], bits[i,:,1], gd[:,0], gd[:,1], **arrow_args)
 
 # plt.show()
-lt.savefig('../toy2d.pdf', dpi=400)
+lt.savefig('../toy2d.pdf')

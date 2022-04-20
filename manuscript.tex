@@ -73,8 +73,8 @@ In addition, unlike other double-ended methods, BITSS does not require any initi
 
 \section{Results and discussion}
 \subsection{BITSS method}
-\begin{figure}[htb]
-  \includegraphics{toy2d.pdf}
+\begin{figure}[tb]
+  \includegraphics[width=\linewidth]{toy2d.pdf}
   \caption{\label{fig:toy2d}
     (a) The trajectories of the two states under the BITSS method (orange line) for a simple 2D potential with two minima (blue dots).
         The transition state is shown by a red dot, and the minimum energy pathway by the dashed line.
@@ -156,7 +156,7 @@ However, if all of transition states or the full pathway are desired, BITSS can 
 
 \subsection{Speed Comparison}
 \begin{figure*}[tb]
-  \includegraphics{speedtest.pdf}
+  \includegraphics[width=\linewidth]{speedtest.pdf}
   \caption{\label{fig:speedtest}
     Comparisons between BITSS, DNEB, and the string method in the convergence to the transition state as a function of the number of calculations of the energy gradient.
     Three test systems are used: (a) a Lennard-Jones seven-particle cluster, (b) cylindrical shell buckling, and (c) wetting of a chemically-striped surface.
@@ -195,10 +195,9 @@ Secondly, the BITSS method can more accurately approximate the transition state 
 Therefore, unlike these other double-ended methods, BITSS does not require a second approach to accurately locate the transition state.
 
 
-\subsection{Adaptive discretisation}
-\label{sec:adaptive}
+\subsection{Adaptive discretisation}\label{sec:adaptive}
 \begin{figure}[tb]
-  \includegraphics{adaptivemesh.pdf}
+  \includegraphics[width=\linewidth]{adaptivemesh.pdf}
   \caption{\label{fig:adaptivemesh}
     (a) Snapshots of the BITSS method applied to the buckling of a cylinder with a changing mesh.
         The radial displacement relative the unbuckled cylinder is shown, as well as the underlying triangular mesh.
@@ -227,7 +226,7 @@ The precision of this convergence is now limited by the transition state energy 
 
 \subsection{Complex landscapes}
 \begin{figure}[tb]
-  \includegraphics{flatdiscontinuous.pdf}
+  \includegraphics[width=\linewidth]{flatdiscontinuous.pdf}
   \caption{\label{fig:flatdiscontinuous}
     (a) Energy profile of the BITSS pathway on a 2D potential with flat regions.
         Blue and red dots denote the minima and transition state, respectively.
@@ -248,7 +247,6 @@ We see BITSS is able to successfully converge past these flat regions, even with
 In these regions there are no driving forces due to the potential and the energy constraint, which use purely local information about the gradient.
 However, the distance constraint continues to pull the states together, preventing them from getting stuck.
 When only a single state has a zero-gradient mode then the other is likely to slide down the potential slightly (iii), but the two states still remain either side of the dividing ridge and so the result is unaffected.
-
 
 Finally, we investigate the application of BITSS to systems with undefined gradients, such as when the landscape is discontinuous.
 To account for this, the equations for the coefficients must be adapted to not depend upon the gradients, and a gradient-free minimiser (simulated annealing) is used.

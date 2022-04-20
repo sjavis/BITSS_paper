@@ -270,7 +270,7 @@ def main():
     plot_cb(fig, h2/h, h)
     plot_sw(fig, h2/h, h)
 
-    lt.savefig('../adaptivemesh.pdf', dpi=500)
+    lt.savefig('../adaptivemesh.pdf')
 
 
 if (__name__ == "__main__"):
