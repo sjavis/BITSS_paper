@@ -88,9 +88,9 @@ These can be set to the minima, but this is not a necessary requirement.
 The energies of these two states are then minimised, while constraining their separation.
 This is iteratively reduced to zero, such that, at iteration $i$, their separation is
 \begin{equation}\label{eq:diteration}
-  d_i = (1 - f) d_{i-1}.
+  d_i = (1 - f) d_{i-1},
 \end{equation}
-With $d_0$ as the separation between the two initial states.
+with $d_0$ taking the value of the separation between the two initial states.
 A reduction factor of $f = 0.5$ is successful for most applications, but this can be made smaller to ensure that the states do not slide off the ridge between the two basins of attraction.
 Different metrics may be used to compute this distance, although in this work we simply use the Euclidean distance,
 \begin{equation}
@@ -106,14 +106,15 @@ Including these energy penalty terms gives the total BITSS energy for the pair o
     + \kappa_e \left( E_1 - E_2 \right) ^2 \\
     + \kappa_d \left( \mathrm{d}(\bm{x}_1, \bm{x}_2) - d_i \right) ^2,
 \end{multline}
-where $E_1$ and $E_2$ are the single state energies, and $\kappa_e$ and $\kappa_d$ parametrise the strengths of the energy and distance constraints.
+where $E_1$ and $E_2$ are the single-state energies, and $\kappa_e$ and $\kappa_d$ parametrise the strengths of the energy and distance constraints.
 
 In this work the L-BFGS algorithm is chosen to minimise this energy, owing to its fast convergence and low memory requirement for large numbers of degrees of freedom \cite{Liu1989}.
 However, any other minimisation method can be used instead.
 
 To ensure that the transition state is located successfully, the constraint strengths $\kappa_d$ and $\kappa_e$ are updated as the algorithm proceeds using information from the system.
-They are initially calculated at the start of each minimisation, and regularly recalculated throughout (once per 100 iterations is used in this work).
-They are set using the following equations such that each term in the gradient of \cref{eq:bitss} is of a similar size,
+These are set such that the driving forces due to the constraints and single-state energies are of similar size.
+This prevents the constraints from washing out the underlying potential or causing large jumps that make a state pass over the dividing ridge.
+This results in the following equations (see the supplementary information for the derivation),
 \begin{gather}
   \kappa_e = \frac {\alpha} {2 E_B},
   \label{eq:ke}
@@ -123,8 +124,9 @@ They are set using the following equations such that each term in the gradient o
     \frac{E_B}{\beta d_i^2} \right),
   \label{eq:kd}
 \end{gather}
-where $\grad E_1$ and $\grad E_2$ are the gradients of the energies of the two states, and $\alpha$ and $\beta$ are parameters with recommended values of $\alpha = 10$ and $\beta = 0.1$ (see supplementary information).
+where $\grad E_1$ and $\grad E_2$ are the gradients of the energies of the two states, and $\alpha$ and $\beta$ are parameters with recommended values of $\alpha = 10$ and $\beta = 0.1$.
 Here, $E_B$ is an estimation for the current energy barrier; evaluated using the difference between the highest energy along a linear interpolation between the two states and the average energy of the two states.
+These constraints are initially calculated at the start of each minimisation, and regularly recalculated throughout (once per 100 iterations is used in this work).
 
 In practice, when numerically minimising, the states will jump about slightly which can result in large gradients perpendicular to the optimal movement direction.
 To reduce this effect, the gradients used in \cref{eq:kd} are projected in the direction of the separation between the two states:
@@ -141,17 +143,32 @@ In summary, the method involves iteratively performing the following three steps
 This process is completed once a suitable convergence criterion is reached.
 This can either be based upon the separation between the states, or the size of gradient at the midpoint between them.
 
-Using this approach, the typical trajectories of the states are demonstrated for a simple 2D potential in \cref{fig:toy2d}a.
+Using the BITSS approach, the typical trajectories of the states are demonstrated for a simple 2D potential in \cref{fig:toy2d}a.
 Initially, the lower energy state jumps up to satisfy the equal energy constraint and then moves to minimise the separation without increasing its energy.
 Then, the two states converge directly towards one another, before being deflected towards the saddle in the ridge.
 Consequently, if there are multiple possible pathways between two states, BITSS will be biased towards identifying those that are more direct or with lower energy.
 Furthermore, the final two states are positioned either side of the transition state in the direction of the negative curvature eigenvector, $\bm{\hat{\tau}}$ (\cref{fig:toy2d}c).
 So, BITSS automatically identifies the `reactive mode' and associated eigenvalue in addition to the transition state.
+Once the transition state has been identified, it is possible to find the full minimum energy pathway by tracing the trajectory of downhill minimisations from the two final states, which are either side of the saddle.
 
-Once BITSS has identified the transition state, it is possible to find the full minimum energy pathway by tracing the trajectory of downhill minimisations from the two final states, either side of the transition state.
-In the case where there are intermediaries, resulting in a chain of multiple transition states between the two minima, BITSS will identify the transition state with the highest energy in the chain.
+In the event that there are intermediate stable states, then there will be a chain of multiple transition states between the two minima.
+In this case, the equal-energy constraint does not restrict the states from passing over the lower energy transition states, and BITSS will converge to the transition state with the highest energy.
 This enables the identification of the overall energy barrier, providing estimates about the overall ease of the transition, or the rate for chemical processes.
 However, if all of transition states or the full pathway are desired, BITSS can be continually repeated from one of the minima downhill from the located transition state and one of the initial minima until the initial minima are piecewise connected by a full pathway.
+
+The BITSS potential in \cref{eq:bitss} and iterative steps above offer key advantages over existing bracketing methods that also use two states to locate the transition state.
+Two such methods are the Step and Slide method \cite{Miron2001} and the saddle method \cite{Dewar1984}.
+In the the Step and Slide method, the separation between two images is minimised while their energy is fixed (iteratively increasing the energy up to the transition state).
+Conversely in the saddle method, the energy of an image is minimised while the image separation is fixed (iteratively decreasing the separation and changing the frozen image up to the transition state).
+However, both of these methods fail if the energy of either image ever exceeds the transition state, as demonstrated in the SI.
+The BITSS method is more reliable, as principally the image pair can both approach the transition state from below, and descend down a ridge from above.
+
+Other bracketing methods experience a range of issues that we will show the BITSS method also overcomes.
+For instance, in the ridge method \cite{Ionova1993}, the two images are initially chosen to bracket the largest energy point on an interpolated path between the two endpoints.
+However, this is not guaranteed to be on the ridge containing the transition state, and specialist methods are required to avoid high-energy local maxima, or when the initial path contains multiple candidate maxima.
+In another example, the Double Ended Surface Walking method \cite{Zhang2013} requires Gaussian bias potentials to be added at each iteration to force two dimers to climb uphill in the landscape.
+For high numbers of degrees of freedom and many iterations this becomes computationally expensive.
+Furthermore, landscapes where the gradient is undefined or discontinuous cannot be explored.
 
 
 \subsection{Speed Comparison}
@@ -165,7 +182,8 @@ However, if all of transition states or the full pathway are desired, BITSS can 
   }
 \end{figure*}
 
-As a result of the BITSS method using only two states, it has the potential to be significantly faster than chain-of-states approaches which typically use tens of states.
+Although reliable, chain-of-states approaches typically use tens of states.
+As a result of the BITSS method using only two states, it has the potential to be significantly faster.
 This is tested here by measuring the speed of convergence to the transition state for BITSS in comparison with the string method and DNEB for three diverse systems, exhibiting a broad range of energy landscapes.
 Details of each are presented in the methods section.
 
@@ -781,6 +799,40 @@ where index $k$ denotes neighboring nodes at which the evaluation of the gradien
 \newblock \emph{\bibinfo{journal}{Mathematical Programming}}
   \textbf{\bibinfo{volume}{45}}, \bibinfo{pages}{503--528}
   (\bibinfo{year}{1989}).
+
+\bibitem{Miron2001}
+\bibinfo{author}{Miron, R.~A.} \& \bibinfo{author}{Fichthorn, K.~A.}
+\newblock \bibinfo{title}{{The Step and Slide method for finding saddle points
+  on multidimensional potential surfaces}}.
+\newblock \emph{\bibinfo{journal}{The Journal of Chemical Physics}}
+  \textbf{\bibinfo{volume}{115}}, \bibinfo{pages}{8742--8747}
+  (\bibinfo{year}{2001}).
+
+\bibitem{Dewar1984}
+\bibinfo{author}{Dewar, M. J.~S.}, \bibinfo{author}{Healy, E.~F.} \&
+  \bibinfo{author}{Stewart, J. J.~P.}
+\newblock \bibinfo{title}{{Location of transition states in reaction
+  mechanisms}}.
+\newblock \emph{\bibinfo{journal}{Journal of the Chemical Society, Faraday
+  Transactions 2}} \textbf{\bibinfo{volume}{80}}, \bibinfo{pages}{227}
+  (\bibinfo{year}{1984}).
+
+\bibitem{Ionova1993}
+\bibinfo{author}{Ionova, I.~V.} \& \bibinfo{author}{Carter, E.~A.}
+\newblock \bibinfo{title}{{Ridge method for finding saddle points on potential
+  energy surfaces}}.
+\newblock \emph{\bibinfo{journal}{The Journal of Chemical Physics}}
+  \textbf{\bibinfo{volume}{98}}, \bibinfo{pages}{6377--6386}
+  (\bibinfo{year}{1993}).
+
+\bibitem{Zhang2013}
+\bibinfo{author}{Zhang, X.-J.}, \bibinfo{author}{Shang, C.} \&
+  \bibinfo{author}{Liu, Z.-P.}
+\newblock \bibinfo{title}{{Double-Ended Surface Walking Method for Pathway
+  Building and Transition State Location of Complex Reactions}}.
+\newblock \emph{\bibinfo{journal}{Journal of Chemical Theory and Computation}}
+  \textbf{\bibinfo{volume}{9}}, \bibinfo{pages}{5745--5753}
+  (\bibinfo{year}{2013}).
 
 \bibitem{Wales2002}
 \bibinfo{author}{Wales, D.~J.}
