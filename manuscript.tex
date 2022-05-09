@@ -10,6 +10,7 @@
 % Text
 \usepackage{siunitx}
 \usepackage{enumitem}
+\usepackage{xcolor}
 
 % Figures
 \usepackage{graphicx}
@@ -113,7 +114,7 @@ However, any other minimisation method can be used instead.
 
 To ensure that the transition state is located successfully, the constraint strengths $\kappa_d$ and $\kappa_e$ are updated as the algorithm proceeds using information from the system.
 These are set such that the driving forces due to the constraints and single-state energies are of similar size.
-This prevents the constraints from washing out the underlying potential or causing large jumps that make a state pass over the dividing ridge.
+This prevents the constraints from washing out the underlying potential or causing large jumps that make a state pass over the ridge.
 This results in the following equations (see the supplementary information for the derivation),
 \begin{gather}
   \kappa_e = \frac {\alpha} {2 E_B},
@@ -151,8 +152,8 @@ Furthermore, the final two states are positioned either side of the transition s
 So, BITSS automatically identifies the `reactive mode' and associated eigenvalue in addition to the transition state.
 Once the transition state has been identified, it is possible to find the full minimum energy pathway by tracing the trajectory of downhill minimisations from the two final states, which are either side of the saddle.
 
-In the event that there are intermediate stable states, then there will be a chain of multiple transition states between the two minima.
-In this case, the equal-energy constraint does not restrict the states from passing over the lower energy transition states, and BITSS will converge to the transition state with the highest energy.
+In the event that there are intermediate stable states, there will be a chain of multiple transition states between the two minima.
+In this case, the equal-energy constraint will not prevent the states from passing over the lower energy transition states, so BITSS will converge to the transition state with the highest energy.
 This enables the identification of the overall energy barrier, providing estimates about the overall ease of the transition, or the rate for chemical processes.
 However, if all of transition states or the full pathway are desired, BITSS can be continually repeated from one of the minima downhill from the located transition state and one of the initial minima until the initial minima are piecewise connected by a full pathway.
 
@@ -278,24 +279,28 @@ Despite this gradient-free method being feasible, it is worth noting that a grad
 
 \section{Conclusion}
 Overall, we have developed the binary image transition state search (BITSS) algorithm for the efficient location of transition states in traditionally challenging landscapes.
+The demonstrated speed and memory-efficiency will be key as we move towards simulating systems with increasingly large numbers of degrees of freedom, such as in large biomolecules \cite{Lee2018}, or with increasingly fine resolution, such as in finite element domains \cite{Kolev2021}.
 This has distinct advantages for complex pathways owing to the lack of a required initial pathway estimate, as well as the identification of the transition state that provides the overall energy barrier in multi-step pathways.
 Furthermore, the demonstrated speed and memory-efficiency will be key as we move towards simulating systems with increasingly large numbers of degrees of freedom, such as in large biomolecules, or with increasingly fine resolution, such as in finite element domains.
 
 A second source of efficiency in the BITSS method comes from the ability to adaptively change the degrees of freedom as the algorithm proceeds.
 We demonstrated how transition states could be found by both increasing the resolution upon convergence, and coupling systems with different discretisations.
-The ease of coupling two copies of a system and adaptive remeshing, now leads to the possibility of incorporating BITSS into existing optimisation methods, such as surface evolver \cite{Brakke1992} or finite element analysis software, to provide important energy barrier functionality. 
+The ease of coupling two copies of a system and adaptive remeshing, now leads to the possibility of incorporating BITSS into existing optimisation methods, such as surface evolver \cite{Brakke1992} or finite element methods \cite{Kolev2021}, to provide important energy barrier functionality.
 
 Finally, we showed how BITSS can be used to survey discontinuous energy landscapes, demonstrated for a system of attractive hard-core particles.
 This opens up possibilities for studying a broad range of systems previously out of reach of conventional landscape methods, but where transition information is valuable.
-These include systems with very short range interactions or contact forces, such as in colloidal clusters, wrinkling and folding of elastic materials, or locomotion and environmental interaction in robotics.
+These include systems with very short range interactions, such as in colloidal clusters, or hard contact forces, such as in the folding of elastic materials, or locomotion and environmental interaction in robotics.
 
-During the comparison with other methods, we have not considered hybrid methods, which involve switching to a single-ended method when close to the transition state, for greater accuracy and efficiency.
-While BITSS does not need to use such a hybrid method to accurately find the transition state, it could be utilised to further increase the efficiency of the algorithm.
-Therefore, future work is to look into how best to implement this and see how it compares against other hybrid methods.
+Throughout, we have demonstrated BITSS as a standalone method for the precise location of transition states.
+However, hybrid methods may also be employed to further increase speed and efficiency.
+Either BITSS could be used to approximately locate the transition state followed by a single ended method for refinement, or BITSS can be used as a refinement method, complimentary to existing chain of states implementations.
+This is scope for possible future work, and could be compared against other existing hybrid methods.
 
 The distance metric between the two BITSS images also proves interesting to analyse further.
 One question that emerges is whether transition states can be located by coupling two images through a small number of collective properties, rather than the total distance between all degrees of freedom in the system.
-A second question is that for landscapes with multiple pathways between states, how can the distance metric be biased to access transition states different from the most direct one?
+A second question concerns landscapes with multiple competing pathways between states.
+BITSS has advantages in these situations due to the lack of a required initial pathway estimate, as well as the identification of the transition state that provides the overall energy barrier in multi-step pathways.
+However, it would be also useful to access transition states different from the most direct one, which may be possible using a biased distance metric.
 Overall, these will enable BITSS to access even more challenging landscapes, and those not yet amenable to traditional landscape exploration techniques.
 
 
@@ -379,7 +384,7 @@ The gradient of the energy can be obtained by individually considering the stret
 For simplicity, we will ignore the index for the bond and hinge.
 Using the variables shown in the schematic in \cref{fig:BAHschematic}, the gradient of the stretching energy of the bond between $\bm{x}_2$ and $\bm{x}_3$ is given by,
 \begin{equation}
-  \frac{\partial E^S}{\partial \bm{x}_2} = - \frac{\partial E^S}{\partial \bm{x}_3} = 
+  \frac{\partial E^S}{\partial \bm{x}_2} = - \frac{\partial E^S}{\partial \bm{x}_3} =
     2 k^S (r - r^0) (\bm{x_2} - \bm{x_3}).
 \end{equation}
 The gradients of the bending energy of the hinge are
@@ -873,6 +878,22 @@ where index $k$ denotes neighboring nodes at which the evaluation of the gradien
 \newblock \emph{\bibinfo{journal}{Philosophical Transactions of the Royal
   Society A}} \textbf{\bibinfo{volume}{374}}, \bibinfo{pages}{20160135}
   (\bibinfo{year}{2016}).
+
+\bibitem{Lee2018}
+\bibinfo{author}{Lee, C.~T.} \& \bibinfo{author}{Amaro, R.~E.}
+\newblock \bibinfo{title}{{Exascale Computing: A New Dawn for Computational
+  Biology}}.
+\newblock \emph{\bibinfo{journal}{Computing in Science {\&} Engineering}}
+  \textbf{\bibinfo{volume}{20}}, \bibinfo{pages}{18--25}
+  (\bibinfo{year}{2018}).
+
+\bibitem{Kolev2021}
+\bibinfo{author}{Kolev, T.} \emph{et~al.}
+\newblock \bibinfo{title}{{Efficient exascale discretizations: High-order
+  finite element methods}}.
+\newblock \emph{\bibinfo{journal}{The International Journal of High Performance
+  Computing Applications}} \textbf{\bibinfo{volume}{35}},
+  \bibinfo{pages}{527--552} (\bibinfo{year}{2021}).
 
 \bibitem{Brakke1992}
 \bibinfo{author}{Brakke, K.~A.}
