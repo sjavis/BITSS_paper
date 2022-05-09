@@ -1,6 +1,6 @@
 #!/bin/bash
 
-py_figs=('toy2d' 'speedtest' 'adaptivemesh' 'flatdiscontinuous')
+py_figs=('toy2d' 'bracketing' 'speedtest' 'adaptivemesh' 'flatdiscontinuous')
 tex_figs=('BAHschematic')
 
 for fig in ${py_figs[@]}; do

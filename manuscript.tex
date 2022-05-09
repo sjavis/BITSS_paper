@@ -157,6 +157,14 @@ In this case, the equal-energy constraint will not prevent the states from passi
 This enables the identification of the overall energy barrier, providing estimates about the overall ease of the transition, or the rate for chemical processes.
 However, if all of transition states or the full pathway are desired, BITSS can be continually repeated from one of the minima downhill from the located transition state and one of the initial minima until the initial minima are piecewise connected by a full pathway.
 
+\subsection{Other bracketing methods}
+\begin{figure}[htb]
+  \includegraphics[width=\linewidth]{bracketing.pdf}
+  \caption{\label{fig:bracketing}
+    Trajectories of the bracketing methods on a hooked potential with a single saddle point.
+    The minimum energy pathway is shown by the dashed line.
+  }
+\end{figure}
 The BITSS potential in \cref{eq:bitss} and iterative steps above offer key advantages over existing bracketing methods that also use two states to locate the transition state.
 Two such methods are the Step and Slide method \cite{Miron2001} and the saddle method \cite{Dewar1984}.
 In the the Step and Slide method, the separation between two images is minimised while their energy is fixed (iteratively increasing the energy up to the transition state).
