@@ -97,7 +97,7 @@ def plot_cb(fig, y0, htot):
         # Arrow
         ax4.set_aspect('equal')
         ax4.arrow(0, 0, 1, 0, width=0.015, color='k')
-        fig.text(xax1+1.5*w2+wspace2,  y0+0.4*hspace4/htot, 'BITSS trajectory', ha='center', va='bottom')
+        fig.text(xax1+1.5*w2+wspace2,  y0+0.4*hspace4/htot, 'BITSS trajectory (increasing resolution)', ha='center', va='bottom')
         return axes
 
     def plot_cylinder(ax):
@@ -261,13 +261,14 @@ def plot_sw(fig, y1, htot):
 def main():
     h1 = 0.5
     h2 = 0.34
-    h = h1 + h2
+    hspace = 0.01
+    h = h1 + h2 + hspace
 
     fig = lt.figure(1, h)
     fig.text(0,  1, '(a)', ha='left', va='top')
     fig.text(0,  h2/h, '(b)', ha='left', va='top')
 
-    plot_cb(fig, h2/h, h)
+    plot_cb(fig, (h2+hspace)/h, h)
     plot_sw(fig, h2/h, h)
 
     lt.savefig('../adaptivemesh.pdf')

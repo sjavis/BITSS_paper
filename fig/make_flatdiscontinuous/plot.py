@@ -160,10 +160,11 @@ def plot_flat(fig, hsize):
 
 
 def plot_discontinuous(fig, hsize):
-    space1 = 0.2
-    space2 = 0.1
-    w1 = 0.4
-    w2 = 0.25
+    space1 = 0.1
+    space2 = 0.2
+    space2label = 0.03
+    w1 = 0.3
+    w2 = 0.4
     h1 = 0.9
     h2 = 0.7
     y2 = 0.2
@@ -212,12 +213,12 @@ def plot_discontinuous(fig, hsize):
 
     def make_axes():
         fig.text(0, hsize[0]+0.95*hsize[1], '(b)', ha='left', va='top')
-        fig.text(w1+space1, hsize[0]+0.95*hsize[1], '(c)', ha='left', va='top')
-        ax = fig.add_axes([space1, hsize[0]+(1-h1)/2*hsize[1], w1, h1*hsize[1]])
-        pot_ax = fig.add_axes([w1+space1+space2, hsize[0]+y2*hsize[1], w2, h2*hsize[1]])
-        ax.set_ylabel(r'Energy / $\epsilon$')
-        ax.set_ylim(-13, -10.5)
-        return ax, pot_ax
+        fig.text(w1+space1+space2label, hsize[0]+0.95*hsize[1], '(c)', ha='left', va='top')
+        pot_ax = fig.add_axes([space1, hsize[0]+y2*hsize[1], w1, h2*hsize[1]])
+        dg_ax = fig.add_axes([w1+space1+space2, hsize[0]+(1-h1)/2*hsize[1], w2, h1*hsize[1]])
+        dg_ax.set_ylabel(r'Energy / $\epsilon$')
+        dg_ax.set_ylim(-13, -10.5)
+        return dg_ax, pot_ax
     
     def make_dgraph(nodes, ts):
         # Generate disconnectivity graph
@@ -279,26 +280,26 @@ def plot_discontinuous(fig, hsize):
     dg2.color_by_group([[0,1,2,3]], [c2])
 
     # Plot
-    ax, pot_ax = make_axes()
-    dg2.plot(axes=ax, linewidth=1)
-    dg1.plot(axes=ax, linewidth=1)
-    ax.tick_params(which='both', direction='in')
+    dg_ax, pot_ax = make_axes()
+    dg2.plot(axes=dg_ax, linewidth=1)
+    dg1.plot(axes=dg_ax, linewidth=1)
+    dg_ax.tick_params(which='both', direction='in')
 
     # Plot clusters on dgraph
-    ybot, ytop = ax.get_ylim()
+    ybot, ytop = dg_ax.get_ylim()
     dy = (ytop - ybot) / 4
     xpos, nodes = dg1.get_minima_layout()
     ypos = [n.energy for n in nodes]
     for i in range(len(xpos)):
-        tmp_ax = ax.inset_axes([xpos[i]-0.5, ypos[i]-dy, 1, dy], transform=ax.transData)
+        tmp_ax = dg_ax.inset_axes([xpos[i]-0.5, ypos[i]-dy, 1, dy], transform=dg_ax.transData)
         plot_cluster(nodes[i].x, tmp_ax)
 
     plot_potenial(pot_ax)
 
 
 def main():
-    h1 = 0.5
-    h2 = 0.4
+    h1 = 0.48
+    h2 = 0.37
     h = h1 + h2
 
     fig = lt.figure(1, h)
