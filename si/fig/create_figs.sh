@@ -1,7 +1,7 @@
 #!/bin/bash
 
-py_figs=('paramtest')
-tex_figs=('BAHschematic')
+py_figs=('paramtest' 'multits')
+tex_figs=()
 
 for fig in ${py_figs[@]}; do
   echo "Plotting $fig"

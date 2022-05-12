@@ -1,5 +1,8 @@
 \documentclass[10pt]{revtex4}
 
+% Text
+% \usepackage{amssymb}
+
 % Maths
 \usepackage{bm}
 \usepackage{amsmath}
@@ -19,7 +22,7 @@
 
 
 \begin{document}
-\title{Binary Image Transition State Search \\ Supplementary Information}
+\title{A fast and memory-efficient transition state search method for complex energy landscapes \\ Supplementary Information}
 \author{Samuel J. Avis}
 \author{Jack R. Panter}
 \email[]{j.r.panter@durham.ac.uk}
@@ -66,7 +69,7 @@ To ensure that the coefficient is not too small if the gradient is close to zero
   \caption{\label{fig:paramtest}
     Speed of convergence of the BITSS method under different choices of parameters for (a) the seven-particle cluster, and (b) cylindrical buckling.
     The speed is given by the number of evaluations of the gradient until the two states are separated by less than a thousandth of the initial separation.
-    The combinations that do not converge to the transition state are shown in grey. 
+    The combinations that do not converge to the transition state are shown in grey.
     The chosen parameters are marked by a red star.
   }
 \end{figure}
@@ -77,6 +80,34 @@ To this end we have tested different parameter choices using the seven-particle 
 The parameters $\alpha = 10$ and $\beta = 0.1$ are chosen for both converging quickly and being situated far from the regions of non-convergence in both test cases.
 Hence, this choice is likely to still succeed even if the boudaries of the regions were to shift under different systems.
 However, the user is able to choose values optimised for their specific system should they wish.
+
+
+\section{Multiple transition states}
+Here we test how the BITSS method performs when there are multiple transition states in the pathway between the two starting minima.
+For this we use a 2D potential, shown in \cref{fig:multits}a, with a pathway that follows a chicane of two $135^\circ$ circular arcs.
+The energy is given by the squared distance from this path, plus two barriers resulting in transition states A and B, with energies $E_A$ and $E_B$.
+We then vary $E_B$ between 0 and $E_A$, and the size of the distance reduction factor, $f$, to see if BITSS successfully converges to the higher transition state A.
+For each pair of parameters we perform 5 runs with slight variations in the starting positions, with the results in \cref{fig:multits}b showing the points at which all 5 converge to A.
+
+We see that if the difference between the two barriers is sufficiently large ($\gtrsim 10\%$) then BITSS always converges to the higher transition state.
+However, as the difference decreases it starts to sometimes converge to the lower transition state if the separation is decreased quickly.
+Therefore, to ensure that BITSS always converges to the higher energy transition state it may be necessary to restrict the separation step size.
+
+Although the equal-energy constraint should cause the states to converge to A, this is not always the case because the discrete steps in the minimisation can cause the left image to jump over A before the other image passes B.
+If the minisation is fast and takes large steps then the chance for this to occur is increased.
+Therefore, systems with complex, high-dimensional landscapes can probably successfully locate the highest transition state for larger values of $f$ and smaller height differences than simpler systems such as this 2D example.
+
+\begin{figure}[htb]
+  \includegraphics{fig/multits.pdf}
+  \caption{\label{fig:multits}
+    (a) The potential used in the test.
+    M1 and M2 denote the two starting minima, and A and B are the two transition states.
+    The energy of the barrier to B, $E_B$, is varied between 0 and $E_A$.
+    (b) The results for the parameters under which BITSS reliably converges to A, and the points at which it sometimes converges to B.
+    The x-axis is the BITSS distance reduction factor, $f$, and the y-axis is the relative difference between the two barrier heights.
+  }
+\end{figure}
+
 
 
 \end{document}
