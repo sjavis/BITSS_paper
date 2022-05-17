@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import re
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import pyutils.latexify as lt
@@ -11,20 +12,42 @@ lt.update_width('natcomm-single')
 plt.rc('font', size=9)
 plt.rc('axes', labelsize=9)
 
+def formatter(s):
+    base = re.search(r'\$\\mathdefault\{(.*)\}\$', s)
+    if (base is None): return s
+    s = base.group(1)
+    s = s.replace('−', '-')
+    # Add thousands separator
+    if (re.search(r'\^', s) is None):
+        try:
+            value = int(s)
+        except ValueError:
+            value = float(s)
+        s = f'{value:,}'
+    # Convert numbers to normal text font
+    s = s.replace('^', r'}^\text{')
+    s = s.replace('-', r'}-\text{')
+    s = r'$\text{'+s+r'}$'
+    return s
+lt.axis_formatter = formatter
+
 # Helvetica font
 mpl.rcParams['font.family'] = 'sans-serif'
 mpl.rcParams['font.sans-serif'] = ['Helvetica']
 mpl.rcParams['text.latex.preamble'] = "\n".join([mpl.rcParams['text.latex.preamble'],
-                                                 r"\usepackage{helvet}",
-                                                 r"\usepackage{sansmath}",
-                                                 r"\sansmath"])
+                                                 r"\usepackage{helvet}",])
+                                                 # r"\usepackage{sansmath}",
+                                                 # r"\sansmath"])
+
+# Upright vectors
+mpl.rcParams['text.latex.preamble'] = "\n".join([mpl.rcParams['text.latex.preamble'], r'\renewcommand{\bm}[1]{\boldsymbol{\mathbf{#1}}}'])
 
 # Colours
 plt.rc('font', size=9)
 c1 = 'tab:orange'
-c2 = 'tab:red'
-c3 = 'tab:blue'
-colors = [c2, c1, c3]
+c2 = 'tab:blue'
+c3 = '#b00000'
+colors = [c1, c2, c3]
 
 
 ### Make sure this is reloaded by IPython ###

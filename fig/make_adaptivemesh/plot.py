@@ -119,6 +119,8 @@ def plot_cb(fig, y0, htot):
 
     def plot_colorbar(ax, vmax):
         mpl.colorbar.ColorbarBase(ax, cmap=plt.get_cmap(cmap), norm=mpl.colors.Normalize(vmin=-vmax, vmax=vmax))
+        ax.yformatted = False
+        ax.format_axes()
         ax.yaxis.set_ticks_position('left')
 
     tri1, disp1, tri2, disp2, tri3, disp3 = load_data('cb_data.json')
@@ -150,7 +152,7 @@ def plot_sw(fig, y1, htot):
     cs1 = 'lightgrey' # hydrophobic
     cs2 = 'k'         # hydrophilic
     cz1 = style.c1
-    cz2 = style.c2
+    cz2 = style.c3
 
     def load_data(data_file):
         with open(data_file) as f:
@@ -191,7 +193,7 @@ def plot_sw(fig, y1, htot):
         ax3.axis('off')
         # Zoom indicator
         ind_lw = 0.8
-        ax15_trans = fig.add_axes([xc, yb, w1, h1/htot], sharex=ax15, sharey=ax15, fc='none')
+        ax15_trans = fig.add_axes([xc, yb, w1, h1/htot], sharex=ax15.ax, sharey=ax15.ax, fc='none')
         params = {'bounds':zoom_region, 'inset_ax':ax2, 'alpha':1, 'lw':ind_lw, 'zorder':99}
         _, conn1 = ax15_trans.indicate_inset(**params, edgecolor=cz1)
         _, conn2 = ax16.indicate_inset(**params, edgecolor=cz2)

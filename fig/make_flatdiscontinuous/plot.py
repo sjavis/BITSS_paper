@@ -26,8 +26,8 @@ def plot_flat(fig, hsize):
     dx = 2.5
 
     cpath = style.c1
-    cts = style.c2
-    cmin = style.c3
+    cmin = style.c2
+    cts = style.c3
     ms = 5
     mec = 'k'
     lw = 1.2

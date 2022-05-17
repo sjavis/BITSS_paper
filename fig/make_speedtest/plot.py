@@ -56,8 +56,8 @@ for isub, subfig in enumerate(['a', 'b', 'c']):
     if (isub == 0):
         x0 = x0 + 0.01
         w1 = w1 - 0.01
-    ax1 = plt.axes((x0+xd0, hd11/h, w1, h1/h))
-    ax2 = plt.axes((x0+xd0, (hd11+h1+hd12)/h, w1, h1/h), sharex=ax1, sharey=ax1)
+    ax1 = fig.add_axes((x0+xd0, hd11/h, w1, h1/h))
+    ax2 = fig.add_axes((x0+xd0, (hd11+h1+hd12)/h, w1, h1/h), sharex=ax1.ax, sharey=ax1.ax)
     fig.text(x0, 1, f'({subfig})', va='top', ha='left')
 
     # Plot lines
@@ -105,7 +105,7 @@ for isub, subfig in enumerate(['a', 'b', 'c']):
         ax2.annotate('DNEB', [0.4, 0.7], [0.53, 0.53], xycoords='axes fraction', alpha=0,
                     arrowprops={'arrowstyle':'-'}, bbox={'pad':0, 'fc':'none', 'ec':'none'})
         # Big hidden axes for y label
-        ax_tmp = plt.axes((x0+xd0, hd11/h, w1, (2*h1+hd12)/h), sharey=ax1, frameon=False)
+        ax_tmp = plt.axes((x0+xd0, hd11/h, w1, (2*h1+hd12)/h), sharey=ax1.ax, frameon=False)
         ax_tmp.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
         ax_tmp.set_ylabel('Distance error / $d_0$', labelpad=-0.1)
 

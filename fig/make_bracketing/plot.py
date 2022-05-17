@@ -16,7 +16,7 @@ ar = 0.6
 xlim = [-2.1, 1.8]
 ylim = [-1.75, 1.75]
 
-cpath = style.colors
+cpath = style.colors[::-1]
 cts = 'w'#style.c2
 cmin = 'w'#style.c3
 cmap = 'Greys_r'

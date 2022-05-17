@@ -21,14 +21,14 @@ ar2 = 0.5
 ldx = 0#.008
 
 cbits = style.c1
-cts = style.c2
-cmin = style.c3
-cenergy = style.c3
+cmin = style.c2
+cts = style.c3
 cdist = style.c2
+cenergy = style.c3
 cmap = 'Greys_r'
 mec = 'k'
 ms = 6
-clw = 1
+lw = 1.5
 tau_len = 1.5
 
 
@@ -112,8 +112,8 @@ axa.plot(minima[:,0], minima[:,1], c=cmin, marker='o', mec=mec, ms=ms, ls='none'
 axa.plot(ts[0], ts[1], c=cts, marker='o', mec=mec, ms=ms, zorder=99)
 
 # BITS
-axa.plot(bits[:,0,0], bits[:,0,1], c=cbits, zorder=2)
-axa.plot(bits[:,1,0], bits[:,1,1], c=cbits, zorder=2)
+axa.plot(bits[:,:,0], bits[:,:,1], c='k', lw=lw, zorder=2)
+axa.plot(bits[:,:,0], bits[:,:,1], c=cbits, lw=lw, zorder=2)
 
 # Pathway
 axa.plot(path[:,0], path[:,1], ls='--', c='k', zorder=1)
@@ -137,8 +137,6 @@ levels = np.delete(np.arange(np.min(e), np.max(e), (e0-np.min(e))/6), 6)
 cnt = axb.contourf(x, y, e, cmap=cmap, levels=levels)
 for c in cnt.collections:
     c.set_edgecolor('face')
-# axb.contour(x, y, e, levels=levels, colors='k', linestyles='solid', linewidths=clw)
-# axb.contour(x, y, e, levels=[e0], colors='k', linestyles='solid', linewidths=1.5*clw)
 
 axb.plot(x1[0], x1[1], c=cbits, marker='o', mec=mec, ms=ms, zorder=99)
 axb.plot(x2[0], x2[1], c=cbits, marker='o', mec=mec, ms=ms, zorder=99)
@@ -156,8 +154,8 @@ axb.quiver(x1[0], x1[1], gd[0], gd[1], color=cdist, **arrow_args)
 axb.quiver(x2[0], x2[1], -gd[0], -gd[1], color=cdist, **arrow_args)
 
 # axb.text(0.03, 0.35, '$F_P$', transform=axb.transAxes).set_path_effects([mpe.withStroke(linewidth=2, foreground='w')])
-axb.text(0.38, 0.7, r'$\bm{F}_E$', c=cenergy, transform=axb.transAxes)#.set_path_effects([mpe.withStroke(linewidth=2, foreground='w')])
-axb.text(0.35, 0.5, r'$\bm{F}_D$', c=cdist, transform=axb.transAxes)#.set_path_effects([mpe.withStroke(linewidth=2, foreground='w')])
+axb.text(0.38, 0.7, r'$\bm{F}_\mathrm{E}$', c=cenergy, transform=axb.transAxes)#.set_path_effects([mpe.withStroke(linewidth=2, foreground='w')])
+axb.text(0.35, 0.5, r'$\bm{F}_\mathrm{D}$', c=cdist, transform=axb.transAxes)#.set_path_effects([mpe.withStroke(linewidth=2, foreground='w')])
 
 axb.text(x1[0], x1[1]-0.03, r'$\bm{x}_1$', va='top', ha='center')
 axb.text(x2[0], x2[1]-0.03, r'$\bm{x}_2$', va='top', ha='center')
@@ -168,7 +166,6 @@ dx = 0.0045
 xlim = (ts[0]-dx, ts[0]+dx)
 ylim = (ts[1]-dx*ar2, ts[1]+dx*ar2)
 x, y = np.mgrid[xlim[0]:xlim[1]:100j, ylim[0]:ylim[1]:100j]
-# axc.contour(x, y, energy(x,y), colors='k', linestyles='solid', linewidths=clw)
 cnt = axc.contourf(x, y, energy(x,y), cmap=cmap)
 for c in cnt.collections:
     c.set_edgecolor('face')
