@@ -9,7 +9,7 @@
 \newcommand{\upDelta}{\mathop{}\!\Delta}
 
 % Text
-\usepackage{siunitx}
+\usepackage[group-separator={,}]{siunitx}
 \usepackage{enumitem}
 \usepackage{xcolor}
 
@@ -207,7 +207,7 @@ Details of each are presented in the methods section.
 
 The first system is a two-dimensional, seven-particle cluster, interacting via a Lennard-Jones pair potential.
 This is a frequently used test system for studying transition rates \cite{Wales2002,Passerone2001}.
-Here, the \num{14} degrees of freedom are the particle coordinates.
+Here, the 14 degrees of freedom are the particle coordinates.
 The characteristic transition shown in \cref{fig:speedtest}a sees a particle rearrangement between two close-packed clusters.
 
 The second system is an elastic cylindrical shell, modelled by a triangulated mesh of nodes, which interact via extensional and angular springs.
@@ -321,7 +321,8 @@ In such cases, it may be possible to access transition states different from the
 Overall, these will enable BITSS to access even more challenging landscapes, and those not yet amenable to traditional landscape exploration techniques.
 
 
-\section{Methods}
+\appendix
+\section*{Methods}
 
 \subsection{Implementing the string and DNEB methods}
 In the convergence rate comparison in \cref{fig:speedtest}, the string method and doubly-nudged elastic band method (DNEB) are used, based upon \cite{E2007} and \cite{Trygubenko2004}, respectively.
@@ -447,12 +448,11 @@ The gradients of these terms are given by,
 where index $k$ denotes neighboring nodes at which the evaluation of the gradient uses $\phi_i$.
 
 
-\appendix
-\section*{}
-\begin{acknowledgments}
-  S.~J.~A. is supported by a studentship from the Engineering and Physical Sciences Research Council [Grant No. EP/R513039/1].
-  H.~K. and J.~R.~P. acknowledge funding from the Engineering and Physical Sciences Research Council [Grant No. EP/V034154/1].
-\end{acknowledgments}
+\section*{Data availability}
+The data that support the findings of this study are available from the corresponding author upon reasonable request.
+
+\section*{Code availability}
+The code used in this study is available from the corresponding author upon reasonable request.
 
 %% start bib
 % % \bibliography{../../library.bib}
@@ -929,5 +929,19 @@ where index $k$ denotes neighboring nodes at which the evaluation of the gradien
 
 \end{thebibliography}
 %% end bib
+
+\begin{acknowledgments}
+  S.~J.~A. is supported by a studentship from the Engineering and Physical Sciences Research Council [Grant No. EP/R513039/1].
+  H.~K. and J.~R.~P. acknowledge funding from the Engineering and Physical Sciences Research Council [Grant No. EP/V034154/1].
+\end{acknowledgments}
+
+\section*{Author contributions}
+S.~J.~A. and J.~R.~P. developed the theoretical model.
+S.~J.~A. performed the experiments and analysed the data.
+H.~K. supervised the study.
+S.~J.~A. wrote the paper, with review and input from H.~K. and J.~R.~P.
+
+\section*{Competing interests}
+The authors declare no competing interests.
 
 \end{document}
