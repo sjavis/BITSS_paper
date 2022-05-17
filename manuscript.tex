@@ -1,8 +1,9 @@
 \documentclass[twocolumn,10pt]{revtex4}
 
 % Maths
-\usepackage{bm}
+% \usepackage{bm}
 \usepackage{amsmath}
+\newcommand{\bm}[1]{\boldsymbol{\mathbf{#1}}}
 \newcommand{\abs}[1]{\left| #1 \right|}
 \newcommand{\grad}{\bm{\nabla}}
 \newcommand{\upDelta}{\mathop{}\!\Delta}
@@ -82,7 +83,7 @@ In addition, we show that BITSS is superior compared to existing bracketing meth
   \caption{\label{fig:toy2d}
     (a) The trajectories of the two states under the BITSS method (orange line) for a simple 2D potential with two minima (blue dots).
         The transition state is shown by a red dot, and the minimum energy pathway by the dashed line.
-    (b) A snapshot of the BITSS minimisation showing the driving forces on each state due to the energy constraint, $\bm{F}_E$, and distance constraint, $\bm{F}_D$, with $E_1 < E_2$ and $\mathrm{d}(\bm{x}_1,\bm{x}_2) < d_i$.
+    (b) A snapshot of the BITSS minimisation showing the driving forces on each state due to the energy constraint, $\bm{F}_\mathrm{E}$, and distance constraint, $\bm{F}_\mathrm{D}$, with $E_1 < E_2$ and $d(\bm{x}_1,\bm{x}_2) < d_i$.
     (c) The final configuration of the BITSS method showing the two states in orange, the transition state in red, and the negative curvature eigenvector, $\bm{\hat{\tau}}$.
   }
 \end{figure}
@@ -98,7 +99,7 @@ with $d_0$ taking the value of the separation between the two initial states.
 A reduction factor of $f = 0.5$ is successful for most applications, but this can be made smaller to ensure that the states do not slide off the ridge between the two basins of attraction.
 Different metrics may be used to compute this distance, although in this work we simply use the Euclidean distance,
 \begin{equation}
-  \mathrm{d}(\bm{x}_1, \bm{x}_2) = \sqrt{\sum_i (x_{1,i} - x_{2,i})^2}.
+  d(\bm{x}_1, \bm{x}_2) = \sqrt{\sum_i (x_{1,i} - x_{2,i})^2}.
 \end{equation}
 To further ensure that neither state is pulled over the ridge, a secondary constraint enforces equal energies for the two states.
 Using this strategy, the two states will meet at the lowest point on the ridge, the transition state.
@@ -106,9 +107,9 @@ Using this strategy, the two states will meet at the lowest point on the ridge, 
 The two constraints are implemented using energy penalty terms, which result in driving forces on the two states if the constraints are not met, such as in \cref{fig:toy2d}b.
 Including these energy penalty terms gives the total BITSS energy for the pair of states,
 \begin{multline}\label{eq:bitss}
-  E_\text{BITSS}(\bm{x}_1, \bm{x}_2) = E_1 + E_2
+  E_\mathrm{BITSS}(\bm{x}_1, \bm{x}_2) = E_1 + E_2
     + \kappa_e \left( E_1 - E_2 \right) ^2 \\
-    + \kappa_d \left( \mathrm{d}(\bm{x}_1, \bm{x}_2) - d_i \right) ^2,
+    + \kappa_d \left( d(\bm{x}_1, \bm{x}_2) - d_i \right) ^2,
 \end{multline}
 where $E_1$ and $E_2$ are the single-state energies, and $\kappa_e$ and $\kappa_d$ parametrise the strengths of the energy and distance constraints.
 
@@ -120,16 +121,16 @@ These are set such that the driving forces due to the constraints and single-sta
 This prevents the constraints from dominating the underlying potential or causing large jumps that make a state pass over the ridge.
 This results in the following equations (see the supplementary information for the derivation),
 \begin{gather}
-  \kappa_e = \frac {\alpha} {2 E_B},
+  \kappa_e = \frac {\alpha} {2 E_\mathrm{B}},
   \label{eq:ke}
   \\
   \kappa_d = \max \left(
     \frac {\sqrt{\abs{\grad E_1}^2 + \abs{\grad E_2}^2}} {2\sqrt{2} \beta d_i} \; , \;
-    \frac{E_B}{\beta d_i^2} \right),
+    \frac{E_\mathrm{B}}{\beta d_i^2} \right),
   \label{eq:kd}
 \end{gather}
 where $\grad E_1$ and $\grad E_2$ are the gradients of the energies of the two states, and $\alpha$ and $\beta$ are parameters with recommended values of $\alpha = 10$ and $\beta = 0.1$.
-Here, $E_B$ is an estimation for the current energy barrier, evaluated using the difference between the highest energy along a linear interpolation between the two states and the average energy of the two states.
+Here, $E_\mathrm{B}$ is an estimation for the current energy barrier, evaluated using the difference between the highest energy along a linear interpolation between the two states and the average energy of the two states.
 These constraints are initially calculated at the start of each minimisation, and regularly recalculated throughout (once per 100 iterations is used in this work).
 
 In practice, when numerically minimising, the states will jump about slightly which can result in large gradients perpendicular to the optimal movement direction.
@@ -244,7 +245,7 @@ Therefore, unlike these chain-of-states methods, BITSS does not require a second
 
 Adaptive remeshing and coarse-graining are widely used techniques that we can utilise to further increase the efficiency of BITSS.
 These techniques cause issues for most existing double-ended methods because the coupled states may end up with different degrees of freedom.
-However, in BITSS the only direct coupling is in the distance measure, $\mathrm{d}(\bm{x}_1,\bm{x}_2)$, which is relatively easy to adapt.
+However, in BITSS the only direct coupling is in the distance measure, $d(\bm{x}_1,\bm{x}_2)$, which is relatively easy to adapt.
 Here we demonstrate the use of adaptive remeshing by considering two separate issues.
 
 Firstly, we show in \cref{fig:adaptivemesh}a that BITSS is able to handle the discretisation adapting, and the number of degrees of freedom changing, as the method runs.
@@ -338,7 +339,7 @@ This can be done by simply removing the first term and just using the second ter
 Secondly, L-BFGS can no longer be used because it requires knowledge of the gradients.
 We must instead use a minimiser that does not require a differentiable optimisation function, for which we use simulated annealing \cite{Kirkpatrick1983}.
 This has a chance of randomly jumping one state over the dividing barrier, but we can reduce this probability by limiting the initial temparature and maximum random displacement.
-We typically employ $T_0 = E_B / 10$, and $d_\text{max} = d(\bm{x}_1, \bm{x}_2) / 100$.
+We typically employ $T_0 = E_\mathrm{B} / 10$, and $d_\mathrm{max} = d(\bm{x}_1, \bm{x}_2) / 100$.
 
 \subsection{Adaptive discretisation test details}
 Here we provide the details for the interpolations and mapping involved in the two examples demonstrating the feasibility of using an adaptive discretisation method.
@@ -382,10 +383,10 @@ A 2D triangular mesh is used to model the cylindrical buckling system, with the 
 The energy of the system is evaluated by treating all bonds in the mesh as an elastic spring to obtain the stretching energy, and all pairs of adjacent triangles to be connected by elastic hinges, providing the bending energy.
 Their expressions are given by
 \begin{equation}
-  E = \sum_i k^S_i (r_i - r^0_i)^2 + \sum_j k^B_j [1 + \cos(\theta_j - \theta^0_j)].
+  E = \sum_i k^\mathrm{S}_i (r_i - r^0_i)^2 + \sum_j k^\mathrm{B}_j [1 + \cos(\theta_j - \theta^0_j)].
 \end{equation}
-The first term is the stretching energy, where $r_i$ is the length, $r^0_i$ is the equilibrium length, and $k^S_i$ is the stretching rigidity of bond $i$.
-The second term provides the bending energy, where $\theta_j$ is the dihedral angle, $\theta^0_j$ is the equilibrium angle, and $k^B_j$ is the bending rigidity of hinge $j$.
+The first term is the stretching energy, where $r_i$ is the length, $r^0_i$ is the equilibrium length, and $k^\mathrm{S}_i$ is the stretching rigidity of bond $i$.
+The second term provides the bending energy, where $\theta_j$ is the dihedral angle, $\theta^0_j$ is the equilibrium angle, and $k^\mathrm{B}_j$ is the bending rigidity of hinge $j$.
 
 \begin{figure}[htb]
   \includegraphics{fig/BAHschematic.pdf}
@@ -397,47 +398,47 @@ The gradient of the energy can be obtained by individually considering the stret
 For simplicity, we will ignore the index for the bond and hinge.
 Using the variables shown in the schematic in \cref{fig:BAHschematic}, the gradient of the stretching energy of the bond between $\bm{x}_2$ and $\bm{x}_3$ is given by,
 \begin{equation}
-  \frac{\partial E^S}{\partial \bm{x}_2} = - \frac{\partial E^S}{\partial \bm{x}_3} =
-    2 k^S (r - r^0) (\bm{x_2} - \bm{x_3}).
+  \frac{\partial E^\mathrm{S}}{\partial \bm{x}_2} = - \frac{\partial E^\mathrm{S}}{\partial \bm{x}_3} =
+    2 k^\mathrm{S} (r - r^0) (\bm{x_2} - \bm{x_3}).
 \end{equation}
 The gradients of the bending energy of the hinge are
 \begin{align}
-  \frac{\partial E^B}{\partial \bm{x}_1} &= k^B \sin(\theta - \theta^0) \frac{\bm{\hat{n}}_a}{h_a}, \\
-  \frac{\partial E^B}{\partial \bm{x}_2} &= - k^B \sin(\theta - \theta^0) \left[\frac{\bm{\hat{n}}_a}{h_a} + \frac{\bm{\hat{n}}_a + \bm{\hat{n}}_b}{r}\right], \\
-  \frac{\partial E^B}{\partial \bm{x}_3} &= - k^B \sin(\theta - \theta^0) \left[\frac{\bm{\hat{n}}_b}{h_b} + \frac{\bm{\hat{n}}_a + \bm{\hat{n}}_b}{r}\right], \\
-  \frac{\partial E^B}{\partial \bm{x}_4} &= k^B \sin(\theta - \theta^0) \frac{\bm{\hat{n}}_b}{h_b}.
+  \frac{\partial E^\mathrm{B}}{\partial \bm{x}_1} &= k^\mathrm{B} \sin(\theta - \theta^0) \frac{\bm{\hat{n}}_a}{h_a}, \\
+  \frac{\partial E^\mathrm{B}}{\partial \bm{x}_2} &= - k^\mathrm{B} \sin(\theta - \theta^0) \left[\frac{\bm{\hat{n}}_a}{h_a} + \frac{\bm{\hat{n}}_a + \bm{\hat{n}}_b}{r}\right], \\
+  \frac{\partial E^\mathrm{B}}{\partial \bm{x}_3} &= - k^\mathrm{B} \sin(\theta - \theta^0) \left[\frac{\bm{\hat{n}}_b}{h_b} + \frac{\bm{\hat{n}}_a + \bm{\hat{n}}_b}{r}\right], \\
+  \frac{\partial E^\mathrm{B}}{\partial \bm{x}_4} &= k^\mathrm{B} \sin(\theta - \theta^0) \frac{\bm{\hat{n}}_b}{h_b}.
 \end{align}
 
 \subsubsection{Striped wetting system}
 This modelled on a 200x200 2D grid (and 400x400 in \cref{sec:adaptive}) using a phase-field model \cite{Panter2019b}, which has an order parameter, $\phi(\bm{r})$, representing the phase of the liquid ($\phi=-1$ for gas, $\phi=1$ for liquid).
 The energy functional has four separate terms,
 \begin{equation} \label{eq:phasefield}
-  E[\phi] = E^B[\phi] + E^I[\phi] + E^S[\phi] + E^V[\phi].
+  E[\phi] = E^\mathrm{B}[\phi] + E^\mathrm{I}[\phi] + E^\mathrm{S}[\phi] + E^\mathrm{V}[\phi].
 \end{equation}
-The first term, $E^B$, uses a double well potential to set values of $\phi=\pm1$ in the bulk.
+The first term, $E^\mathrm{B}$, uses a double well potential to set values of $\phi=\pm1$ in the bulk.
 The second term then provides the interfacial energy between the liquid and gas by imposing an energy penalty to gradients in $\phi$.
-$E^S$ is the solid-liquid interaction energy, which sets the contact angles of the hydrophilic and hydrophobic regions to 60\si{\degree} and 110\si{\degree}, respectively.
-Finally, $E^V$ constrains the volume of the liquid drop by penalising any variation from the target volume.
+$E^\mathrm{S}$ is the solid-liquid interaction energy, which sets the contact angles of the hydrophilic and hydrophobic regions to 60\si{\degree} and 110\si{\degree}, respectively.
+Finally, $E^\mathrm{V}$ constrains the volume of the liquid drop by penalising any variation from the target volume.
 
 These four sections of the phase-field model are obtained using the following equations,
 \begin{align}
-  E^B[\phi] &= \sum_i \frac{1}{\epsilon} \left( \frac{{\phi_i}^4}{4} - \frac{{\phi_i}^2}{2} + \frac{1}{4} \right) \upDelta V,\\
-  E^I[\phi] &= \sum_i \frac{\epsilon}{2} \abs{\grad \phi_i}^2 \upDelta V,\\
-  E^S[\phi] &= \sum_j \sqrt{2}\cos\theta_j \left( \frac{{\phi_j}^3}{6} - \frac{\phi_j}{2} - \frac{1}{3} \right) \upDelta S,\\
-  E^V[\phi] &= k_V \left[ \sum_i \frac{\phi_i + 1}{2} \upDelta V - V_0 \right]^2,
+  E^\mathrm{B}[\phi] &= \sum_i \frac{1}{\epsilon} \left( \frac{{\phi_i}^4}{4} - \frac{{\phi_i}^2}{2} + \frac{1}{4} \right) \upDelta V,\\
+  E^\mathrm{I}[\phi] &= \sum_i \frac{\epsilon}{2} \abs{\grad \phi_i}^2 \upDelta V,\\
+  E^\mathrm{S}[\phi] &= \sum_j \sqrt{2}\cos\theta_j \left( \frac{{\phi_j}^3}{6} - \frac{\phi_j}{2} - \frac{1}{3} \right) \upDelta S,\\
+  E^\mathrm{V}[\phi] &= k_\mathrm{V} \left[ \sum_i \frac{\phi_i + 1}{2} \upDelta V - V_0 \right]^2,
 \end{align}
 where the index $i$ includes all of the nodes, while $j$ represents the nodes along the solid surface.
 $\upDelta V$ and $\upDelta S$ are, respectively, the volume and solid surface areas contained by each individual node.
 $\epsilon$ is the liquid-gas interface width (set to 2.5 lattice units), $\theta_j$ is the contact-angle with the solid surface, and $V_0$ is the constrained volume of the liquid drop.
-The strength of the volume constraint is parametrised by $k_V$ for which we use a value of $10^4$.
+The strength of the volume constraint is parametrised by $k_\mathrm{V}$ for which we use a value of $10^4$.
 The gradients of these terms are given by,
 \begin{align}
-  \frac{\partial E^B}{\partial \phi_i} &= \frac{1}{\epsilon} \left( {\phi_i}^3 - \phi_i \right) \upDelta V,\\
-  \frac{\partial E^I}{\partial \phi_i} &= \frac{\epsilon}{2} \left[
+  \frac{\partial E^\mathrm{B}}{\partial \phi_i} &= \frac{1}{\epsilon} \left( {\phi_i}^3 - \phi_i \right) \upDelta V,\\
+  \frac{\partial E^\mathrm{I}}{\partial \phi_i} &= \frac{\epsilon}{2} \left[
     \frac{\partial \abs{\grad \phi_i}^2}{\partial \phi_i} +
     \sum_k\frac{\partial \abs{\grad \phi_k}^2}{\partial \phi_i} \right] \upDelta V,\\
-  \frac{\partial E^S}{\partial \phi_j} &= \sqrt{2}\cos\theta_j \left( \frac{{\phi_j}^2}{2} - \frac{1}{2} \right) \upDelta S,\\
-  \frac{\partial E^V}{\partial \phi_i} &= k_V \left[ \sum_{i'} \frac{\phi_{i'} + 1}{2} \upDelta V - V_0 \right] \upDelta V,
+  \frac{\partial E^\mathrm{S}}{\partial \phi_j} &= \sqrt{2}\cos\theta_j \left( \frac{{\phi_j}^2}{2} - \frac{1}{2} \right) \upDelta S,\\
+  \frac{\partial E^\mathrm{V}}{\partial \phi_i} &= k_\mathrm{V} \left[ \sum_{i'} \frac{\phi_{i'} + 1}{2} \upDelta V - V_0 \right] \upDelta V,
 \end{align}
 where index $k$ denotes neighboring nodes at which the evaluation of the gradient uses $\phi_i$.
 
