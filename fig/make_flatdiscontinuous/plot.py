@@ -19,7 +19,7 @@ def plot_flat(fig, hsize):
     ### Plot parameters
     ax_size = np.array([[0.15, 0.2, 0.83, 0.78],
                         [0.42, 0.25, 0.48, 0.38]])
-    axin_bounds = np.array([[0.675, 0.8], [-2,-1.45]])
+    axin_bounds = np.array([[0.57, 0.725], [-2,-1.45]])
     axin_scale = 50
 
     y0 = 0.3
@@ -121,13 +121,13 @@ def plot_flat(fig, hsize):
         axin.set_xticks([])
         axin.set_yticks([])
         axin.margins(0, 0.2)
-        axin.text(0.98, 0.95, f'$\\times{axin_scale}$',
+        axin.text(0.98, 0.95, r'$\times\text{'+str(axin_scale)+r'}$',
                   ha='right', va='top', transform=axin.transAxes)
         box, _ = ax.indicate_inset_zoom(axin, edgecolor='k')#, alpha=1)
         box.set_visible(False)
 
-        ax.text(0.54, -1.83, 'i', ha='center')
-        ax.text(0.91, -1.95, 'iii', ha='center')
+        ax.text(0.4, -1.83, 'i', ha='center')
+        ax.text(0.89, -1.95, 'iii', ha='center')
         axin.text(0.75, 0, 'ii', ha='center', va='bottom', transform=axin.transAxes)
 
     def plot_potential(ax):
@@ -138,7 +138,7 @@ def plot_flat(fig, hsize):
         ax.axvline(cut2, ls=':', c='k')
         ax.axvline(cut2+w, ls=':', c='k')
         ax.text(0.35, 0.29, 'i', ha='center', va='center', transform=ax.transAxes)
-        ax.text(0.62, 0.55, 'ii', ha='center', va='center', transform=ax.transAxes)
+        ax.text(0.61, 0.55, 'ii', ha='center', va='center', transform=ax.transAxes)
         ax.text(0.78, 0.22, 'iii', ha='center', va='center', transform=ax.transAxes)
 
     def plot_path(ax, path):
