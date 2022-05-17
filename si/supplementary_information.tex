@@ -2,6 +2,7 @@
 
 % Text
 % \usepackage{amssymb}
+\def\thesection{SUPPLEMENTARY NOTE \Roman{section}}
 
 % Maths
 \usepackage{bm}
@@ -34,33 +35,33 @@
 \section{Optimising the constraint coefficients}
 The constraint coefficients are chosen to set comparable sizes for each term in the gradient of the BITSS potential,
 \begin{equation} \label{eq:gradBITSS}
-  \grad E_\text{BITSS} = \sum_{\substack{i=1,2 \\ j\neq i}} \left[ 1 + 2 \kappa_e (E_i - E_j) \right] \grad E_i + 2 \kappa_d (d - d_i) \grad d.
+  \grad E_\text{BITSS} = \sum_{\substack{i=1,2 \\ j\neq i}} \left[ 1 + 2 \kappa_\text{e} (E_i - E_j) \right] \grad E_i + 2 \kappa_\text{d} (d - d_i) \grad d.
 \end{equation}
-To obtain the expression for the energy coefficient, $\kappa_e$, we first assume that the separation is fixed, so the distance term can be ignored.
-The coefficient $\kappa_e$ must be high enough to prevent one state from being pulled over the ridge, for which the greatest risk occurs when the gradient on one state is much greater than the other, e.g. $\abs{\grad E_2} \gg \abs{\grad E_1}$.
+To obtain the expression for the energy coefficient, $\kappa_\text{e}$, we first assume that the separation is fixed, so the distance term can be ignored.
+The coefficient $\kappa_\text{e}$ must be high enough to prevent one state from being pulled over the ridge, for which the greatest risk occurs when the gradient on one state is much greater than the other, e.g. $\abs{\grad E_2} \gg \abs{\grad E_1}$.
 In this case the total gradient is approximated by
 \begin{equation}
-  \grad E_\text{BITSS} = \left[ 1 - 2 \kappa_e (E_1 - E_2) \right] \grad E_2.
+  \grad E_\text{BITSS} = \left[ 1 - 2 \kappa_\text{e} (E_1 - E_2) \right] \grad E_2.
 \end{equation}
-Therefore, when not at a transition state or a minimum in the landscape ($\abs{\grad E_2} \neq 0$) convergence will occur when the term in the square brackets is zero, resulting in $E_1 - E_2 = 1 / 2 \kappa_e$.
-This energy difference should be less than current energy barrier, so we can substitute it with $E_B / \alpha$, where $E_B$ is the energy barrier estimate described in the main paper and $\alpha$ is a constant greater than one.
+Therefore, when not at a transition state or a minimum in the landscape ($\abs{\grad E_2} \neq 0$) convergence will occur when the term in the square brackets is zero, resulting in $E_1 - E_2 = 1 / 2 \kappa_\text{e}$.
+This energy difference should be less than current energy barrier, so we can substitute it with $E_\text{B} / \alpha$, where $E_\text{B}$ is the energy barrier estimate described in the main paper and $\alpha$ is a constant greater than one.
 This leaves us with the expression,
 \begin{equation}
-  \kappa_e = \frac {\alpha} {2 E_B}.
+  \kappa_\text{e} = \frac {\alpha} {2 E_\text{B}}.
 \end{equation}
 
 The distance coefficient is determined by assuming that the energies are equal and thus the energy constraint can be ignored.
-In this case, convergence will occur when $\grad E_1 + \grad E_2 = -2 \kappa_d (d - d_i) \grad d$.
-It is then possible to find the value of $\kappa_d$ for which the magnitude of each side of this equation is equal for a desired relative error in the distance, $\beta = (d - d_i) / d_i$,
+In this case, convergence will occur when $\grad E_1 + \grad E_2 = -2 \kappa_\text{d} (d - d_i) \grad d$.
+It is then possible to find the value of $\kappa_\text{d}$ for which the magnitude of each side of this equation is equal for a desired relative error in the distance, $\beta = (d - d_i) / d_i$,
 \begin{equation}
-  \kappa_d = \frac {\sqrt{\abs{\grad E_1}^2 + \abs{\grad E_2}^2}} {2 \sqrt{2} \beta d_i}.
+  \kappa_\text{d} = \frac {\sqrt{\abs{\grad E_1}^2 + \abs{\grad E_2}^2}} {2 \sqrt{2} \beta d_i}.
 \end{equation}
 (Note: The gradient of the distance with respect to a single state has a magnitude of 1, thus the magnitude of the gradient for the pair of states is $\abs{\grad d} = \sqrt{1^2+1^2} = \sqrt{2}$.)
-To ensure that the coefficient is not too small if the gradient is close to zero, such as when the states are initialised at the minima, a lower bound is set by replacing $\abs{\grad E_1}$ and $\abs{\grad E_2}$ with $2 E_B / d_i$. This gives the expression,
+To ensure that the coefficient is not too small if the gradient is close to zero, such as when the states are initialised at the minima, a lower bound is set by replacing $\abs{\grad E_1}$ and $\abs{\grad E_2}$ with $2 E_\text{B} / d_i$. This gives the expression,
 \begin{equation}
-  \kappa_d = \mathrm{max} \! \left(
+  \kappa_\text{d} = \mathrm{max} \! \left(
   \frac {\sqrt{\abs{\grad E_1}^2 + \abs{\grad E_2}^2}} {2 \sqrt{2} \beta d_i}, \quad
-  \frac{E_B}{\beta d_i^2} \right).
+  \frac{E_\text{B}}{\beta d_i^2} \right).
 \end{equation}
 
 \begin{figure}[htb]
@@ -85,8 +86,8 @@ However, the user is able to choose values optimised for their specific system s
 \section{Multiple transition states}
 Here we test how the BITSS method performs when there are multiple transition states in the pathway between the two starting minima.
 For this we use a 2D potential, shown in \cref{fig:multits}a, with a pathway that follows a chicane of two $135^\circ$ circular arcs.
-The energy is given by the squared distance from this path, plus two barriers resulting in transition states A and B, with energies $E_A$ and $E_B$.
-We then vary $E_B$ between 0 and $E_A$, and the size of the distance reduction factor, $f$, to see if BITSS successfully converges to the higher transition state A.
+The energy is given by the squared distance from this path, plus two barriers resulting in transition states A and B, with energies $E_\text{A}$ and $E_\text{B}$.
+We then vary $E_\text{B}$ between 0 and $E_\text{A}$, and the size of the distance reduction factor, $f$, to see if BITSS successfully converges to the higher transition state A.
 For each pair of parameters we perform 5 runs with slight variations in the starting positions, with the results in \cref{fig:multits}b showing the points at which all 5 converge to A.
 
 We see that if the difference between the two barriers is sufficiently large ($\gtrsim 10\%$) then BITSS always converges to the higher transition state.
@@ -102,7 +103,7 @@ Therefore, systems with complex, high-dimensional landscapes can probably succes
   \caption{\label{fig:multits}
     (a) The potential used in the test.
     M1 and M2 denote the two starting minima, and A and B are the two transition states.
-    The energy of the barrier to B, $E_B$, is varied between 0 and $E_A$.
+    The energy of the barrier to B, $E_\text{B}$, is varied between 0 and $E_\text{A}$.
     (b) The results for the parameters under which BITSS reliably converges to A, and the points at which it sometimes converges to B.
     The x-axis is the BITSS distance reduction factor, $f$, and the y-axis is the relative difference between the two barrier heights.
   }

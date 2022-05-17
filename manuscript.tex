@@ -120,7 +120,7 @@ However, any other minimisation method can be used instead.
 To ensure that the transition state is located successfully, the constraint strengths $\kappa_d$ and $\kappa_e$ are updated as the algorithm proceeds using information from the system.
 These are set such that the driving forces due to the constraints and single-state energies are of similar size.
 This prevents the constraints from dominating the underlying potential or causing large jumps that make a state pass over the ridge.
-This results in the following equations (see the supplementary information for the derivation),
+This results in the following equations (see Supplementary Note I for the derivation),
 \begin{gather}
   \kappa_e = \frac {\alpha} {2 E_\mathrm{B}},
   \label{eq:ke}
@@ -160,7 +160,7 @@ Once the transition state has been identified, it is possible to find the full m
 In the event that there are intermediate stable states, there will be a chain of multiple transition states between the two minima.
 In this case, the equal-energy constraint will not prevent the states from passing over the lower energy transition states, so BITSS should converge to the transition state with the highest energy.
 This enables the identification of the overall energy barrier, providing estimates about the overall ease of the transition, or the rate for chemical processes.
-However, as demonstrated in the supplementary information, if multiple transition states have very similar energies then a smaller distance reduction factor, $f$, may be necessary to ensure that it does indeed converge to the highest transition state.
+However, as demonstrated in Supplementary Note II, if multiple transition states have very similar energies then a smaller distance reduction factor, $f$, may be necessary to ensure that it does indeed converge to the highest transition state.
 Furthermore, if all of transition states or the full pathway are desired, BITSS can be continually repeated from one of the minima downhill from the located transition state and one of the initial minima until the initial minima are piecewise connected by a full pathway.
 
 \subsection{Other bracketing methods}
