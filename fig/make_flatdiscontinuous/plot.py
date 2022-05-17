@@ -96,7 +96,7 @@ def plot_flat(fig, hsize):
     def plot_path_energy(ax, path):
         path = np.concatenate((path[0], path[1,::-1]))
         e = energy(path[:,0], path[:,1])
-        dist = np.cumsum(np.linalg.norm(np.diff(path, axis=0, prepend=0), axis=1))
+        dist = np.cumsum(np.linalg.norm(np.diff(path, axis=0, prepend=[path[0]]), axis=1))
         dist = dist / np.max(dist)
         ax.plot(dist, e, c=cpath, lw=lw)
         ax.plot(dist[0] , e[0] , c=cmin, marker='o', ms=ms, mec=mec)
