@@ -81,8 +81,9 @@ In addition, we show that BITSS is superior compared to existing bracketing meth
 \begin{figure}[tb]
   \includegraphics[width=\linewidth]{toy2d.pdf}
   \caption{\label{fig:toy2d}
-    (a) The trajectories of the two states under the BITSS method (orange line) for a simple 2D potential with two minima (blue dots).
-        The transition state is shown by a red dot, and the minimum energy pathway by the dashed line.
+    \textbf{Schematics of the BITSS method on a simple 2D potential with two minima.}
+    (a) The orange line shows the trajectories of the two states from the minima (blue) to the transition states (red) under the BITSS method.
+        The minimum energy pathway is shown by the dashed line.
     (b) A snapshot of the BITSS minimisation showing the driving forces on each state due to the energy constraint, $\bm{F}_\mathrm{E}$, and distance constraint, $\bm{F}_\mathrm{D}$, with $E_1 < E_2$ and $d(\bm{x}_1,\bm{x}_2) < d_i$.
     (c) The final configuration of the BITSS method showing the two states in orange, the transition state in red, and the negative curvature eigenvector, $\bm{\hat{\tau}}$.
   }
@@ -166,7 +167,7 @@ Furthermore, if all of transition states or the full pathway are desired, BITSS 
 \begin{figure}[htb]
   \includegraphics[width=\linewidth]{bracketing.pdf}
   \caption{\label{fig:bracketing}
-    Trajectories of the bracketing methods on a hooked potential with a single saddle point.
+    \textbf{Trajectories of the bracketing methods on a hooked potential with a single saddle point.}
     The minimum energy pathway is shown by the dashed line.
   }
 \end{figure}
@@ -192,7 +193,7 @@ Meanwhile, using step and slide, it is difficult to obtain a reasonable energy i
 \begin{figure*}[tb]
   \includegraphics[width=\linewidth]{speedtest.pdf}
   \caption{\label{fig:speedtest}
-    Comparisons between BITSS, DNEB, and the string method in the convergence to the transition state as a function of the number of calculations of the energy gradient.
+    \textbf{Comparisons between BITSS, DNEB, and the string method in the convergence to the transition state as a function of the number of calculations of the energy gradient.}
     Three test systems are used: (a) a Lennard-Jones seven-particle cluster, (b) cylindrical shell buckling, and (c) wetting of a chemically-striped surface.
     The configurations shown correspond to the two minimum energy states and the transition state, marked by an asterisk.
     The string method and DNEB are repeated with a differing number of images, as listed in the legend in (c).
@@ -234,9 +235,10 @@ Therefore, unlike these chain-of-states methods, BITSS does not require a second
 \begin{figure}[tb]
   \includegraphics[width=\linewidth]{adaptivemesh.pdf}
   \caption{\label{fig:adaptivemesh}
-    (a) Snapshots of the BITSS method applied to the buckling of a cylinder with a changing mesh.
+    \textbf{Demonstration of BITSS addressing the challenges associated with adaptive remeshing.}
+    (a) Snapshots of the BITSS method for the buckling of a cylinder with a changing mesh.
         The radial displacement relative the unbuckled cylinder is shown, as well as the underlying triangular mesh.
-    (b) BITSS applied to the striped wetting example with different resolutions for the two states.
+    (b) Snapshots for the striped wetting example with different resolutions for the two states.
         Each grid cell denotes 50x50 lattice nodes.
         The zoomed axis shows the difference in the fluid interface between the two final states, as well as the approximated transition state (solid black line).
         This is compared to the transition state found using a high resolution (dashed line).
@@ -263,6 +265,7 @@ The precision of this convergence is now limited by the transition state energy 
 \begin{figure}[tb]
   \includegraphics[width=\linewidth]{flatdiscontinuous.pdf}
   \caption{\label{fig:flatdiscontinuous}
+    \textbf{Demonstration of BITSS applied to flat and discontinuous potentials.}
     (a) Energy profile of the BITSS pathway on a 2D potential with flat regions.
         Blue and red dots denote the minima and transition state, respectively.
         Points of interest are labelled by i--iii (see text).
@@ -391,7 +394,8 @@ The second term provides the bending energy, where $\theta_j$ is the dihedral an
 \begin{figure}[htb]
   \includegraphics{fig/BAHschematic.pdf}
   \caption{\label{fig:BAHschematic}
-    Schematic of the bar and hinge model showing the relevent parameters for a single hinge element. $h_i$ and $\bm{\hat{n}}_i$ denote the height and unit normal of each triangle respectively.
+    \textbf{Schematic of the bar and hinge model showing the relevent parameters for a single hinge element.}
+    $h_i$ and $\bm{\hat{n}}_i$ denote the height and unit normal of each triangle respectively.
   }
 \end{figure}
 The gradient of the energy can be obtained by individually considering the stretching and bending energies of a single bond and hinge.
