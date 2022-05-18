@@ -328,7 +328,7 @@ Overall, these will enable BITSS to access even more challenging landscapes, and
 In the convergence rate comparison in \cref{fig:speedtest}, the string method and doubly-nudged elastic band method (DNEB) are used, based upon \cite{E2007} and \cite{Trygubenko2004}, respectively.
 Each method is initialised with 5, 10, or 20 images, using a linear interpolation between the chosen end states.
 
-In each iteration of the string method, each image is evolved downhill for a number of LBFGS iterations before redistributing the images along a cubic-spline interpolated path.
+In each iteration of the string method, each image is evolved downhill for a number of L-BFGS iterations before redistributing the images along a cubic-spline interpolated path.
 This number of iterations is varied to obtain the fastest convergence, for which we find 2, 50, and 20 to be optimal for the particle cluster, cylidrical buckling, and striped wetting examples, respectively.
 
 In the case of DNEB, the spring constant between the images is instead optimised.
@@ -545,8 +545,7 @@ The code used in this study is available from the corresponding author upon reas
 \newblock \bibinfo{title}{{Decoding the energy landscape: Extracting structure,
   dynamics and thermodynamics}}.
 \newblock \emph{\bibinfo{journal}{Philosophical Transactions of the Royal
-  Society A: Mathematical, Physical and Engineering Sciences}}
-  \textbf{\bibinfo{volume}{370}}, \bibinfo{pages}{2877--2899}
+  Society A}} \textbf{\bibinfo{volume}{370}}, \bibinfo{pages}{2877--2899}
   (\bibinfo{year}{2012}).
 
 \bibitem{Panter2019}
@@ -596,8 +595,8 @@ The code used in this study is available from the corresponding author upon reas
 \newblock \bibinfo{title}{{An energy landscape approach to locomotor
   transitions in complex 3D terrain}}.
 \newblock \emph{\bibinfo{journal}{Proceedings of the National Academy of
-  Sciences}} \textbf{\bibinfo{volume}{117}}, \bibinfo{pages}{14987--14995}
-  (\bibinfo{year}{2020}).
+  Sciences of the United States of America}} \textbf{\bibinfo{volume}{117}},
+  \bibinfo{pages}{14987--14995} (\bibinfo{year}{2020}).
 
 \bibitem{Filipov2015}
 \bibinfo{author}{Filipov, E.~T.}, \bibinfo{author}{Tachi, T.},
@@ -634,7 +633,9 @@ The code used in this study is available from the corresponding author upon reas
 \bibinfo{author}{Chi, Y.} \emph{et~al.}
 \newblock \bibinfo{title}{{Bistable and Multistable Actuators for Soft Robots:
   Structures, Materials, and Functionalities}}.
-\newblock \emph{\bibinfo{journal}{Advanced Materials}}  (\bibinfo{year}{2022}).
+\newblock \emph{\bibinfo{journal}{Advanced Materials}}
+  \textbf{\bibinfo{volume}{34}}, \bibinfo{pages}{2110384}
+  (\bibinfo{year}{2022}).
 
 \bibitem{Bonfanti2020}
 \bibinfo{author}{Bonfanti, S.}, \bibinfo{author}{Guerra, R.},
@@ -735,6 +736,40 @@ The code used in this study is available from the corresponding author upon reas
   \textbf{\bibinfo{volume}{8}}, \bibinfo{pages}{5020--5034}
   (\bibinfo{year}{2012}).
 
+\bibitem{Dewar1984}
+\bibinfo{author}{Dewar, M. J.~S.}, \bibinfo{author}{Healy, E.~F.} \&
+  \bibinfo{author}{Stewart, J. J.~P.}
+\newblock \bibinfo{title}{{Location of transition states in reaction
+  mechanisms}}.
+\newblock \emph{\bibinfo{journal}{Journal of the Chemical Society, Faraday
+  Transactions 2}} \textbf{\bibinfo{volume}{80}}, \bibinfo{pages}{227}
+  (\bibinfo{year}{1984}).
+
+\bibitem{Ionova1993}
+\bibinfo{author}{Ionova, I.~V.} \& \bibinfo{author}{Carter, E.~A.}
+\newblock \bibinfo{title}{{Ridge method for finding saddle points on potential
+  energy surfaces}}.
+\newblock \emph{\bibinfo{journal}{The Journal of Chemical Physics}}
+  \textbf{\bibinfo{volume}{98}}, \bibinfo{pages}{6377--6386}
+  (\bibinfo{year}{1993}).
+
+\bibitem{Miron2001}
+\bibinfo{author}{Miron, R.~A.} \& \bibinfo{author}{Fichthorn, K.~A.}
+\newblock \bibinfo{title}{{The Step and Slide method for finding saddle points
+  on multidimensional potential surfaces}}.
+\newblock \emph{\bibinfo{journal}{The Journal of Chemical Physics}}
+  \textbf{\bibinfo{volume}{115}}, \bibinfo{pages}{8742--8747}
+  (\bibinfo{year}{2001}).
+
+\bibitem{Zhang2013}
+\bibinfo{author}{Zhang, X.-J.}, \bibinfo{author}{Shang, C.} \&
+  \bibinfo{author}{Liu, Z.-P.}
+\newblock \bibinfo{title}{{Double-Ended Surface Walking Method for Pathway
+  Building and Transition State Location of Complex Reactions}}.
+\newblock \emph{\bibinfo{journal}{Journal of Chemical Theory and Computation}}
+  \textbf{\bibinfo{volume}{9}}, \bibinfo{pages}{5745--5753}
+  (\bibinfo{year}{2013}).
+
 \bibitem{Trefethen2013}
 \bibinfo{author}{Trefethen, A.~E.} \& \bibinfo{author}{Thiyagalingam, J.}
 \newblock \bibinfo{title}{{Energy-aware software: Challenges, opportunities and
@@ -746,8 +781,8 @@ The code used in this study is available from the corresponding author upon reas
 \bibitem{Shalf2020}
 \bibinfo{author}{Shalf, J.}
 \newblock \bibinfo{title}{{The future of computing beyond Moore's Law}}.
-\newblock \emph{\bibinfo{journal}{Philosophical Transactions Royal Society}}
-  \textbf{\bibinfo{volume}{378}}, \bibinfo{pages}{20190061}
+\newblock \emph{\bibinfo{journal}{Philosophical Transactions of the Royal
+  Society A}} \textbf{\bibinfo{volume}{378}}, \bibinfo{pages}{20190061}
   (\bibinfo{year}{2020}).
 
 \bibitem{Alexander2020}
@@ -822,40 +857,6 @@ The code used in this study is available from the corresponding author upon reas
 \newblock \emph{\bibinfo{journal}{Mathematical Programming}}
   \textbf{\bibinfo{volume}{45}}, \bibinfo{pages}{503--528}
   (\bibinfo{year}{1989}).
-
-\bibitem{Miron2001}
-\bibinfo{author}{Miron, R.~A.} \& \bibinfo{author}{Fichthorn, K.~A.}
-\newblock \bibinfo{title}{{The Step and Slide method for finding saddle points
-  on multidimensional potential surfaces}}.
-\newblock \emph{\bibinfo{journal}{The Journal of Chemical Physics}}
-  \textbf{\bibinfo{volume}{115}}, \bibinfo{pages}{8742--8747}
-  (\bibinfo{year}{2001}).
-
-\bibitem{Dewar1984}
-\bibinfo{author}{Dewar, M. J.~S.}, \bibinfo{author}{Healy, E.~F.} \&
-  \bibinfo{author}{Stewart, J. J.~P.}
-\newblock \bibinfo{title}{{Location of transition states in reaction
-  mechanisms}}.
-\newblock \emph{\bibinfo{journal}{Journal of the Chemical Society, Faraday
-  Transactions 2}} \textbf{\bibinfo{volume}{80}}, \bibinfo{pages}{227}
-  (\bibinfo{year}{1984}).
-
-\bibitem{Ionova1993}
-\bibinfo{author}{Ionova, I.~V.} \& \bibinfo{author}{Carter, E.~A.}
-\newblock \bibinfo{title}{{Ridge method for finding saddle points on potential
-  energy surfaces}}.
-\newblock \emph{\bibinfo{journal}{The Journal of Chemical Physics}}
-  \textbf{\bibinfo{volume}{98}}, \bibinfo{pages}{6377--6386}
-  (\bibinfo{year}{1993}).
-
-\bibitem{Zhang2013}
-\bibinfo{author}{Zhang, X.-J.}, \bibinfo{author}{Shang, C.} \&
-  \bibinfo{author}{Liu, Z.-P.}
-\newblock \bibinfo{title}{{Double-Ended Surface Walking Method for Pathway
-  Building and Transition State Location of Complex Reactions}}.
-\newblock \emph{\bibinfo{journal}{Journal of Chemical Theory and Computation}}
-  \textbf{\bibinfo{volume}{9}}, \bibinfo{pages}{5745--5753}
-  (\bibinfo{year}{2013}).
 
 \bibitem{Wales2002}
 \bibinfo{author}{Wales, D.~J.}
