@@ -36,7 +36,7 @@
   Existing methods, however, can struggle in problems with a large number of degrees of freedom, on-the-fly adaptive remeshing and coarse-graining, and energy landscapes that are locally flat or discontinuous.
   To resolve these challenges, we introduce a new double-ended method, the Binary-Image Transition State Search (BITSS).
   It uses just two states that converge to the transition state, resulting in a fast, flexible, and memory-efficient method.
-  We demonstate its versatility by applying BITSS to three very different classes of problems: Lennard-Jones clusters, shell buckling, and multiphase phase-field models.
+  We demonstrate its versatility by applying BITSS to three very different classes of problems: Lennard-Jones clusters, shell buckling, and multiphase phase-field models.
 \end{abstract}
 
 \maketitle
@@ -329,7 +329,7 @@ In the convergence rate comparison in \cref{fig:speedtest}, the string method an
 Each method is initialised with 5, 10, or 20 images, using a linear interpolation between the chosen end states.
 
 In each iteration of the string method, each image is evolved downhill for a number of L-BFGS iterations before redistributing the images along a cubic-spline interpolated path.
-This number of iterations is varied to obtain the fastest convergence, for which we find 2, 50, and 20 to be optimal for the particle cluster, cylidrical buckling, and striped wetting examples, respectively.
+This number of iterations is varied to obtain the fastest convergence, for which we find 2, 50, and 20 to be optimal for the particle cluster, cylindrical buckling, and striped wetting examples, respectively.
 
 In the case of DNEB, the spring constant between the images is instead optimised.
 For the particle cluster system, a spring constant of $1$ is used for the 5 image case, and $0.1$ for 10 and 20 images.
@@ -342,7 +342,7 @@ First, the calculation of $\kappa_d$ in \cref{eq:kd} must be adapted to avoid th
 This can be done by simply removing the first term and just using the second term in the equation.
 Secondly, L-BFGS can no longer be used because it requires knowledge of the gradients.
 We must instead use a minimiser that does not require a differentiable optimisation function, for which we use simulated annealing \cite{Kirkpatrick1983}.
-This has a chance of randomly jumping one state over the dividing barrier, but we can reduce this probability by limiting the initial temparature and maximum random displacement.
+This has a chance of randomly jumping one state over the dividing barrier, but we can reduce this probability by limiting the initial temperature and maximum random displacement.
 We typically employ $T_0 = E_\mathrm{B} / 10$, and $d_\mathrm{max} = d(\bm{x}_1, \bm{x}_2) / 100$.
 
 \subsection{Adaptive discretisation test details}
@@ -395,7 +395,7 @@ The second term provides the bending energy, where $\theta_j$ is the dihedral an
 \begin{figure}[htb]
   \includegraphics{fig/BAHschematic.pdf}
   \caption{\label{fig:BAHschematic}
-    \textbf{Schematic of the bar and hinge model showing the relevent parameters for a single hinge element.}
+    \textbf{Schematic of the bar and hinge model showing the relevant parameters for a single hinge element.}
     $h_i$ and $\bm{\hat{n}}_i$ denote the height and unit normal of each triangle respectively.
   }
 \end{figure}
@@ -937,10 +937,10 @@ The code used in this study is available from the corresponding author upon reas
 \end{acknowledgments}
 
 \section*{Author contributions}
-S.~J.~A. and J.~R.~P. developed the theoretical model.
-S.~J.~A. performed the experiments and analysed the data.
-H.~K. supervised the study.
-S.~J.~A. wrote the paper, with review and input from H.~K. and J.~R.~P.
+S.~J.~A., J.~R.~P., and H.~K conceived and planned the project.
+S.~J.~A. performed the numerical experiments and analysed the data.
+J.~R.~P. and H.~K. supervised the study.
+S.~J.~A. wrote the paper, with review and input from and J.~R.~P. and H.~K.
 
 \section*{Competing interests}
 The authors declare no competing interests.
