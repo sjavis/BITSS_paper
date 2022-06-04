@@ -217,8 +217,7 @@ Meanwhile, using step and slide, it is difficult to obtain a reasonable energy i
 
 Although reliable, chain-of-states approaches typically use tens of states.
 As a result of the BITSS method using only two states, it has the potential to be significantly faster.
-This is tested here by measuring the speed of convergence to the transition state for BITSS in comparison with the string method \cite{E2007} and DNEB \cite{Trygubenko2004} for three diverse systems, exhibiting a broad range of energy landscapes.
-Details of each are presented in the methods section.
+This is tested here by measuring the speed of convergence to the transition state for BITSS in comparison with the string method \cite{E2007} and DNEB \cite{Trygubenko2004} using 5, 10, and 20 images for three diverse systems, exhibiting a broad range of energy landscapes.
 
 The first system is a two-dimensional, seven-particle cluster, interacting via a Lennard-Jones pair potential.
 This is a frequently used test system for studying transition rates \cite{Wales2002,Passerone2001}.
@@ -238,6 +237,14 @@ Here, the system is represented by a diffuse-interface model, in which the \num{
 Convergence is measured using the distance from the transition state.
 For BITSS, the average of the two states is used for this, whereas for the chain-of-states methods, the closest point on a cubic spline interpolation is used.
 The speed of this convergence is evaluated through comparison with the number of calculations of the potential gradient for a single state.
+
+The parameters used in the chain-of-states methods are also chosen such that they optimise the speed of convergence.
+For the string method, this is the number of downhill iterations before the images are redistributed.
+For which, the optimal values are found to be 2, 50, and 20 for the particle cluster, cylindrical buckling, and striped wetting examples, respectively.
+In the case of DNEB, the spring constant between the images is optimised instead.
+For the particle cluster system, a spring constant of $1$ is used for the 5 image case, and $0.1$ for 10 and 20 images.
+For the cylindrical buckling, the spring constant is $0.01$ in all cases.
+And for the striped wetting, $10^{-4}$ is used for 5 and 10 images, and $10^{-3}$ for 20 images.
 
 The results for this test, shown in \cref{fig:speedtest}, demonstrate two main advantages for the BITSS method.
 Firstly, the slope illustrates that the rate of convergence is indeed much greater for the BITSS method.
@@ -338,18 +345,6 @@ Overall, these will enable BITSS to access even more challenging landscapes, and
 
 \appendix
 \section*{Methods}
-
-\subsection{Implementing the string and DNEB methods}
-In the convergence rate comparison in \cref{fig:speedtest}, the string method and doubly-nudged elastic band method (DNEB) are used, based upon \cite{E2007} and \cite{Trygubenko2004}, respectively.
-Each method is initialised with 5, 10, or 20 images, using a linear interpolation between the chosen end states.
-
-In each iteration of the string method, each image is evolved downhill for a number of L-BFGS iterations before redistributing the images along a cubic-spline interpolated path.
-This number of iterations is varied to obtain the fastest convergence, for which we find 2, 50, and 20 to be optimal for the particle cluster, cylindrical buckling, and striped wetting examples, respectively.
-
-In the case of DNEB, the spring constant between the images is instead optimised.
-For the particle cluster system, a spring constant of $1$ is used for the 5 image case, and $0.1$ for 10 and 20 images.
-For the cylindrical buckling, the spring constant is $0.01$ in all cases.
-And for the striped wetting, $10^{-4}$ is used for 5 and 10 images, and $10^{-3}$ for 20 images.
 
 \subsection{Adaptive discretisation test details}
 Here we provide the details for the interpolations and mapping involved in the two examples demonstrating the feasibility of using an adaptive discretisation method.
