@@ -5,13 +5,14 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import pyutils.latexify as lt
 
-lt.dpi = 500
-lt.update_width('natcomm-single')
+lt.dpi = 1200
+lt.update_width('aip-single')
 
 # Font size
 plt.rc('font', size=9)
 plt.rc('axes', labelsize=9)
 
+# Use text font for axes
 def formatter(s):
     base = re.search(r'\$\\mathdefault\{(.*)\}\$', s)
     if (base is None): return s
@@ -31,16 +32,16 @@ def formatter(s):
     return s
 lt.axis_formatter = formatter
 
-# Helvetica font
-mpl.rcParams['font.family'] = 'sans-serif'
-mpl.rcParams['font.sans-serif'] = ['Helvetica']
-mpl.rcParams['text.latex.preamble'] = "\n".join([mpl.rcParams['text.latex.preamble'],
-                                                 r"\usepackage{helvet}",])
-                                                 # r"\usepackage{sansmath}",
-                                                 # r"\sansmath"])
+# # Helvetica font
+# mpl.rcParams['font.family'] = 'sans-serif'
+# mpl.rcParams['font.sans-serif'] = ['Helvetica']
+# mpl.rcParams['text.latex.preamble'] = "\n".join([mpl.rcParams['text.latex.preamble'],
+#                                                  r"\usepackage{helvet}",])
+#                                                  # r"\usepackage{sansmath}",
+#                                                  # r"\sansmath"])
 
-# Upright vectors
-mpl.rcParams['text.latex.preamble'] = "\n".join([mpl.rcParams['text.latex.preamble'], r'\renewcommand{\bm}[1]{\boldsymbol{\mathbf{#1}}}'])
+# # Upright vectors
+# mpl.rcParams['text.latex.preamble'] = "\n".join([mpl.rcParams['text.latex.preamble'], r'\renewcommand{\bm}[1]{\boldsymbol{\mathbf{#1}}}'])
 
 # Colours
 plt.rc('font', size=9)

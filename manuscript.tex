@@ -1,14 +1,15 @@
-\documentclass[twocolumn,10pt]{revtex4}
+\documentclass[aip,jcp,reprint,twocolumn]{revtex4-1}
 
 % Maths
-% \usepackage{bm}
+\usepackage{bm}
 \usepackage{amsmath}
-\newcommand{\bm}[1]{\boldsymbol{\mathbf{#1}}}
 \newcommand{\abs}[1]{\left| #1 \right|}
 \newcommand{\grad}{\bm{\nabla}}
 \newcommand{\upDelta}{\mathop{}\!\Delta}
 
 % Text
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 \usepackage[group-separator={,}]{siunitx}
 \usepackage{enumitem}
 \usepackage{xcolor}
@@ -21,15 +22,20 @@
 \usepackage{cleveref}
 \Crefname{figure}{Fig.}{Figs.}
 
+% \usepackage[mathlines]{lineno}
+% \linenumbers\relax
 
 \begin{document}
 \title{A fast and memory-efficient transition state search method for complex energy landscapes}
+
 \author{Samuel J. Avis}
 \author{Jack R. Panter}
 \email[]{j.r.panter@durham.ac.uk}
 \author{Halim Kusumaatmaja}
 \email[]{halim.kusumaatmaja@durham.ac.uk}
 \affiliation{Department of Physics, Durham University, South Road, Durham DH1 3LE, UK}
+
+\date{\today}
 
 \begin{abstract}
   Locating transition states is crucial for investigating transition mechanisms in wide-ranging phenomena, from atomistic to macroscale systems.
@@ -76,12 +82,11 @@ Using a range of different applications, we demonstrate that it successfully add
 In addition, we show that BITSS is superior compared to existing bracketing methods, allowing us to access the transition states when other methods fail.
 
 
-\section{Results and discussion}
-\subsection{BITSS method}
+\section{BITSS method}
 \begin{figure}[tb]
   \includegraphics[width=\linewidth]{toy2d.pdf}
   \caption{\label{fig:toy2d}
-    \textbf{Schematics of the BITSS method on a simple 2D potential with two minima.}
+    Schematics of the BITSS method on a simple 2D potential with two minima.
     (a) The orange line shows the trajectories of the two states from the minima (blue) to the transition states (red) under the BITSS method.
         The minimum energy pathway is shown by the dashed line.
     (b) A snapshot of the BITSS minimisation showing the driving forces on each state due to the energy constraint, $\bm{F}_\mathrm{E}$, and distance constraint, $\bm{F}_\mathrm{D}$, with $E_1 < E_2$ and $d(\bm{x}_1,\bm{x}_2) < d_i$.
@@ -163,11 +168,21 @@ This enables the identification of the overall energy barrier, providing estimat
 However, as demonstrated in Supplementary Note II, if multiple transition states have very similar energies then a smaller distance reduction factor, $f$, may be necessary to ensure that it does indeed converge to the highest transition state.
 Furthermore, if all of transition states or the full pathway are desired, BITSS can be continually repeated from one of the minima downhill from the located transition state and one of the initial minima until the initial minima are piecewise connected by a full pathway.
 
-\subsection{Other bracketing methods}
+\subsection{Changes for undefined gradients}
+A couple of alterations to the method must be made to account for situations where the gradients are unknown.
+First, the calculation of $\kappa_d$ in \cref{eq:kd} must be adapted to avoid the use of gradients.
+This can be done by simply removing the first term and just using the second term in the equation.
+Secondly, L-BFGS can no longer be used because it requires knowledge of the gradients.
+We must instead use a minimiser that does not require a differentiable optimisation function, for which we use simulated annealing \cite{Kirkpatrick1983}.
+This has a chance of randomly jumping one state over the dividing barrier, but we can reduce this probability by limiting the initial temperature and maximum random displacement.
+We typically employ $T_0 = E_\mathrm{B} / 10$, and $d_\mathrm{max} = d(\bm{x}_1, \bm{x}_2) / 100$.
+
+\section{Results and Discussion}
+\subsection{Comparison with other bracketing methods}
 \begin{figure}[htb]
   \includegraphics[width=\linewidth]{bracketing.pdf}
   \caption{\label{fig:bracketing}
-    \textbf{Trajectories of the bracketing methods on a hooked potential with a single saddle point.}
+    Trajectories of the bracketing methods on a hooked potential with a single saddle point.
     The minimum energy pathway is shown by the dashed line.
   }
 \end{figure}
@@ -189,11 +204,11 @@ In the case of DHS, fixing one state in place and optimising the other means tha
 Meanwhile, using step and slide, it is difficult to obtain a reasonable energy increment when the two states are far from the transition state, also leading to a larger than necessary number of iterations.
 
 
-\subsection{Speed Comparison}
+\subsection{Speed comparison}
 \begin{figure*}[tb]
   \includegraphics[width=\linewidth]{speedtest.pdf}
   \caption{\label{fig:speedtest}
-    \textbf{Comparisons between BITSS, DNEB, and the string method in the convergence to the transition state as a function of the number of calculations of the energy gradient.}
+    Comparisons between BITSS, DNEB, and the string method in the convergence to the transition state as a function of the number of calculations of the energy gradient.
     Three test systems are used: (a) a Lennard-Jones seven-particle cluster, (b) cylindrical shell buckling, and (c) wetting of a chemically-striped surface.
     The configurations shown correspond to the two minimum energy states and the transition state, marked by an asterisk.
     The string method and DNEB are repeated with a differing number of images, as listed in the legend in (c).
@@ -202,7 +217,7 @@ Meanwhile, using step and slide, it is difficult to obtain a reasonable energy i
 
 Although reliable, chain-of-states approaches typically use tens of states.
 As a result of the BITSS method using only two states, it has the potential to be significantly faster.
-This is tested here by measuring the speed of convergence to the transition state for BITSS in comparison with the string method and DNEB for three diverse systems, exhibiting a broad range of energy landscapes.
+This is tested here by measuring the speed of convergence to the transition state for BITSS in comparison with the string method \cite{E2007} and DNEB \cite{Trygubenko2004} for three diverse systems, exhibiting a broad range of energy landscapes.
 Details of each are presented in the methods section.
 
 The first system is a two-dimensional, seven-particle cluster, interacting via a Lennard-Jones pair potential.
@@ -235,7 +250,7 @@ Therefore, unlike these chain-of-states methods, BITSS does not require a second
 \begin{figure}[tb]
   \includegraphics[width=\linewidth]{adaptivemesh.pdf}
   \caption{\label{fig:adaptivemesh}
-    \textbf{Demonstration of BITSS addressing the challenges associated with adaptive remeshing.}
+    Demonstration of BITSS addressing the challenges associated with adaptive remeshing.
     (a) Snapshots of the BITSS method for the buckling of a cylinder with a changing mesh.
         The radial displacement relative the unbuckled cylinder is shown, as well as the underlying triangular mesh.
     (b) Snapshots for the striped wetting example with different resolutions for the two states.
@@ -265,7 +280,7 @@ The precision of this convergence is now limited by the transition state energy 
 \begin{figure}[tb]
   \includegraphics[width=\linewidth]{flatdiscontinuous.pdf}
   \caption{\label{fig:flatdiscontinuous}
-    \textbf{Demonstration of BITSS applied to flat and discontinuous potentials.}
+    Demonstration of BITSS applied to flat and discontinuous potentials.
     (a) Energy profile of the BITSS pathway on a 2D potential with flat regions.
         Blue and red dots denote the minima and transition state, respectively.
         Points of interest are labelled by i--iii (see text).
@@ -336,15 +351,6 @@ For the particle cluster system, a spring constant of $1$ is used for the 5 imag
 For the cylindrical buckling, the spring constant is $0.01$ in all cases.
 And for the striped wetting, $10^{-4}$ is used for 5 and 10 images, and $10^{-3}$ for 20 images.
 
-\subsection{BITSS: Changes for undefined gradients}
-A couple of alterations to the method must be made to account for situations where the gradients are unknown.
-First, the calculation of $\kappa_d$ in \cref{eq:kd} must be adapted to avoid the use of gradients.
-This can be done by simply removing the first term and just using the second term in the equation.
-Secondly, L-BFGS can no longer be used because it requires knowledge of the gradients.
-We must instead use a minimiser that does not require a differentiable optimisation function, for which we use simulated annealing \cite{Kirkpatrick1983}.
-This has a chance of randomly jumping one state over the dividing barrier, but we can reduce this probability by limiting the initial temperature and maximum random displacement.
-We typically employ $T_0 = E_\mathrm{B} / 10$, and $d_\mathrm{max} = d(\bm{x}_1, \bm{x}_2) / 100$.
-
 \subsection{Adaptive discretisation test details}
 Here we provide the details for the interpolations and mapping involved in the two examples demonstrating the feasibility of using an adaptive discretisation method.
 For the cylindrical buckling example with a changing mesh, the resolution is refined each time the separation between the two states has halved, and is performed at the end of each iteration of the BITSS method.
@@ -395,7 +401,7 @@ The second term provides the bending energy, where $\theta_j$ is the dihedral an
 \begin{figure}[htb]
   \includegraphics{fig/BAHschematic.pdf}
   \caption{\label{fig:BAHschematic}
-    \textbf{Schematic of the bar and hinge model showing the relevant parameters for a single hinge element.}
+    Schematic of the bar and hinge model showing the relevant parameters for a single hinge element.
     $h_i$ and $\bm{\hat{n}}_i$ denote the height and unit normal of each triangle respectively.
   }
 \end{figure}
@@ -447,502 +453,31 @@ The gradients of these terms are given by,
 \end{align}
 where index $k$ denotes neighboring nodes at which the evaluation of the gradient uses $\phi_i$.
 
-
-\section*{Data availability}
-The data that support the findings of this study are available from the corresponding author upon reasonable request.
-
-\section*{Code availability}
-The code used in this study is available from the corresponding author upon reasonable request.
-
-%% start bib
-% % \bibliography{../../library.bib}
-% \bibliography{bibexport.bib}
-% \bibliographystyle{naturemag}
-%% mid bib
-\begin{thebibliography}{10}
-\expandafter\ifx\csname url\endcsname\relax
-  \def\url#1{\texttt{#1}}\fi
-\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
-\providecommand{\bibinfo}[2]{#2}
-\providecommand{\eprint}[2][]{\url{#2}}
-
-\bibitem{Bryngelson1995}
-\bibinfo{author}{Bryngelson, J.~D.}, \bibinfo{author}{Onuchic, J.~N.},
-  \bibinfo{author}{Socci, N.~D.} \& \bibinfo{author}{Wolynes, P.~G.}
-\newblock \bibinfo{title}{{Funnels, pathways, and the energy landscape of
-  protein folding: A synthesis}}.
-\newblock \emph{\bibinfo{journal}{Proteins: Structure, Function, and
-  Bioinformatics}} \textbf{\bibinfo{volume}{21}}, \bibinfo{pages}{167--195}
-  (\bibinfo{year}{1995}).
-
-\bibitem{Onuchic1997}
-\bibinfo{author}{Onuchic, J.~N.}, \bibinfo{author}{Luthey-Schulten, Z.} \&
-  \bibinfo{author}{Wolynes, P.~G.}
-\newblock \bibinfo{title}{{Theory of Protein Folding: The Energy Landscape
-  Perspective}}.
-\newblock \emph{\bibinfo{journal}{Annual Review of Physical Chemistry}}
-  \textbf{\bibinfo{volume}{48}}, \bibinfo{pages}{545--600}
-  (\bibinfo{year}{1997}).
-
-\bibitem{Boehr2006}
-\bibinfo{author}{Boehr, D.~D.}, \bibinfo{author}{McElheny, D.},
-  \bibinfo{author}{Dyson, H.~J.} \& \bibinfo{author}{Wrightt, P.~E.}
-\newblock \bibinfo{title}{{The dynamic energy landscape of dihydrofolate
-  reductase catalysis}}.
-\newblock \emph{\bibinfo{journal}{Science}} \textbf{\bibinfo{volume}{313}},
-  \bibinfo{pages}{1638--1642} (\bibinfo{year}{2006}).
-
-\bibitem{Kerns2015}
-\bibinfo{author}{Kerns, S.~J.} \emph{et~al.}
-\newblock \bibinfo{title}{{The energy landscape of adenylate kinase during
-  catalysis}}.
-\newblock \emph{\bibinfo{journal}{Nature Structural and Molecular Biology}}
-  \textbf{\bibinfo{volume}{22}}, \bibinfo{pages}{124--131}
-  (\bibinfo{year}{2015}).
-
-\bibitem{Guo2018a}
-\bibinfo{author}{Guo, C.}, \bibinfo{author}{Wang, Z.}, \bibinfo{author}{Wang,
-  D.}, \bibinfo{author}{Wang, H.~F.} \& \bibinfo{author}{Hu, P.}
-\newblock \bibinfo{title}{{First-Principles Determination of CO Adsorption and
-  Desorption on Pt(111) in the Free Energy Landscape}}.
-\newblock \emph{\bibinfo{journal}{Journal of Physical Chemistry C}}
-  \textbf{\bibinfo{volume}{122}}, \bibinfo{pages}{21478--21483}
-  (\bibinfo{year}{2018}).
-
-\bibitem{Richardson2016}
-\bibinfo{author}{Richardson, J.~O.} \emph{et~al.}
-\newblock \bibinfo{title}{{Concerted hydrogen-bond breaking by quantum
-  tunneling in the water hexamer prism}}.
-\newblock \emph{\bibinfo{journal}{Science}} \textbf{\bibinfo{volume}{351}},
-  \bibinfo{pages}{1310} (\bibinfo{year}{2016}).
-
-\bibitem{Vaillant2019}
-\bibinfo{author}{Vaillant, C.~L.}, \bibinfo{author}{Althorpe, S.~C.} \&
-  \bibinfo{author}{Wales, D.~J.}
-\newblock \bibinfo{title}{{Path Integral Energy Landscapes for Water
-  Clusters}}.
-\newblock \emph{\bibinfo{journal}{Journal of Chemical Theory and Computation}}
-  \textbf{\bibinfo{volume}{15}}, \bibinfo{pages}{33--42}
-  (\bibinfo{year}{2019}).
-
-\bibitem{Richard2018}
-\bibinfo{author}{Richard, D.} \& \bibinfo{author}{Speck, T.}
-\newblock \bibinfo{title}{{Crystallization of hard spheres revisited. I.
-  Extracting kinetics and free energy landscape from forward flux sampling}}.
-\newblock \emph{\bibinfo{journal}{The Journal of Chemical Physics}}
-  \textbf{\bibinfo{volume}{148}}, \bibinfo{pages}{124110}
-  (\bibinfo{year}{2018}).
-
-\bibitem{Wales1998}
-\bibinfo{author}{Wales, D.~J.}, \bibinfo{author}{Miller, M.~A.} \&
-  \bibinfo{author}{Walsh, T.~R.}
-\newblock \bibinfo{title}{{Archetypal energy landscapes}}.
-\newblock \emph{\bibinfo{journal}{Nature}} \textbf{\bibinfo{volume}{394}},
-  \bibinfo{pages}{758--760} (\bibinfo{year}{1998}).
-
-\bibitem{Wales2012}
-\bibinfo{author}{Wales, D.~J.}
-\newblock \bibinfo{title}{{Decoding the energy landscape: Extracting structure,
-  dynamics and thermodynamics}}.
-\newblock \emph{\bibinfo{journal}{Philosophical Transactions of the Royal
-  Society A}} \textbf{\bibinfo{volume}{370}}, \bibinfo{pages}{2877--2899}
-  (\bibinfo{year}{2012}).
-
-\bibitem{Panter2019}
-\bibinfo{author}{Panter, J.~R.}, \bibinfo{author}{Chen, J.},
-  \bibinfo{author}{Zhang, T.} \& \bibinfo{author}{Kusumaatmaja, H.}
-\newblock \bibinfo{title}{{Harnessing energy landscape exploration to control
-  the buckling of cylindrical shells}}.
-\newblock \emph{\bibinfo{journal}{Communications Physics}}
-  \textbf{\bibinfo{volume}{2}}, \bibinfo{pages}{151} (\bibinfo{year}{2019}).
-
-\bibitem{Hutchinson2018}
-\bibinfo{author}{Hutchinson, J.~W.} \& \bibinfo{author}{Thompson, J. M.~T.}
-\newblock \bibinfo{title}{{Imperfections and energy barriers in shell
-  buckling}}.
-\newblock \emph{\bibinfo{journal}{International Journal of Solids and
-  Structures}} \textbf{\bibinfo{volume}{148-149}}, \bibinfo{pages}{157--168}
-  (\bibinfo{year}{2018}).
-
-\bibitem{Zhang2014}
-\bibinfo{author}{Zhang, Y.} \& \bibinfo{author}{Ren, W.}
-\newblock \bibinfo{title}{{Numerical study of the effects of surface topography
-  and chemistry on the wetting transition using the string method}}.
-\newblock \emph{\bibinfo{journal}{The Journal of Chemical Physics}}
-  \textbf{\bibinfo{volume}{141}}, \bibinfo{pages}{244705}
-  (\bibinfo{year}{2014}).
-
-\bibitem{Panter2019b}
-\bibinfo{author}{Panter, J.~R.}, \bibinfo{author}{Gizaw, Y.} \&
-  \bibinfo{author}{Kusumaatmaja, H.}
-\newblock \bibinfo{title}{{Multifaceted design optimization for superomniphobic
-  surfaces}}.
-\newblock \emph{\bibinfo{journal}{Science Advances}}
-  \textbf{\bibinfo{volume}{5}}, \bibinfo{pages}{eaav7328}
-  (\bibinfo{year}{2019}).
-
-\bibitem{Amabili2017}
-\bibinfo{author}{Amabili, M.}, \bibinfo{author}{Giacomello, A.},
-  \bibinfo{author}{Meloni, S.} \& \bibinfo{author}{Casciola, C.~M.}
-\newblock \bibinfo{title}{{Collapse of superhydrophobicity on nanopillared
-  surfaces}}.
-\newblock \emph{\bibinfo{journal}{Physical Review Fluids}}
-  \textbf{\bibinfo{volume}{2}}, \bibinfo{pages}{034202} (\bibinfo{year}{2017}).
-
-\bibitem{Othayoth2020}
-\bibinfo{author}{Othayoth, R.}, \bibinfo{author}{Thoms, G.} \&
-  \bibinfo{author}{Li, C.}
-\newblock \bibinfo{title}{{An energy landscape approach to locomotor
-  transitions in complex 3D terrain}}.
-\newblock \emph{\bibinfo{journal}{Proceedings of the National Academy of
-  Sciences of the United States of America}} \textbf{\bibinfo{volume}{117}},
-  \bibinfo{pages}{14987--14995} (\bibinfo{year}{2020}).
-
-\bibitem{Filipov2015}
-\bibinfo{author}{Filipov, E.~T.}, \bibinfo{author}{Tachi, T.},
-  \bibinfo{author}{Paulino, G.~H.} \& \bibinfo{author}{Weitz, D.~A.}
-\newblock \bibinfo{title}{{Origami tubes assembled into stiff, yet
-  reconfigurable structures and metamaterials}}.
-\newblock \emph{\bibinfo{journal}{Proceedings of the National Academy of
-  Sciences of the United States of America}} \textbf{\bibinfo{volume}{112}},
-  \bibinfo{pages}{12321} (\bibinfo{year}{2015}).
-
-\bibitem{Zhai2018}
-\bibinfo{author}{Zhai, Z.}, \bibinfo{author}{Wang, Y.} \&
-  \bibinfo{author}{Jiang, H.}
-\newblock \bibinfo{title}{{Origami-inspired, on-demand deployable and
-  collapsible mechanical metamaterials with tunable stiffness}}.
-\newblock \emph{\bibinfo{journal}{Proceedings of the National Academy of
-  Sciences of the United States of America}} \textbf{\bibinfo{volume}{115}},
-  \bibinfo{pages}{2032--2037} (\bibinfo{year}{2018}).
-
-\bibitem{Bertoldi2017}
-\bibinfo{author}{Bertoldi, K.}, \bibinfo{author}{Vitelli, V.},
-  \bibinfo{author}{Christensen, J.} \& \bibinfo{author}{{Van Hecke}, M.}
-\newblock \bibinfo{title}{{Flexible mechanical metamaterials}}.
-\newblock \emph{\bibinfo{journal}{Nature Reviews Materials}}
-  \textbf{\bibinfo{volume}{2}}, \bibinfo{pages}{17066} (\bibinfo{year}{2017}).
-
-\bibitem{Truby2016}
-\bibinfo{author}{Truby, R.~L.} \& \bibinfo{author}{Lewis, J.~A.}
-\newblock \bibinfo{title}{{Printing soft matter in three dimensions}}.
-\newblock \emph{\bibinfo{journal}{Nature}} \textbf{\bibinfo{volume}{540}},
-  \bibinfo{pages}{371--378} (\bibinfo{year}{2016}).
-
-\bibitem{Chi2022}
-\bibinfo{author}{Chi, Y.} \emph{et~al.}
-\newblock \bibinfo{title}{{Bistable and Multistable Actuators for Soft Robots:
-  Structures, Materials, and Functionalities}}.
-\newblock \emph{\bibinfo{journal}{Advanced Materials}}
-  \textbf{\bibinfo{volume}{34}}, \bibinfo{pages}{2110384}
-  (\bibinfo{year}{2022}).
-
-\bibitem{Bonfanti2020}
-\bibinfo{author}{Bonfanti, S.}, \bibinfo{author}{Guerra, R.},
-  \bibinfo{author}{Font-Clos, F.}, \bibinfo{author}{Rayneau-Kirkhope, D.} \&
-  \bibinfo{author}{Zapperi, S.}
-\newblock \bibinfo{title}{{Automatic design of mechanical metamaterial
-  actuators}}.
-\newblock \emph{\bibinfo{journal}{Nature Communications}}
-  \textbf{\bibinfo{volume}{11}}, \bibinfo{pages}{4162} (\bibinfo{year}{2020}).
-
-\bibitem{Shan2015}
-\bibinfo{author}{Shan, S.} \emph{et~al.}
-\newblock \bibinfo{title}{{Multistable Architected Materials for Trapping
-  Elastic Strain Energy}}.
-\newblock \emph{\bibinfo{journal}{Advanced Materials}}
-  \textbf{\bibinfo{volume}{27}}, \bibinfo{pages}{4296--4301}
-  (\bibinfo{year}{2015}).
-
-\bibitem{Giri2021}
-\bibinfo{author}{Giri, T.~R.} \& \bibinfo{author}{Mailen, R.}
-\newblock \bibinfo{title}{{Controlled snapping sequence and energy absorption
-  in multistable mechanical metamaterial cylinders}}.
-\newblock \emph{\bibinfo{journal}{International Journal of Mechanical
-  Sciences}} \textbf{\bibinfo{volume}{204}}, \bibinfo{pages}{106541}
-  (\bibinfo{year}{2021}).
-
-\bibitem{Cerjan1981}
-\bibinfo{author}{Cerjan, C.~J.} \& \bibinfo{author}{Miller, W.~H.}
-\newblock \bibinfo{title}{{On finding transition states}}.
-\newblock \emph{\bibinfo{journal}{The Journal of Chemical Physics}}
-  \textbf{\bibinfo{volume}{75}}, \bibinfo{pages}{2800--2806}
-  (\bibinfo{year}{1981}).
-
-\bibitem{Heyden2005}
-\bibinfo{author}{Heyden, A.}, \bibinfo{author}{Bell, A.~T.} \&
-  \bibinfo{author}{Keil, F.~J.}
-\newblock \bibinfo{title}{{Efficient methods for finding transition states in
-  chemical reactions: Comparison of improved dimer method and partitioned
-  rational function optimization method}}.
-\newblock \emph{\bibinfo{journal}{Journal of Chemical Physics}}
-  \textbf{\bibinfo{volume}{123}}, \bibinfo{pages}{224101}
-  (\bibinfo{year}{2005}).
-
-\bibitem{Kastner2008}
-\bibinfo{author}{K{\"{a}}stner, J.} \& \bibinfo{author}{Sherwood, P.}
-\newblock \bibinfo{title}{{Superlinearly converging dimer method for transition
-  state search}}.
-\newblock \emph{\bibinfo{journal}{Journal of Chemical Physics}}
-  \textbf{\bibinfo{volume}{128}}, \bibinfo{pages}{014106}
-  (\bibinfo{year}{2008}).
-
-\bibitem{Zhang2016}
-\bibinfo{author}{Zhang, L.}, \bibinfo{author}{Du, Q.} \&
-  \bibinfo{author}{Zheng, Z.}
-\newblock \bibinfo{title}{{Optimization-based Shrinking Dimer Method for
-  Finding Transition States}}.
-\newblock \emph{\bibinfo{journal}{SIAM Journal on Scientific Computing}}
-  \textbf{\bibinfo{volume}{38}}, \bibinfo{pages}{A528--A544}
-  (\bibinfo{year}{2016}).
-
-\bibitem{E2007}
-\bibinfo{author}{E, W.}, \bibinfo{author}{Ren, W.} \&
-  \bibinfo{author}{Vanden-Eijnden, E.}
-\newblock \bibinfo{title}{{Simplified and improved string method for computing
-  the minimum energy paths in barrier-crossing events}}.
-\newblock \emph{\bibinfo{journal}{The Journal of Chemical Physics}}
-  \textbf{\bibinfo{volume}{126}}, \bibinfo{pages}{164103}
-  (\bibinfo{year}{2007}).
-
-\bibitem{Ren2013}
-\bibinfo{author}{Ren, W.} \& \bibinfo{author}{Vanden-Eijnden, E.}
-\newblock \bibinfo{title}{{A climbing string method for saddle point search}}.
-\newblock \emph{\bibinfo{journal}{Journal of Chemical Physics}}
-  \textbf{\bibinfo{volume}{138}}, \bibinfo{pages}{134105}
-  (\bibinfo{year}{2013}).
-
-\bibitem{E2002}
-\bibinfo{author}{E, W.}, \bibinfo{author}{Ren, W.} \&
-  \bibinfo{author}{Vanden-Eijnden, E.}
-\newblock \bibinfo{title}{{String method for the study of rare events}}.
-\newblock \emph{\bibinfo{journal}{Physical Review B}}
-  \textbf{\bibinfo{volume}{66}}, \bibinfo{pages}{052301}
-  (\bibinfo{year}{2002}).
-
-\bibitem{Trygubenko2004}
-\bibinfo{author}{Trygubenko, S.~A.} \& \bibinfo{author}{Wales, D.~J.}
-\newblock \bibinfo{title}{{A doubly nudged elastic band method for finding
-  transition states}}.
-\newblock \emph{\bibinfo{journal}{Journal of Chemical Physics}}
-  \textbf{\bibinfo{volume}{120}}, \bibinfo{pages}{2082--2094}
-  (\bibinfo{year}{2004}).
-
-\bibitem{Wales2012a}
-\bibinfo{author}{Wales, D.~J.} \& \bibinfo{author}{Carr, J.~M.}
-\newblock \bibinfo{title}{{Quasi-Continuous Interpolation Scheme for Pathways
-  between Distant Configurations}}.
-\newblock \emph{\bibinfo{journal}{Journal of Chemical Theory and Computation}}
-  \textbf{\bibinfo{volume}{8}}, \bibinfo{pages}{5020--5034}
-  (\bibinfo{year}{2012}).
-
-\bibitem{Dewar1984}
-\bibinfo{author}{Dewar, M. J.~S.}, \bibinfo{author}{Healy, E.~F.} \&
-  \bibinfo{author}{Stewart, J. J.~P.}
-\newblock \bibinfo{title}{{Location of transition states in reaction
-  mechanisms}}.
-\newblock \emph{\bibinfo{journal}{Journal of the Chemical Society, Faraday
-  Transactions 2}} \textbf{\bibinfo{volume}{80}}, \bibinfo{pages}{227}
-  (\bibinfo{year}{1984}).
-
-\bibitem{Ionova1993}
-\bibinfo{author}{Ionova, I.~V.} \& \bibinfo{author}{Carter, E.~A.}
-\newblock \bibinfo{title}{{Ridge method for finding saddle points on potential
-  energy surfaces}}.
-\newblock \emph{\bibinfo{journal}{The Journal of Chemical Physics}}
-  \textbf{\bibinfo{volume}{98}}, \bibinfo{pages}{6377--6386}
-  (\bibinfo{year}{1993}).
-
-\bibitem{Miron2001}
-\bibinfo{author}{Miron, R.~A.} \& \bibinfo{author}{Fichthorn, K.~A.}
-\newblock \bibinfo{title}{{The Step and Slide method for finding saddle points
-  on multidimensional potential surfaces}}.
-\newblock \emph{\bibinfo{journal}{The Journal of Chemical Physics}}
-  \textbf{\bibinfo{volume}{115}}, \bibinfo{pages}{8742--8747}
-  (\bibinfo{year}{2001}).
-
-\bibitem{Zhang2013}
-\bibinfo{author}{Zhang, X.-J.}, \bibinfo{author}{Shang, C.} \&
-  \bibinfo{author}{Liu, Z.-P.}
-\newblock \bibinfo{title}{{Double-Ended Surface Walking Method for Pathway
-  Building and Transition State Location of Complex Reactions}}.
-\newblock \emph{\bibinfo{journal}{Journal of Chemical Theory and Computation}}
-  \textbf{\bibinfo{volume}{9}}, \bibinfo{pages}{5745--5753}
-  (\bibinfo{year}{2013}).
-
-\bibitem{Trefethen2013}
-\bibinfo{author}{Trefethen, A.~E.} \& \bibinfo{author}{Thiyagalingam, J.}
-\newblock \bibinfo{title}{{Energy-aware software: Challenges, opportunities and
-  strategies}}.
-\newblock \emph{\bibinfo{journal}{Journal of Computational Science}}
-  \textbf{\bibinfo{volume}{4}}, \bibinfo{pages}{444--449}
-  (\bibinfo{year}{2013}).
-
-\bibitem{Shalf2020}
-\bibinfo{author}{Shalf, J.}
-\newblock \bibinfo{title}{{The future of computing beyond Moore's Law}}.
-\newblock \emph{\bibinfo{journal}{Philosophical Transactions of the Royal
-  Society A}} \textbf{\bibinfo{volume}{378}}, \bibinfo{pages}{20190061}
-  (\bibinfo{year}{2020}).
-
-\bibitem{Alexander2020}
-\bibinfo{author}{Alexander, F.} \emph{et~al.}
-\newblock \bibinfo{title}{{Exascale applications: Skin in the game}}.
-\newblock \emph{\bibinfo{journal}{Philosophical Transactions of the Royal
-  Society A}} \textbf{\bibinfo{volume}{378}}, \bibinfo{pages}{20190056}
-  (\bibinfo{year}{2020}).
-
-\bibitem{McMullen2018}
-\bibinfo{author}{McMullen, A.}, \bibinfo{author}{Holmes-Cerfon, M.},
-  \bibinfo{author}{Sciortino, F.}, \bibinfo{author}{Grosberg, A.~Y.} \&
-  \bibinfo{author}{Brujic, J.}
-\newblock \bibinfo{title}{{Freely Jointed Polymers Made of Droplets}}.
-\newblock \emph{\bibinfo{journal}{Physical Review Letters}}
-  \textbf{\bibinfo{volume}{121}}, \bibinfo{pages}{138002}
-  (\bibinfo{year}{2018}).
-
-\bibitem{Nguemaha2018}
-\bibinfo{author}{Nguemaha, V.} \& \bibinfo{author}{Zhou, H.~X.}
-\newblock \bibinfo{title}{{Liquid-Liquid Phase Separation of Patchy Particles
-  Illuminates Diverse Effects of Regulatory Components on Protein Droplet
-  Formation}}.
-\newblock \emph{\bibinfo{journal}{Scientific Reports}}
-  \textbf{\bibinfo{volume}{8}}, \bibinfo{pages}{1--11} (\bibinfo{year}{2018}).
-
-\bibitem{Chen2018b}
-\bibinfo{author}{Chen, D.}, \bibinfo{author}{Zhang, G.} \&
-  \bibinfo{author}{Torquato, S.}
-\newblock \bibinfo{title}{{Inverse Design of Colloidal Crystals via Optimized
-  Patchy Interactions}}.
-\newblock \emph{\bibinfo{journal}{Journal of Physical Chemistry B}}
-  \textbf{\bibinfo{volume}{122}}, \bibinfo{pages}{8462--8468}
-  (\bibinfo{year}{2018}).
-
-\bibitem{Santra2018}
-\bibinfo{author}{Santra, M.}, \bibinfo{author}{Singh, R.~S.} \&
-  \bibinfo{author}{Bagchi, B.}
-\newblock \bibinfo{title}{{Polymorph selection during crystallization of a
-  model colloidal fluid with a free energy landscape containing a metastable
-  solid}}.
-\newblock \emph{\bibinfo{journal}{Physical Review E}}
-  \textbf{\bibinfo{volume}{98}}, \bibinfo{pages}{032606}
-  (\bibinfo{year}{2018}).
-
-\bibitem{Mokkonen2016}
-\bibinfo{author}{M{\"{o}}kk{\"{o}}nen, H.}, \bibinfo{author}{Ala-Nissila, T.}
-  \& \bibinfo{author}{J{\'{o}}nsson, H.}
-\newblock \bibinfo{title}{{Efficient dynamical correction of the transition
-  state theory rate estimate for a flat energy barrier}}.
-\newblock \emph{\bibinfo{journal}{The Journal of Chemical Physics}}
-  \textbf{\bibinfo{volume}{145}}, \bibinfo{pages}{094901}
-  (\bibinfo{year}{2016}).
-
-\bibitem{Wriggers2006}
-\bibinfo{author}{Wriggers, P.}
-\newblock \emph{\bibinfo{title}{{Computational Contact Mechanics}}}
-  (\bibinfo{publisher}{Springer Berlin Heidelberg}, \bibinfo{address}{Berlin,
-  Heidelberg}, \bibinfo{year}{2006}).
-
-\bibitem{Page1988}
-\bibinfo{author}{Page, M.} \& \bibinfo{author}{McIver, J.~W.}
-\newblock \bibinfo{title}{{On evaluating the reaction path Hamiltonian}}.
-\newblock \emph{\bibinfo{journal}{The Journal of Chemical Physics}}
-  \textbf{\bibinfo{volume}{88}}, \bibinfo{pages}{922--935}
-  (\bibinfo{year}{1988}).
-
-\bibitem{Liu1989}
-\bibinfo{author}{Liu, D.~C.} \& \bibinfo{author}{Nocedal, J.}
-\newblock \bibinfo{title}{{On the limited memory bfgs method for large scale
-  optimization}}.
-\newblock \emph{\bibinfo{journal}{Mathematical Programming}}
-  \textbf{\bibinfo{volume}{45}}, \bibinfo{pages}{503--528}
-  (\bibinfo{year}{1989}).
-
-\bibitem{Wales2002}
-\bibinfo{author}{Wales, D.~J.}
-\newblock \bibinfo{title}{{Discrete path sampling}}.
-\newblock \emph{\bibinfo{journal}{Molecular Physics}}
-  \textbf{\bibinfo{volume}{100}}, \bibinfo{pages}{3285--3305}
-  (\bibinfo{year}{2002}).
-
-\bibitem{Passerone2001}
-\bibinfo{author}{Passerone, D.} \& \bibinfo{author}{Parrinello, M.}
-\newblock \bibinfo{title}{{Action-Derived Molecular Dynamics in the Study of
-  Rare Events}}.
-\newblock \emph{\bibinfo{journal}{Physical Review Letters}}
-  \textbf{\bibinfo{volume}{87}}, \bibinfo{pages}{108302}
-  (\bibinfo{year}{2001}).
-
-\bibitem{Virot2017}
-\bibinfo{author}{Virot, E.}, \bibinfo{author}{Kreilos, T.},
-  \bibinfo{author}{Schneider, T.~M.} \& \bibinfo{author}{Rubinstein, S.~M.}
-\newblock \bibinfo{title}{{Stability Landscape of Shell Buckling}}.
-\newblock \emph{\bibinfo{journal}{Physical Review Letters}}
-  \textbf{\bibinfo{volume}{119}}, \bibinfo{pages}{224101}
-  (\bibinfo{year}{2017}).
-
-\bibitem{Kusumaatmaja2006}
-\bibinfo{author}{Kusumaatmaja, H.}, \bibinfo{author}{L{\'{e}}opold{\`{e}}s,
-  J.}, \bibinfo{author}{Dupuis, A.} \& \bibinfo{author}{Yeomans, J.~M.}
-\newblock \bibinfo{title}{{Drop dynamics on chemically patterned surfaces}}.
-\newblock \emph{\bibinfo{journal}{Europhysics Letters}}
-  \textbf{\bibinfo{volume}{73}}, \bibinfo{pages}{740--746}
-  (\bibinfo{year}{2006}).
-
-\bibitem{Brown2016}
-\bibinfo{author}{Brown, P.~S.} \& \bibinfo{author}{Bhushan, B.}
-\newblock \bibinfo{title}{{Bioinspired materials for water supply and
-  management: water collection, water purification and separation of water from
-  oil}}.
-\newblock \emph{\bibinfo{journal}{Philosophical Transactions of the Royal
-  Society A}} \textbf{\bibinfo{volume}{374}}, \bibinfo{pages}{20160135}
-  (\bibinfo{year}{2016}).
-
-\bibitem{Lee2018}
-\bibinfo{author}{Lee, C.~T.} \& \bibinfo{author}{Amaro, R.~E.}
-\newblock \bibinfo{title}{{Exascale Computing: A New Dawn for Computational
-  Biology}}.
-\newblock \emph{\bibinfo{journal}{Computing in Science {\&} Engineering}}
-  \textbf{\bibinfo{volume}{20}}, \bibinfo{pages}{18--25}
-  (\bibinfo{year}{2018}).
-
-\bibitem{Kolev2021}
-\bibinfo{author}{Kolev, T.} \emph{et~al.}
-\newblock \bibinfo{title}{{Efficient exascale discretizations: High-order
-  finite element methods}}.
-\newblock \emph{\bibinfo{journal}{The International Journal of High Performance
-  Computing Applications}} \textbf{\bibinfo{volume}{35}},
-  \bibinfo{pages}{527--552} (\bibinfo{year}{2021}).
-
-\bibitem{Brakke1992}
-\bibinfo{author}{Brakke, K.~A.}
-\newblock \bibinfo{title}{{The Surface Evolver}}.
-\newblock \emph{\bibinfo{journal}{Experimental Mathematics}}
-  \textbf{\bibinfo{volume}{1}}, \bibinfo{pages}{141--165}
-  (\bibinfo{year}{1992}).
-
-\bibitem{Kirkpatrick1983}
-\bibinfo{author}{Kirkpatrick, S.}, \bibinfo{author}{Gelatt, C.~D.} \&
-  \bibinfo{author}{Vecchi, M.~P.}
-\newblock \bibinfo{title}{{Optimization By Simulated Annealing}}.
-\newblock \emph{\bibinfo{journal}{Science}} \textbf{\bibinfo{volume}{220}},
-  \bibinfo{pages}{671--680} (\bibinfo{year}{1983}).
-
-\end{thebibliography}
-%% end bib
+\section*{Supplementary material}
+See the supplementary material for derivations of the expressions of the constraint coefficients in \cref{eq:kd,eq:ke}, and the demonstration of the BITSS method applied to a path with multiple transition states.
 
 \begin{acknowledgments}
   S.~J.~A. is supported by a studentship from the Engineering and Physical Sciences Research Council [Grant No. EP/R513039/1].
   H.~K. and J.~R.~P. acknowledge funding from the Engineering and Physical Sciences Research Council [Grant No. EP/V034154/1].
 \end{acknowledgments}
 
-\section*{Author contributions}
-S.~J.~A., J.~R.~P., and H.~K conceived and planned the project.
+\section*{Conflict of Interest}
+The authors have no conflicts to disclose.
+
+\section*{Author Contributions}
+All authors conceived and planned the project.
 S.~J.~A. performed the numerical experiments and analysed the data.
 J.~R.~P. and H.~K. supervised the study.
 S.~J.~A. wrote the paper, with review and input from and J.~R.~P. and H.~K.
 
-\section*{Competing interests}
-The authors declare no competing interests.
+\section*{Data availability}
+The data that support the findings of this study are available from the corresponding author upon reasonable request.
+
+%% start bib
+\bibliographystyle{aipnum4-1}
+\bibliography{bibexport.bib}
+% % \bibliography{../../library.bib}
+%% mid bib
+%% end bib
 
 \end{document}

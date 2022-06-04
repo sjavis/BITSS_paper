@@ -73,7 +73,7 @@ def plot_flat(fig, hsize):
         ax = fig.add_axes([0,0,1,1])
         plt.contourf(x, y, e, cmap='Greys_r', levels=10)
         ax.axis('off')
-        plt.savefig(f'potential.png', dpi=500)
+        plt.savefig(f'potential.png', dpi=600)
         plt.close(fig)
 
     def read_data():

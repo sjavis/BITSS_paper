@@ -43,7 +43,7 @@ def make_potential():
     levels = np.arange(-1.5, 1.5, 0.25)
     plt.contourf(x, y, e, cmap=cmap, levels=levels, extend='both')
     ax.axis('off')
-    plt.savefig(f'potential.png')
+    plt.savefig(f'potential.png', dpi=600)
     plt.close()
 
 
