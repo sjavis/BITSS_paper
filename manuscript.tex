@@ -27,6 +27,7 @@
 
 \begin{document}
 \title{A fast and memory-efficient transition state search method for complex energy landscapes}
+\date{\today}
 
 \author{Samuel J. Avis}
 \author{Jack R. Panter}
@@ -34,8 +35,6 @@
 \author{Halim Kusumaatmaja}
 \email[]{halim.kusumaatmaja@durham.ac.uk}
 \affiliation{Department of Physics, Durham University, South Road, Durham DH1 3LE, UK}
-
-\date{\today}
 
 \begin{abstract}
   Locating transition states is crucial for investigating transition mechanisms in wide-ranging phenomena, from atomistic to macroscale systems.
@@ -168,15 +167,6 @@ This enables the identification of the overall energy barrier, providing estimat
 However, as demonstrated in Supplementary Note II, if multiple transition states have very similar energies then a smaller distance reduction factor, $f$, may be necessary to ensure that it does indeed converge to the highest transition state.
 Furthermore, if all of transition states or the full pathway are desired, BITSS can be continually repeated from one of the minima downhill from the located transition state and one of the initial minima until the initial minima are piecewise connected by a full pathway.
 
-\subsection{Changes for undefined gradients}
-A couple of alterations to the method must be made to account for situations where the gradients are unknown.
-First, the calculation of $\kappa_d$ in \cref{eq:kd} must be adapted to avoid the use of gradients.
-This can be done by simply removing the first term and just using the second term in the equation.
-Secondly, L-BFGS can no longer be used because it requires knowledge of the gradients.
-We must instead use a minimiser that does not require a differentiable optimisation function, for which we use simulated annealing \cite{Kirkpatrick1983}.
-This has a chance of randomly jumping one state over the dividing barrier, but we can reduce this probability by limiting the initial temperature and maximum random displacement.
-We typically employ $T_0 = E_\mathrm{B} / 10$, and $d_\mathrm{max} = d(\bm{x}_1, \bm{x}_2) / 100$.
-
 \section{Results and Discussion}
 \subsection{Comparison with other bracketing methods}
 \begin{figure}[htb]
@@ -272,34 +262,12 @@ These techniques cause issues for most existing double-ended methods because the
 However, in BITSS the only direct coupling is in the distance measure, $d(\bm{x}_1,\bm{x}_2)$, which is relatively easy to adapt.
 Here we demonstrate the use of adaptive remeshing by considering two separate issues.
 
-% Firstly, we show in \cref{fig:adaptivemesh}a that BITSS is able to handle the discretisation adapting, and the number of degrees of freedom changing, as the method runs.
-% For this we use the cylindrical buckling example with the resolution increasing from 40 to 100 triangles around the cylinder, corresponding to an increase from \num{1760} to \num{11000} degrees of freedom.
-% This demonstrates that BITSS is able to converge to the transition state so long as the remeshing is not so significant as to shift a state into the basin of attraction of the other minimum.
+Firstly, we show in \cref{fig:adaptivemesh}a that BITSS is able to handle the discretisation adapting, and the number of degrees of freedom changing, as the method runs.
+For this we use the cylindrical buckling example with the resolution increasing from 40 to 100 triangles around the cylinder, corresponding to an increase from \num{1760} to \num{11000} degrees of freedom.
+This demonstrates that BITSS is able to converge to the transition state so long as the remeshing is not so significant as to shift a state into the basin of attraction of the other minimum.
 
-Firstly, we test if BITSS is able to handle the discretisation adapting, and the number of degrees of freedom changing, as the method runs.
-For this we use the cylindrical buckling example with the resolution being refined at the end of each iteration of the BITSS method, each time the separation between the two states has halved.
-This involves the number of triangles around the circumference of the cylinder increasing along the sequence: $40 \rightarrow 60 \rightarrow 80 \rightarrow 100$; with the number of degrees of freedom increasing by: $\num{1760} \rightarrow \num{3960} \rightarrow \num{7040} \rightarrow \num{11000}$.
-The positions of the nodes on the new grid, $\{\bm{n}_i\}$, are determined by linear interpolation from the previous grid $\{\bm{p}_i\}$, using the positions of the unbuckled meshes, $\{\bm{n'}_i\}$ and $\{\bm{p'}_i\}$.
-For each node of the new grid, $\bm{n'}_i$, the triangle that contains it is first identified, which we will denote $\{\bm{p'}_1,\bm{p'}_2,\bm{p'}_3\}$, and the barycentric coordinates of the point are computed, $\{\lambda_1,\lambda_2,\lambda_3\}$.
-The new position is then given by $\bm{n}_i = \lambda_1 \bm{p}_1 + \lambda_2 \bm{p}_2 + \lambda_3 \bm{p}_3$.
-The results in \cref{fig:adaptivemesh}a demonstrates that BITSS is indeed able to converge to the transition state.
-In general, it will be successful so long as the remeshing is not so significant as to shift a state into the basin of attraction of the other minimum.
-
-% In the second test, shown in \cref{fig:adaptivemesh}b, we demonstrate the use of different meshes for the two states in the striped wetting example.
-% In this case, the distance measure is adapted by interpolating one state onto the other mesh and computing the Euclidean distance.
-% However, for some applications a simpler measure may be sufficient, such as the difference between average values of the system.
-% Using this approach, BITSS is able to closely approach the transition state.
-% The precision of this convergence is now limited by the transition state energy differing slightly on each grid, but this effect will be reduced when using an adaptive method or a higher resolution.
-
-In the second test, we demonstrate the use of different meshes for the two states in the striped wetting example.
-In this case, the distance measure is adapted by first interpolating one state onto the other mesh.
-To do this the phase field is mapped from the higher resolution grid, $\{\phi_{k,l} | k,l \in \{0,1,\cdots,399\}\}$, to the low resolution grid, $\{\phi'_{i,j} | i,j \in \{0,1,\cdots,199\}\}$.
-Since a square grid is used with a resolution ratio of two, the involves averaging each 2x2 block to a single point:
-\begin{equation}
-  \phi'_{i,j} = \frac{1}{4} \left( \phi_{2i,2j} + \phi_{2i+1,2j} + \phi_{2i,2j+1} + \phi_{2i+1,2j+1} \right).
-\end{equation}
-The separation between the states is then computed with the 2-norm.
-Finally, the gradient of the distance with respect to each point is mapped back to the higher-resolution grid.
+In the second test, shown in \cref{fig:adaptivemesh}b, we demonstrate the use of different meshes for the two states in the striped wetting example.
+In this case, the distance measure is adapted by interpolating one state onto the other mesh and computing the Euclidean distance.
 However, for some applications a simpler measure may be sufficient, such as the difference between average values of the system.
 Using this approach, BITSS is able to closely approach the transition state.
 The precision of this convergence is now limited by the transition state energy differing slightly on each grid, but this effect will be reduced when using an adaptive method or a higher resolution.
@@ -365,10 +333,38 @@ In such cases, it may be possible to access transition states different from the
 Overall, these will enable BITSS to access even more challenging landscapes, and those not yet amenable to traditional landscape exploration techniques.
 
 
-\appendix
-\section*{Methods}
+\section*{Supplementary material}
+See the supplementary material for derivations of the expressions of the constraint coefficients in \cref{eq:kd,eq:ke}, and the demonstration of the BITSS method applied to a path with multiple transition states.
 
-\subsection{Adaptive discretisation test details}
+\begin{acknowledgments}
+  S.~J.~A. is supported by a studentship from the Engineering and Physical Sciences Research Council [Grant No. EP/R513039/1].
+  H.~K. and J.~R.~P. acknowledge funding from the Engineering and Physical Sciences Research Council [Grant No. EP/V034154/1].
+\end{acknowledgments}
+
+\section*{Conflict of Interest}
+The authors have no conflicts to disclose.
+
+\section*{Author Contributions}
+All authors conceived and planned the project.
+S.~J.~A. performed the numerical experiments and analysed the data.
+J.~R.~P. and H.~K. supervised the study.
+S.~J.~A. wrote the paper, with review and input from and J.~R.~P. and H.~K.
+
+\section*{Data availability}
+The data that support the findings of this study are available from the corresponding author upon reasonable request.
+
+
+\appendix
+\section{BITSS: Changes for undefined gradients}
+A couple of alterations to the method must be made to account for situations where the gradients are unknown.
+First, the calculation of $\kappa_d$ in \cref{eq:kd} must be adapted to avoid the use of gradients.
+This can be done by simply removing the first term and just using the second term in the equation.
+Secondly, L-BFGS can no longer be used because it requires knowledge of the gradients.
+We must instead use a minimiser that does not require a differentiable optimisation function, for which we use simulated annealing \cite{Kirkpatrick1983}.
+This has a chance of randomly jumping one state over the dividing barrier, but we can reduce this probability by limiting the initial temperature and maximum random displacement.
+We typically employ $T_0 = E_\mathrm{B} / 10$, and $d_\mathrm{max} = d(\bm{x}_1, \bm{x}_2) / 100$.
+
+\section{Adaptive discretisation test details}
 Here we provide the details for the interpolations and mapping involved in the two examples demonstrating the feasibility of using an adaptive discretisation method.
 For the cylindrical buckling example with a changing mesh, the resolution is refined each time the separation between the two states has halved, and is performed at the end of each iteration of the BITSS method.
 This involves the number of triangles around the circumference of the cylinder increasing along the sequence: $40 \rightarrow 60 \rightarrow 80 \rightarrow 100$; with the number of degrees of freedom increasing by: $\num{1760} \rightarrow \num{3960} \rightarrow \num{7040} \rightarrow \num{11000}$.
@@ -394,26 +390,81 @@ Finally, the gradient of the distance with respect to each point must be mapped 
 \end{equation}
 where $k \in \{2i, 2i+1\}$, and $l \in \{2j, 2j+1\}$.
 
+\section{Energy and gradient expressions for the example systems}
+\subsection{Particle cluster system}
+In the particle cluster example system, the Lennard-Jones potential is used for the interaction between each pair of particles.
+Therefore, the potential and its gradient for each pair of particles are
+\begin{gather}
+  E = 4\epsilon \left[ \left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{r}\right)^6 \right], \\
+  \frac{\partial E}{\partial \bm{x}_1} = -\frac{\partial E}{\partial \bm{x}_2} =
+    \frac{24 \epsilon (\bm{x}_2 - \bm{x}_1)}{r^2} \left[ 2 \left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{r}\right)^6 \right],
+\end{gather}
+where $\bm{x}_1$ and $\bm{x}_2$ are the positions of the two particles, $r$ is their separation, $\epsilon$ is the interaction strength, and $\sigma$ is the particle radius.
 
-\section*{Supplementary material}
-See the supplementary material for derivations of the expressions of the constraint coefficients in \cref{eq:kd,eq:ke}, details of the potentials used in example systems, and the demonstration of the BITSS method applied to a path with multiple transition states.
+\subsection{Cylindrical buckling system}
+A 2D triangular mesh is used to model the cylindrical buckling system, with the ends of the cylinder fixed in place to apply an axial compression of 0.14\%.
+The energy of the system is evaluated by treating all bonds in the mesh as an elastic spring to obtain the stretching energy, and all pairs of adjacent triangles to be connected by elastic hinges, providing the bending energy.
+Their expressions are given by
+\begin{equation}
+  E = \sum_i k^\mathrm{S}_i (r_i - r^0_i)^2 + \sum_j k^\mathrm{B}_j [1 + \cos(\theta_j - \theta^0_j)].
+\end{equation}
+The first term is the stretching energy, where $r_i$ is the length, $r^0_i$ is the equilibrium length, and $k^\mathrm{S}_i$ is the stretching rigidity of bond $i$.
+The second term provides the bending energy, where $\theta_j$ is the dihedral angle, $\theta^0_j$ is the equilibrium angle, and $k^\mathrm{B}_j$ is the bending rigidity of hinge $j$.
 
-\begin{acknowledgments}
-  S.~J.~A. is supported by a studentship from the Engineering and Physical Sciences Research Council [Grant No. EP/R513039/1].
-  H.~K. and J.~R.~P. acknowledge funding from the Engineering and Physical Sciences Research Council [Grant No. EP/V034154/1].
-\end{acknowledgments}
+\begin{figure}[htb]
+  \includegraphics{fig/BAHschematic.pdf}
+  \caption{\label{fig:BAHschematic}
+    Schematic of the bar and hinge model showing the relevant parameters for a single hinge element.
+    $h_i$ and $\bm{\hat{n}}_i$ denote the height and unit normal of each triangle respectively.
+  }
+\end{figure}
+The gradient of the energy can be obtained by individually considering the stretching and bending energies of a single bond and hinge.
+For simplicity, we will ignore the index for the bond and hinge.
+Using the variables shown in the schematic in \cref{fig:BAHschematic}, the gradient of the stretching energy of the bond between $\bm{x}_2$ and $\bm{x}_3$ is given by,
+\begin{equation}
+  \frac{\partial E^\mathrm{S}}{\partial \bm{x}_2} = - \frac{\partial E^\mathrm{S}}{\partial \bm{x}_3} =
+    2 k^\mathrm{S} (r - r^0) (\bm{x_2} - \bm{x_3}).
+\end{equation}
+The gradients of the bending energy of the hinge are
+\begin{align}
+  \frac{\partial E^\mathrm{B}}{\partial \bm{x}_1} &= k^\mathrm{B} \sin(\theta - \theta^0) \frac{\bm{\hat{n}}_a}{h_a}, \\
+  \frac{\partial E^\mathrm{B}}{\partial \bm{x}_2} &= - k^\mathrm{B} \sin(\theta - \theta^0) \left[\frac{\bm{\hat{n}}_a}{h_a} + \frac{\bm{\hat{n}}_a + \bm{\hat{n}}_b}{r}\right], \\
+  \frac{\partial E^\mathrm{B}}{\partial \bm{x}_3} &= - k^\mathrm{B} \sin(\theta - \theta^0) \left[\frac{\bm{\hat{n}}_b}{h_b} + \frac{\bm{\hat{n}}_a + \bm{\hat{n}}_b}{r}\right], \\
+  \frac{\partial E^\mathrm{B}}{\partial \bm{x}_4} &= k^\mathrm{B} \sin(\theta - \theta^0) \frac{\bm{\hat{n}}_b}{h_b}.
+\end{align}
 
-\section*{Conflict of Interest}
-The authors have no conflicts to disclose.
+\subsection{Striped wetting system}
+This is modelled on a 200x200 2D grid (and 400x400 in \cref{sec:adaptive}) using a phase-field model \cite{Panter2019b}, which has an order parameter, $\phi(\bm{r})$, representing the phase of the liquid ($\phi=-1$ for gas, $\phi=1$ for liquid).
+The energy functional has four separate terms,
+\begin{equation} \label{eq:phasefield}
+  E[\phi] = E^\mathrm{B}[\phi] + E^\mathrm{I}[\phi] + E^\mathrm{S}[\phi] + E^\mathrm{V}[\phi].
+\end{equation}
+The first term, $E^\mathrm{B}$, uses a double well potential to set values of $\phi=\pm1$ in the bulk.
+The second term then provides the interfacial energy between the liquid and gas by imposing an energy penalty to gradients in $\phi$.
+$E^\mathrm{S}$ is the solid-liquid interaction energy, which sets the contact angles of the hydrophilic and hydrophobic regions to 60\si{\degree} and 110\si{\degree}, respectively.
+Finally, $E^\mathrm{V}$ constrains the volume of the liquid drop by penalising any variation from the target volume.
 
-\section*{Author Contributions}
-All authors conceived and planned the project.
-S.~J.~A. performed the numerical experiments and analysed the data.
-J.~R.~P. and H.~K. supervised the study.
-S.~J.~A. wrote the paper, with review and input from and J.~R.~P. and H.~K.
-
-\section*{Data availability}
-The data that support the findings of this study are available from the corresponding author upon reasonable request.
+These four sections of the phase-field model are obtained using the following equations,
+\begin{align}
+  E^\mathrm{B}[\phi] &= \sum_i \frac{1}{\epsilon} \left( \frac{{\phi_i}^4}{4} - \frac{{\phi_i}^2}{2} + \frac{1}{4} \right) \upDelta V,\\
+  E^\mathrm{I}[\phi] &= \sum_i \frac{\epsilon}{2} \abs{\grad \phi_i}^2 \upDelta V,\\
+  E^\mathrm{S}[\phi] &= \sum_j \sqrt{2}\cos\theta_j \left( \frac{{\phi_j}^3}{6} - \frac{\phi_j}{2} - \frac{1}{3} \right) \upDelta S,\\
+  E^\mathrm{V}[\phi] &= k_\mathrm{V} \left[ \sum_i \frac{\phi_i + 1}{2} \upDelta V - V_0 \right]^2,
+\end{align}
+where the index $i$ includes all of the nodes, while $j$ represents the nodes along the solid surface.
+$\upDelta V$ and $\upDelta S$ are, respectively, the volume and solid surface areas contained by each individual node.
+$\epsilon$ is the liquid-gas interface width (set to 2.5 lattice units), $\theta_j$ is the contact-angle with the solid surface, and $V_0$ is the constrained volume of the liquid drop.
+The strength of the volume constraint is parametrised by $k_\mathrm{V}$ for which we use a value of $10^4$.
+The gradients of these terms are given by,
+\begin{align}
+  \frac{\partial E^\mathrm{B}}{\partial \phi_i} &= \frac{1}{\epsilon} \left( {\phi_i}^3 - \phi_i \right) \upDelta V,\\
+  \frac{\partial E^\mathrm{I}}{\partial \phi_i} &= \frac{\epsilon}{2} \left[
+    \frac{\partial \abs{\grad \phi_i}^2}{\partial \phi_i} +
+    \sum_k\frac{\partial \abs{\grad \phi_k}^2}{\partial \phi_i} \right] \upDelta V,\\
+  \frac{\partial E^\mathrm{S}}{\partial \phi_j} &= \sqrt{2}\cos\theta_j \left( \frac{{\phi_j}^2}{2} - \frac{1}{2} \right) \upDelta S,\\
+  \frac{\partial E^\mathrm{V}}{\partial \phi_i} &= k_\mathrm{V} \left[ \sum_{i'} \frac{\phi_{i'} + 1}{2} \upDelta V - V_0 \right] \upDelta V,
+\end{align}
+where index $k$ denotes neighboring nodes at which the evaluation of the gradient uses $\phi_i$.
 
 %% start bib
 \bibliographystyle{aipnum4-1}

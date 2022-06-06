@@ -25,13 +25,13 @@
 
 \begin{document}
 \title{A fast and memory-efficient transition state search method for complex energy landscapes \\ Supplementary Information}
+\date{\today}
 \author{Samuel J. Avis}
 \author{Jack R. Panter}
 \email[]{j.r.panter@durham.ac.uk}
 \author{Halim Kusumaatmaja}
 \email[]{halim.kusumaatmaja@durham.ac.uk}
 \affiliation{Department of Physics, Durham University, South Road, Durham DH1 3LE, UK}
-\date{\today}
 \maketitle
 
 \section{Optimising the constraint coefficients}
@@ -85,83 +85,6 @@ Hence, this choice is likely to still succeed even if the boudaries of the regio
 However, the user is able to choose values optimised for their specific system should they wish.
 
 
-\section{Energy and gradient expressions for the example systems}
-\subsection{Particle cluster system}
-In the particle cluster example system, the Lennard-Jones potential is used for the interaction between each pair of particles.
-Therefore, the potential and its gradient for each pair of particles are
-\begin{gather}
-  E = 4\epsilon \left[ \left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{r}\right)^6 \right], \\
-  \frac{\partial E}{\partial \bm{x}_1} = -\frac{\partial E}{\partial \bm{x}_2} =
-    \frac{24 \epsilon (\bm{x}_2 - \bm{x}_1)}{r^2} \left[ 2 \left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{r}\right)^6 \right],
-\end{gather}
-where $\bm{x}_1$ and $\bm{x}_2$ are the positions of the two particles, $r$ is their separation, $\epsilon$ is the interaction strength, and $\sigma$ is the particle radius.
-
-\subsection{Cylindrical buckling system}
-A 2D triangular mesh is used to model the cylindrical buckling system, with the ends of the cylinder fixed in place to apply an axial compression of 0.14\%.
-The energy of the system is evaluated by treating all bonds in the mesh as an elastic spring to obtain the stretching energy, and all pairs of adjacent triangles to be connected by elastic hinges, providing the bending energy.
-Their expressions are given by
-\begin{equation}
-  E = \sum_i k^\mathrm{S}_i (r_i - r^0_i)^2 + \sum_j k^\mathrm{B}_j [1 + \cos(\theta_j - \theta^0_j)].
-\end{equation}
-The first term is the stretching energy, where $r_i$ is the length, $r^0_i$ is the equilibrium length, and $k^\mathrm{S}_i$ is the stretching rigidity of bond $i$.
-The second term provides the bending energy, where $\theta_j$ is the dihedral angle, $\theta^0_j$ is the equilibrium angle, and $k^\mathrm{B}_j$ is the bending rigidity of hinge $j$.
-
-\begin{figure}[htb]
-  \includegraphics{fig/BAHschematic.pdf}
-  \caption{\label{fig:BAHschematic}
-    Schematic of the bar and hinge model showing the relevant parameters for a single hinge element.
-    $h_i$ and $\bm{\hat{n}}_i$ denote the height and unit normal of each triangle respectively.
-  }
-\end{figure}
-The gradient of the energy can be obtained by individually considering the stretching and bending energies of a single bond and hinge.
-For simplicity, we will ignore the index for the bond and hinge.
-Using the variables shown in the schematic in \cref{fig:BAHschematic}, the gradient of the stretching energy of the bond between $\bm{x}_2$ and $\bm{x}_3$ is given by,
-\begin{equation}
-  \frac{\partial E^\mathrm{S}}{\partial \bm{x}_2} = - \frac{\partial E^\mathrm{S}}{\partial \bm{x}_3} =
-    2 k^\mathrm{S} (r - r^0) (\bm{x_2} - \bm{x_3}).
-\end{equation}
-The gradients of the bending energy of the hinge are
-\begin{align}
-  \frac{\partial E^\mathrm{B}}{\partial \bm{x}_1} &= k^\mathrm{B} \sin(\theta - \theta^0) \frac{\bm{\hat{n}}_a}{h_a}, \\
-  \frac{\partial E^\mathrm{B}}{\partial \bm{x}_2} &= - k^\mathrm{B} \sin(\theta - \theta^0) \left[\frac{\bm{\hat{n}}_a}{h_a} + \frac{\bm{\hat{n}}_a + \bm{\hat{n}}_b}{r}\right], \\
-  \frac{\partial E^\mathrm{B}}{\partial \bm{x}_3} &= - k^\mathrm{B} \sin(\theta - \theta^0) \left[\frac{\bm{\hat{n}}_b}{h_b} + \frac{\bm{\hat{n}}_a + \bm{\hat{n}}_b}{r}\right], \\
-  \frac{\partial E^\mathrm{B}}{\partial \bm{x}_4} &= k^\mathrm{B} \sin(\theta - \theta^0) \frac{\bm{\hat{n}}_b}{h_b}.
-\end{align}
-
-\subsection{Striped wetting system}
-This modelled on a 200x200 2D grid (and 400x400 in the adaptive grid test) using a phase-field model \cite{Panter2019b}, which has an order parameter, $\phi(\bm{r})$, representing the phase of the liquid ($\phi=-1$ for gas, $\phi=1$ for liquid).
-The energy functional has four separate terms,
-\begin{equation} \label{eq:phasefield}
-  E[\phi] = E^\mathrm{B}[\phi] + E^\mathrm{I}[\phi] + E^\mathrm{S}[\phi] + E^\mathrm{V}[\phi].
-\end{equation}
-The first term, $E^\mathrm{B}$, uses a double well potential to set values of $\phi=\pm1$ in the bulk.
-The second term then provides the interfacial energy between the liquid and gas by imposing an energy penalty to gradients in $\phi$.
-$E^\mathrm{S}$ is the solid-liquid interaction energy, which sets the contact angles of the hydrophilic and hydrophobic regions to 60\si{\degree} and 110\si{\degree}, respectively.
-Finally, $E^\mathrm{V}$ constrains the volume of the liquid drop by penalising any variation from the target volume.
-
-These four sections of the phase-field model are obtained using the following equations,
-\begin{align}
-  E^\mathrm{B}[\phi] &= \sum_i \frac{1}{\epsilon} \left( \frac{{\phi_i}^4}{4} - \frac{{\phi_i}^2}{2} + \frac{1}{4} \right) \upDelta V,\\
-  E^\mathrm{I}[\phi] &= \sum_i \frac{\epsilon}{2} \abs{\grad \phi_i}^2 \upDelta V,\\
-  E^\mathrm{S}[\phi] &= \sum_j \sqrt{2}\cos\theta_j \left( \frac{{\phi_j}^3}{6} - \frac{\phi_j}{2} - \frac{1}{3} \right) \upDelta S,\\
-  E^\mathrm{V}[\phi] &= k_\mathrm{V} \left[ \sum_i \frac{\phi_i + 1}{2} \upDelta V - V_0 \right]^2,
-\end{align}
-where the index $i$ includes all of the nodes, while $j$ represents the nodes along the solid surface.
-$\upDelta V$ and $\upDelta S$ are, respectively, the volume and solid surface areas contained by each individual node.
-$\epsilon$ is the liquid-gas interface width (set to 2.5 lattice units), $\theta_j$ is the contact-angle with the solid surface, and $V_0$ is the constrained volume of the liquid drop.
-The strength of the volume constraint is parametrised by $k_\mathrm{V}$ for which we use a value of $10^4$.
-The gradients of these terms are given by,
-\begin{align}
-  \frac{\partial E^\mathrm{B}}{\partial \phi_i} &= \frac{1}{\epsilon} \left( {\phi_i}^3 - \phi_i \right) \upDelta V,\\
-  \frac{\partial E^\mathrm{I}}{\partial \phi_i} &= \frac{\epsilon}{2} \left[
-    \frac{\partial \abs{\grad \phi_i}^2}{\partial \phi_i} +
-    \sum_k\frac{\partial \abs{\grad \phi_k}^2}{\partial \phi_i} \right] \upDelta V,\\
-  \frac{\partial E^\mathrm{S}}{\partial \phi_j} &= \sqrt{2}\cos\theta_j \left( \frac{{\phi_j}^2}{2} - \frac{1}{2} \right) \upDelta S,\\
-  \frac{\partial E^\mathrm{V}}{\partial \phi_i} &= k_\mathrm{V} \left[ \sum_{i'} \frac{\phi_{i'} + 1}{2} \upDelta V - V_0 \right] \upDelta V,
-\end{align}
-where index $k$ denotes neighboring nodes at which the evaluation of the gradient uses $\phi_i$.
-
-
 \section{Multiple transition states}
 Here we test how the BITSS method performs when there are multiple transition states in the pathway between the two starting minima.
 For this we use a 2D potential, shown in \cref{fig:multits}a, with a pathway that follows a chicane of two $135^\circ$ circular arcs.
@@ -187,10 +110,6 @@ Therefore, systems with complex, high-dimensional landscapes can probably succes
     The x-axis is the BITSS distance reduction factor, $f$, and the y-axis is the relative difference between the two barrier heights.
   }
 \end{figure}
-
-\bibliographystyle{aipnum4-1}
-\bibliography{bibexport.bib}
-% \bibliography{../../../library.bib}
 
 
 \end{document}
