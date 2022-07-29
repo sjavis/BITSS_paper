@@ -66,7 +66,7 @@ def plot(minima, ts, paths, mep):
     plt.plot(minima[:,0], minima[:,1], c=cmin, marker='o', mec=mec, ms=ms, ls='none', zorder=99)
     plt.plot(ts[0], ts[1], c=cts, marker='o', mec=mec, ms=ms, ls='none', zorder=99)
     # Plot path
-    labels = ['BITSS', 'Step \& Slide', 'DHS']
+    labels = ['BITSS', 'DHS', 'Step \& Slide']
     for i, path in enumerate(paths):
         plt.plot(path[0,:,0], path[0,:,1], c=cpath[i], zorder=2, label=labels[i])
         plt.plot(path[1,:,0], path[1,:,1], c=cpath[i], zorder=2)
@@ -85,7 +85,7 @@ def main():
     minima = bits[:,0]
     ts = np.mean(bits[:,-1], axis=0)
 
-    plot(minima, ts, [bits, ss, dhs], mep)
+    plot(minima, ts, [bits, dhs, ss], mep)
 
 if (__name__ == "__main__"):
     main()
