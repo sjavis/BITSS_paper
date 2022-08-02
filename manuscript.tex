@@ -22,7 +22,7 @@
 
 % Table
 \usepackage{multirow}
-% \setlength{\tabcolsep}{4pt}
+\setlength{\tabcolsep}{4pt}
 
 % Referencing
 \usepackage{cleveref}
@@ -180,8 +180,8 @@ Furthermore, if all of transition states or the full pathway are desired, BITSS 
   \includegraphics[width=\linewidth]{bracketing.pdf}
   \caption{\label{fig:bracketing}
     Trajectories of the bracketing methods on a hooked potential with a single saddle point.
+    \hl{The equation for this potential is provided in \mbox{\cref{sec:bracketingpotential}}.}
     The minimum energy pathway is shown by the dashed line.
-    {\color{green}Sam, can you put the equation for this landscape in the methods section? }
   }
 \end{figure}
 The BITSS potential in \cref{eq:bitss} and iterative steps above offer key advantages over existing bracketing methods that also use two states to locate the transition state.
@@ -199,7 +199,7 @@ The step and slide method fails in this situation because it always expects that
 For DHS, the images reach a certain point at which one state can pass over the ridge by minimising its energy.
 At this point DHS will fail even if the distance is reduced very slowly.
 In contrast, the BITSS method is successful for this potential.
-This is because the combination of distance and energy constraints allow BITSS to approach a transition state from below and above (by sliding down a ridge).}
+This is because the combination of distance and energy constraints allow BITSS to approach a transition state from both below and above (by sliding down a ridge).}
 
 Furthermore, \hl{using both an energy and distance constraint with BITSS provides improved efficiency over these methods which each use just one.}
 In the case of DHS, fixing one state in place and optimising the other means that the amount that the separation is reduced must be much smaller than BITSS to ensure that it does not pass over the ridge.
@@ -240,6 +240,9 @@ The final system involves a droplet situated on a chemically striped surface wit
 Droplet transitions on patterned surfaces such as this are vital to understand as powerful bio-inspired liquid manipulation strategies  \cite{Kusumaatmaja2006,Brown2016}.
 In the example shown in \cref{fig:speedtest}c, a droplet transitions from two hydrophilic patches to one patch.
 Here, the system is represented by a diffuse-interface model, in which the \num{40000} degrees of freedom are the local fluid compositions at each site of the discretised domain.
+\hl{The pathway for this example is highly non-linear in the coordinate space because each degree of freedom only varies when it is at the interface of the droplet.
+As a result, the initial pathway for the chain of states methods cannot be a simple linear interpolation.
+Instead, the position of a semi-circular droplet is interpolated between the two final positions.}
 
 \hl{{\Cref{fig:speedtest}} shows the comparison between BITSS, DNEB and the string method.
 Here, the $x$-axis corresponds to the number of calculations of the potential gradient.
@@ -254,7 +257,7 @@ In the case of DNEB, the spring constant between the images is optimised instead
 \hl{In {\cref{fig:speedtest}}, for each system, BITSS quickly converges to the transition state.
 In contrast, DNEB and the string method converge quickly to an approximation of the minimum energy pathway.
 However, as the images are spaced along the chain of states, it is unlikely that they closely approach the transition state.
-It is interesting to note that for the high-dimensional, non-linear pathways of wetting example shown in {\cref{fig:speedtest}}c, DNEB and the string method to not substantially reduce the distance to the transition state compared to the initial interpolation.}
+It is interesting to note that for the high-dimensional, non-linear pathways of wetting example shown in {\cref{fig:speedtest}}c, DNEB and the string method do not substantially reduce the distance to the transition state compared to the initial interpolation.}
 
 \hl{To accurately obtain the transition state, the chain-of-states methods are often used in conjuction with another refinement method.
 One common set of methods are the climbing image hybrid methods {\cite{Henkelman2000a,E2007}}, but if the pathway is non-linear these can require a large number of images.
@@ -262,35 +265,36 @@ For example, in the wetting example of {\cref{fig:speedtest}}c, we find even an 
 Hybrid eigenvector-following methods {\cite{Cerjan1981}} are another commonly used approach, starting from the state with the highest energy on the chain.
 In this approach the eigenvector with the smallest eigenvalue of the Hessian is found, along which direction the state is then moved uphill until eventually it reaches the transition state.
 For completeness, we also use a hybrid method combining eigenvector-following with BITSS.
-For this, the criterion for switching to the eigenvector-following is when the change in the average of the two states is less than half of the distance reduction during a BITSS step.}
+For this, the criterion for switching to the eigenvector-following is when the change in the average of the two states is less than a tenth of the distance reduction during a BITSS step.}
 
-\begin{table}[]
-  \begin{tabular}{ccccccc}
+\begin{table}[h]
+  \begin{tabular*}{\linewidth}{c@{\extracolsep{\fill}}cccccc}
     \hline\hline
     \multirow{2}{*}{System} & \multirow{2}{*}{BITSS} &
     \multirow{2}{*}{\begin{tabular}[c]{@{}c@{}}BITSS-\\HEVF\end{tabular}} &
     \multicolumn{4}{c}{DNEB-HEVF} \\
              &             &             & 3           & 5           & 10          & 20          \\
     \hline
-    LJ-7     & 148         & 140         & 135         & 138         & 208         & 361         \\
-    Wetting  & \num{12100} & \num{15537} & \num{17840} & \num{17721} & \num{20221} & \num{48286} \\
+    LJ-7     & 148         & 144         & 135         & 138         & 208         & 361         \\
+    Buckling & \num{12866} & \num{14446} & ---         & \num{7315}  & \num{6242}  & \num{12094} \\
+    Wetting  & \num{12100} & \num{17262} & \num{17840} & \num{17721} & \num{20221} & \num{48286} \\
     \hline\hline
-  \end{tabular}
+  \end{tabular*}
   \caption{\label{tab:speed}
     \hl{
-    Number of potential gradient calculations required to reach the transition state for the Lennard-Jones cluster and the droplet wetting examples.
+    Number of potential gradient calculations required to reach the transition state for the three comparison examples.
     The approach combining DNEB and hybrid eigenvector-following (HEVF) has been run for different numbers of images.
-    Convergence is determined as when the root-mean-square of the gradient is less than $10^{-4}$.} {\color{green} Need to add the buckling result.}
+    Convergence is determined as when the root-mean-square of the gradient is less than $10^{-4}$.}
   }
 \end{table}
 
 \hl{In \mbox{\cref{tab:speed}}, we compare the speed of convergence to the transition state for BITSS, BITSS with hybrid eigenvector-following, and DNEB with hybrid eigenvector-following.
 We do not carry out systematic calculations combining the string method with hybrid eigenvector-following because the results are essentially similar to those for DNEB with hybrid eigenvector-following.
 We see that, for the examples in \mbox{\cref{tab:speed}}, the speed of BITSS with hybrid eigenvector-following does not significantly improve upon the speed of BITSS alone.
-Indeed, for the wetting example it is considerably slower.}
-{\color{green}Secondly, it is shown that DNEB with a small number of images is the fastest method for the Lennard-Jones cluster, whereas for the droplet wetting DNEB is considerably slower, even with a small number of images.
-This agrees with our expectation that BITSS offers an efficiency advantage for complex pathways.
-WE NEED TO UPDATE THIS DISCUSSION WHEN WE HAVE THE BUCKLING RESULT.}
+Indeed, for the wetting example it is considerably slower.
+Secondly, it is shown that DNEB with a small number of images is the fastest method for the Lennard-Jones cluster, and an intermediate number of images is optimal for the buckling because if there are too few images it will not converge to the correct transition state.
+On the other hand, for the droplet wetting DNEB is considerably slower, even with a small number of images.
+This is in agreement with our expectation that BITSS offers an efficiency advantage for complex pathways.}
 
 
 \subsection{Adaptive discretisation}\label{sec:adaptive}
@@ -451,6 +455,33 @@ Finally, the gradient of the distance with respect to each point must be mapped 
 where $k \in \{2i, 2i+1\}$, and $l \in \{2j, 2j+1\}$.
 
 \section{Energy and gradient expressions for the example systems}
+\subsection{Hook potential equation}\label{sec:bracketingpotential}
+\hl{
+The 2D potential used for the comparison of bracketing methods in {\cref{fig:bracketing}} uses a sum of Gaussian potentials, {\cref{eq:bracketingparams}}, the parameters for which are provided in \mbox{\cref{tab:bracketingparams}}.
+}
+\begin{equation}
+  E(x,y) = \sum_i a_i \exp\!\left( \frac{(x-b_{x,i})^2}{c_{x,i}} + \frac{(y-b_{y,i})^2}{c_{y,i}} \right)
+  \label{eq:bracketingparams}
+\end{equation}
+\begin{table}[ht]
+  \begin{tabular}{ccccc}
+    \hline\hline
+    $a$  & $b_x$ & $b_x$ & $c_x$ & $c_y$ \\
+    \hline
+    -1   &   0   &   0   &  10   &  10   \\
+     1   &   0   &   0   &   1   &   1   \\
+     5   &   2   &   0   &   1   &  0.1  \\
+    -1   &   1   &   1   &  0.1  &  0.1  \\
+    -1   &   1   &  -1   &  0.1  &  0.1  \\
+    0.01 &   0   &   0   &   1   &   1   \\
+    0.5  &  -2   &   0   &   1   &   1   \\
+    \hline\hline
+  \end{tabular}
+  \caption{\label{tab:bracketingparams}
+    Parameters for the Gaussians to produce the potential used in \cref{fig:bracketing}.
+  }
+\end{table}
+
 \subsection{Particle cluster system}
 In the particle cluster example system, the Lennard-Jones potential is used for the interaction between each pair of particles.
 Therefore, the potential and its gradient for each pair of particles are
