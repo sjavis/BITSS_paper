@@ -47,6 +47,7 @@
   Existing methods, however, can struggle in problems with a large number of degrees of freedom, on-the-fly adaptive remeshing and coarse-graining, and energy landscapes that are locally flat or discontinuous.
   To resolve these challenges, we introduce a new double-ended method, the Binary-Image Transition State Search (BITSS).
   It uses just two states that converge to the transition state, resulting in a fast, flexible, and memory-efficient method.
+  \hl{We also snow it is more robust compared to existing bracketing methods that use only two states.}
   We demonstrate its versatility by applying BITSS to three very different classes of problems: Lennard-Jones clusters, shell buckling, and multiphase phase-field models.
 \end{abstract}
 
@@ -75,7 +76,7 @@ These include the Dewar-Healy-Stewart (DHS) algorithm \cite{Dewar1984}, ridge me
 
 A large range of landscapes, however, prove challenging or impossible to explore via these methods.
 One key problem arises from the push towards larger and more complex systems \cite{Trefethen2013,Shalf2020,Alexander2020}, resulting in the need to develop algorithms that are more computationally and memory efficient, and can incorporate optimisation strategies such as on-the-fly adaptive remeshing and coarse-graining.
-\hl{These typically involve changing the discretisation of continuous systems to focus the computational time on important regions, for example, using a higher resolution mesh in regions of high stress in finite element simulations {\cite{Lee1994}}.
+\hl{These typically involve changing the resolution or discretisation of the systems to focus the computational time on important regions, such as using a higher resolution mesh in regions of high stress in finite element simulations {\cite{Lee1994}}.
 However, chain-of-states methods involve a coupling between the configurations of each state, and so there is an issue if they have different discretisations and numbers of degrees of freedom.}
 Meanwhile, single-ended methods can be inefficient because they are not well suited for identifying specific pathways and can spend a large amount of time searching for undesired transition states.
 Another major challenge in studying complex energy landscapes relates to the presence of locally flat or discontinuous regions, such as when considering patchy \cite{McMullen2018,Nguemaha2018,Chen2018b} and hard-body \cite{Richard2018,Santra2018} interactions in atomistic simulations, systems of polymer chains \cite{Mokkonen2016}, or collision constraints for macroscopic objects \cite{Wriggers2006}.
@@ -201,7 +202,7 @@ At this point DHS will fail even if the distance is reduced very slowly.
 In contrast, the BITSS method is successful for this potential.
 This is because the combination of distance and energy constraints allow BITSS to approach a transition state from both below and above (by sliding down a ridge).}
 
-Furthermore, \hl{using both an energy and distance constraint with BITSS provides improved efficiency over these methods which each use just one.}
+Furthermore, \hl{using both an energy and distance constraint with BITSS provides improved efficiency over these methods which each use just one of the constraints.}
 In the case of DHS, fixing one state in place and optimising the other means that the amount that the separation is reduced must be much smaller than BITSS to ensure that it does not pass over the ridge.
 Meanwhile, in step and slide, it is difficult to obtain a reasonable energy increment when the two states are far from the transition state, leading to a larger than necessary number of iterations.
 \hl{Also, restricting the minimisation to a constant energy surface can result in a considerably more complex method, as the states must be constantly projected back onto this surface.}
@@ -218,8 +219,8 @@ Meanwhile, in step and slide, it is difficult to obtain a reasonable energy incr
   }
 \end{figure*}
 
-Although reliable, chain-of-states approaches \hl{may need to use tens of states for systems if the transition pathway is highly complex or non-linear.
-However, because the BITSS method uses just two states, it has the potential to be more efficient in these cases.
+Although reliable, chain-of-states approaches \hl{may need to use a large number of states in cases where the transition pathway is highly complex or non-linear.
+Since the BITSS method uses just two states, it has the potential to be more efficient in these cases.
 This is analysed here in two ways.
 First, we measure how quickly BITSS reduces the distance to the transition state, compared to the string method {\cite{E2007}} and DNEB {\cite{Trygubenko2004}} using 5, 10, and 20 images (including the endpoints, which are fixed in place at the minima).
 Second, these methods are often used in conjunction with another method to accurately find the transition state.
@@ -242,7 +243,8 @@ In the example shown in \cref{fig:speedtest}c, a droplet transitions from two hy
 Here, the system is represented by a diffuse-interface model, in which the \num{40000} degrees of freedom are the local fluid compositions at each site of the discretised domain.
 \hl{The pathway for this example is highly non-linear in the coordinate space because each degree of freedom only varies when it is at the interface of the droplet.
 As a result, the initial pathway for the chain of states methods cannot be a simple linear interpolation.
-Instead, the position of a semi-circular droplet is interpolated between the two final positions.}
+Instead, the position of a semi-circular droplet is interpolated between the two final positions.
+In contrast, it is unneccessary to assume any initial interpolations for the BITSS method.}
 
 \hl{{\Cref{fig:speedtest}} shows the comparison between BITSS, DNEB and the string method.
 Here, the $x$-axis corresponds to the number of calculations of the potential gradient.
@@ -262,7 +264,7 @@ It is interesting to note that for the high-dimensional, non-linear pathways of 
 \hl{To accurately obtain the transition state, the chain-of-states methods are often used in conjuction with another refinement method.
 One common set of methods are the climbing image hybrid methods {\cite{Henkelman2000a,E2007}}, but if the pathway is non-linear these can require a large number of images.
 For example, in the wetting example of {\cref{fig:speedtest}}c, we find even an 100-image initial double-ended search is not sufficient for the climbing image method to then successfully refine the transition state.
-Hybrid eigenvector-following methods {\cite{Cerjan1981}} are another commonly used approach, starting from the state with the highest energy on the chain.
+Hybrid eigenvector-following (HEVF) methods {\cite{Cerjan1981}} are another commonly used approach, starting from the state with the highest energy on the chain.
 In this approach the eigenvector with the smallest eigenvalue of the Hessian is found, along which direction the state is then moved uphill until eventually it reaches the transition state.
 For completeness, we also use a hybrid method combining eigenvector-following with BITSS.
 For this, the criterion for switching to the eigenvector-following is when the change in the average of the two states is less than a tenth of the distance reduction during a BITSS step.}
@@ -292,9 +294,10 @@ For this, the criterion for switching to the eigenvector-following is when the c
 We do not carry out systematic calculations combining the string method with hybrid eigenvector-following because the results are essentially similar to those for DNEB with hybrid eigenvector-following.
 We see that, for the examples in \mbox{\cref{tab:speed}}, the speed of BITSS with hybrid eigenvector-following does not significantly improve upon the speed of BITSS alone.
 Indeed, for the wetting example it is considerably slower.
-Secondly, it is shown that DNEB with a small number of images is the fastest method for the Lennard-Jones cluster, and an intermediate number of images is optimal for the buckling because if there are too few images it will not converge to the correct transition state.
-On the other hand, for the droplet wetting DNEB is considerably slower, even with a small number of images.
-This is in agreement with our expectation that BITSS offers an efficiency advantage for complex pathways.}
+Secondly, when the pathways are near-linear, the combination of DNEB and HEVF leads to the fastest convergence.
+For the Lennard-Jones cluster a small number of images is the most efficient, while an intermediate number of images is optimal for the buckling problem because it will not converge to the correct transition state if there are too few images.
+On the other hand, for the droplet wetting example, DNEB-HEVF is considerably slower, even with a small number of images.
+This is in agreement with our expectation that BITSS offers an efficiency advantage for complex, non-linear pathways.}
 
 
 \subsection{Adaptive discretisation}\label{sec:adaptive}
@@ -373,7 +376,9 @@ Despite this gradient-free method being feasible, it is worth noting that a grad
 \section{Conclusion}
 Overall, we have developed the binary image transition state search (BITSS) algorithm for the efficient location of transition states in traditionally challenging landscapes.
 This has distinct advantages for complex pathways owing to the lack of a required initial pathway estimate, as well as the identification of the transition state that provides the overall energy barrier in multi-step pathways.
-Furthermore, the demonstrated speed and memory-efficiency will be key as we move towards simulating systems with increasingly large numbers of degrees of freedom, such as in large biomolecules \cite{Lee2018}, or with increasingly fine resolution, such as in finite element domains \cite{Kolev2021}.
+\hl{From the speed analysis, we find that the combination of chain-of-states methods with single-ended transition state search methods provides good performance for near-linear pathways, such as for the Lennard-Jones cluster and cylindrical buckling.
+However, for highly complex and non-linear pathways, as exhibited by the striped wetting example, BITSS is superior.
+Indeed, the demonstrated speed and memory-efficiency will be key as we move towards studying larger and more complex systems using BITSS.}
 
 A second source of efficiency in the BITSS method comes from the ability to adaptively change the degrees of freedom as the algorithm proceeds.
 We demonstrated how transition states could be found by both increasing the resolution upon convergence, and coupling systems with different discretisations.
@@ -388,7 +393,7 @@ These include systems with very short range interactions, such as in colloidal c
 % Either BITSS could be used to approximately locate the transition state followed by a single ended method for refinement, or BITSS can be used as a refinement method, complimentary to existing chain of states implementations.
 % This is scope for possible future work, and could be compared against other existing hybrid methods.
 
-The distance metric between the two BITSS images also proves interesting to analyse further.
+The distance metric between the two BITSS images is interesting to analyse further.
 One question that emerges is whether transition states can be located by coupling two images through a small number of collective properties, rather than the total distance between all degrees of freedom in the system.
 A second question concerns landscapes with multiple competing pathways between states.
 In such cases, it may be possible to access transition states different from the most direct one by using a biased distance metric.
