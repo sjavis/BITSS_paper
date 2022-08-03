@@ -61,7 +61,7 @@ fig = plt.figure(frameon=False, figsize=(xlim[1]-xlim[0], ylim[1]-ylim[0]))
 ax = fig.add_axes([0,0,1,1])
 plt.contourf(x, y, e, cmap=cmap, levels=10)
 ax.axis('off')
-plt.savefig(f'potential.png')
+plt.savefig(f'potential.png', dpi=500)
 
 
 ### Read data

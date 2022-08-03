@@ -1,6 +1,8 @@
 *.png
 *.pdf
 *.pgf
+*.eps
+*.tif
 *.aux
 *.dvi
 *.bbl

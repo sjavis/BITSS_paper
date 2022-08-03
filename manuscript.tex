@@ -22,7 +22,7 @@
 
 % Table
 \usepackage{multirow}
-\setlength{\tabcolsep}{4pt}
+% \setlength{\tabcolsep}{4pt}
 
 % Referencing
 \usepackage{cleveref}
@@ -270,8 +270,8 @@ For completeness, we also use a hybrid method combining eigenvector-following wi
 For this, the criterion for switching to the eigenvector-following is when the change in the average of the two states is less than a tenth of the distance reduction during a BITSS step.}
 
 \begin{table}[ht]
-  \begin{tabular*}{\linewidth}{c@{\extracolsep{\fill}}cccccc}
-    \hline\hline
+  \begin{ruledtabular}
+  \begin{tabular}{ccccccc}
     \multirow{2}{*}{System} & \multirow{2}{*}{BITSS} &
     \multirow{2}{*}{\begin{tabular}[c]{@{}c@{}}BITSS-\\HEVF\end{tabular}} &
     \multicolumn{4}{c}{DNEB-HEVF} \\
@@ -280,8 +280,8 @@ For this, the criterion for switching to the eigenvector-following is when the c
     LJ-7     & 148         & 144         & 135         & 138         & 208         & 361         \\
     Buckling & \num{12866} & \num{14446} & ---         & \num{7315}  & \num{6242}  & \num{12094} \\
     Wetting  & \num{12100} & \num{17262} & \num{17840} & \num{17721} & \num{20221} & \num{48286} \\
-    \hline\hline
-  \end{tabular*}
+  \end{tabular}
+  \end{ruledtabular}
   \caption{\label{tab:speed}
     \hl{
     Number of potential gradient calculations required to reach the transition state for the three comparison examples.
@@ -470,8 +470,8 @@ The 2D potential used for the comparison of bracketing methods in {\cref{fig:bra
   \label{eq:bracketingparams}
 \end{equation}
 \begin{table}[ht]
+  \begin{ruledtabular}
   \begin{tabular}{ccccc}
-    \hline\hline
     $a$  & $b_x$ & $b_x$ & $c_x$ & $c_y$ \\
     \hline
     -1   &   0   &   0   &  10   &  10   \\
@@ -481,8 +481,8 @@ The 2D potential used for the comparison of bracketing methods in {\cref{fig:bra
     -1   &   1   &  -1   &  0.1  &  0.1  \\
     0.01 &   0   &   0   &   1   &   1   \\
     0.5  &  -2   &   0   &   1   &   1   \\
-    \hline\hline
   \end{tabular}
+  \end{ruledtabular}
   \caption{\label{tab:bracketingparams}
   \hl{
     Parameters for the Gaussians to produce the potential used in {\cref{fig:bracketing}}.
@@ -566,7 +566,7 @@ The gradients of these terms are given by,
 where index $k$ denotes neighboring nodes at which the evaluation of the gradient uses $\phi_i$.
 
 %% start bib
-\bibliographystyle{aipnum4-1}
+% \bibliographystyle{aipnum4-1}
 \bibliography{bibexport.bib}
 % % \bibliography{../../library.bib}
 %% mid bib
