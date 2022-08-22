@@ -176,7 +176,7 @@ Furthermore, if all of transition states or the full pathway are desired, BITSS 
   \includegraphics[width=\linewidth]{bracketing.pdf}
   \caption{\label{fig:bracketing}
     Trajectories of the bracketing methods on a hooked potential with a single saddle point.
-    The equation for this potential is provided in \cref{sec:bracketingpotential}.
+    The equation for this potential is provided in \cref{sec:2dpotentials}.
     The minimum energy pathway is shown by the dashed line.
   }
 \end{figure}
@@ -451,16 +451,32 @@ Finally, the gradient of the distance with respect to each point must be mapped 
 where $k \in \{2i, 2i+1\}$, and $l \in \{2j, 2j+1\}$.
 
 \section{Energy and gradient expressions for the example systems}
-\subsection{Hook potential equation}\label{sec:bracketingpotential}
-The 2D potential used for the comparison of bracketing methods in \cref{fig:bracketing} uses a sum of Gaussian potentials, \cref{eq:bracketingparams}, the parameters for which are provided in \cref{tab:bracketingparams}.
+\subsection{2D potentials}\label{sec:2dpotentials}
+The 2D potentials in \cref{fig:toy2d,fig:bracketing} use a sum of Gaussian potentials, \cref{eq:gaussianpeaks}, the parameters for which are provided in \cref{tab:toy2dparams,tab:bracketingparams}.
 \begin{equation}
-  E(x,y) = \sum_i a_i \exp\!\left( \frac{(x-b_{x,i})^2}{c_{x,i}} + \frac{(y-b_{y,i})^2}{c_{y,i}} \right)
-  \label{eq:bracketingparams}
+  E(x,y) = \sum_i a_i \exp\!\left( - \frac{(x-b_{x,i})^2}{c_{x,i}} - \frac{(y-b_{y,i})^2}{c_{y,i}} \right)
+  \label{eq:gaussianpeaks}
 \end{equation}
+
 \begin{table}[ht]
   \begin{ruledtabular}
   \begin{tabular}{ccccc}
-    $a$  & $b_x$ & $b_x$ & $c_x$ & $c_y$ \\
+    $a$ & $b_x$ & $b_y$ & $c_x$ & $c_y$ \\
+    \hline
+    -3  & -1.4  &   0   &   1   &   1   \\
+    -2  &  1.4  &   0   &   1   &   1   \\
+    -1  &  0.07 &   1   &   1   &   1   \\
+  \end{tabular}
+  \end{ruledtabular}
+  \caption{\label{tab:toy2dparams}
+    Parameters for the Gaussians to produce the potential used in \cref{fig:toy2d}.
+  }
+\end{table}
+
+\begin{table}[ht]
+  \begin{ruledtabular}
+  \begin{tabular}{ccccc}
+    $a$  & $b_x$ & $b_y$ & $c_x$ & $c_y$ \\
     \hline
     -1   &   0   &   0   &  10   &  10   \\
      1   &   0   &   0   &   1   &   1   \\
