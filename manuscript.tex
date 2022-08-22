@@ -19,6 +19,8 @@
 
 % Table
 \usepackage{multirow}
+\usepackage{booktabs}
+\newcommand{\tworow}[1]{\multirow{2}{*}[-0.5\dimexpr \aboverulesep + \belowrulesep + \cmidrulewidth]{#1}}
 
 % Referencing
 \usepackage{cleveref}
@@ -202,7 +204,7 @@ Also, restricting the minimisation to a constant energy surface can result in a 
 
 
 \subsection{Comparison with chain-of-states methods}
-\begin{figure}[tb]
+\begin{figure}[htb]
   \includegraphics{testsystems.pdf}
   \caption{\label{fig:testsystems}
     The three systems used for comparison with chain-of-states methods.
@@ -261,25 +263,27 @@ In this approach the eigenvector with the smallest eigenvalue of the Hessian is 
 For completeness, we also use a hybrid method combining eigenvector-following with BITSS.
 For this, the criterion for switching to the eigenvector-following is when the change in the average of the two states is less than a tenth of the distance reduction during a BITSS step.
 
-\begin{table}[ht]
+\begin{table*}[tb]
   \begin{ruledtabular}
-  \begin{tabular}{ccccccc}
-    \multirow{2}{*}{System} & \multirow{2}{*}{BITSS} &
-    \multirow{2}{*}{\begin{tabular}[c]{@{}c@{}}BITSS-\\HEVF\end{tabular}} &
-    \multicolumn{4}{c}{DNEB-HEVF} \\
-             &             &             & 3           & 5           & 10          & 20          \\
+  \begin{tabular}{c cc cccc cccc}
+    \tworow{System} & \tworow{BITSS} &
+      \tworow{\begin{tabular}[c]{@{}c@{}}BITSS-\\HEVF\end{tabular}} &
+      \multicolumn{4}{c}{DNEB-HEVF} & \multicolumn{4}{c}{CINEB} \\
+    \cmidrule(lr){4-7}\cmidrule(lr){8-11}
+             &             &             & 3           & 5           & 10          & 20          & 3   & 5          & 10          & 20          \\
     \hline
-    LJ-7     & 148         & 144         & 135         & 138         & 208         & 361         \\
-    Buckling & \num{12866} & \num{14446} & ---         & \num{7315}  & \num{6242}  & \num{12094} \\
-    Wetting  & \num{12100} & \num{17262} & \num{17840} & \num{17721} & \num{20221} & \num{48286} \\
+    LJ-7     & 148         & 144         & 135         & 138         & 208         & 361         & 30  & 153        & 2000        & 1692        \\
+    Buckling & \num{12866} & \num{14446} & ---         & \num{7315}  & \num{6242}  & \num{12094} & --- & \num{8352} & \num{19360} & \num{77904} \\
+    Wetting  & \num{12100} & \num{17262} & \num{17840} & \num{17721} & \num{20221} & \num{48286} & --- & ---        & ---         & ---         \\
   \end{tabular}
   \end{ruledtabular}
   \caption{\label{tab:speed}
     Number of potential gradient calculations required to reach the transition state for the three comparison examples.
-    The approach combining DNEB and hybrid eigenvector-following (HEVF) has been run for different numbers of images.
-    Convergence is determined as when the root-mean-square of the gradient is less than $10^{-4}$.
+    The climbing-image nudged-elastic-band (CINEB) and DNEB with hybrid eigenvector-following (HEVF) methods have been run for different numbers of images.
+    Convergence is determined to be when the root-mean-square of the gradient at the estimate for the transition state is less than $10^{-4}$.
+    The fields left blank indicate that the method has not converged to the correct transition state.
   }
-\end{table}
+\end{table*}
 
 In \cref{tab:speed}, we compare the speed of convergence to the transition state for BITSS, BITSS with hybrid eigenvector-following, and DNEB with hybrid eigenvector-following.
 We do not carry out systematic calculations combining the string method with hybrid eigenvector-following because the results are essentially similar to those for DNEB with hybrid eigenvector-following.
