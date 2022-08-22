@@ -31,7 +31,7 @@ levels = np.linspace(limits[0], limits[1], 7)
 
 ##### Visualise
 for i, state in enumerate(data):
-    fig = plt.figure(figsize=(5,5))
+    fig = plt.figure(figsize=(5,3))
     ax = plt.axes((0.01,0.01,0.98,0.98))
     plt.axis('off')
     ax.set_aspect('equal')
@@ -39,7 +39,7 @@ for i, state in enumerate(data):
     plt.contourf(state.T, cmap='Blues', levels=levels)
     plt.pcolormesh(surface_x, surface_y, surface, cmap='Greys_r', vmax=140, zorder=2)
 
-    plt.ylim((surface_y[0,0], n/2))
+    plt.ylim((surface_y[0,0], n*2/5))
     ax.axhline(surface_y[0,0], c='k')
     ax.axhline(surface_y[0,1], c='k')
 
