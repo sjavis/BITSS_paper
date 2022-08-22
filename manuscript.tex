@@ -203,8 +203,8 @@ Also, restricting the minimisation to a constant energy surface can result in a 
 
 \subsection{Comparison with chain-of-states methods}
 \begin{figure*}[tb]
-  \includegraphics[width=\linewidth]{speedtest.pdf}
-  \caption{\label{fig:speedtest}
+  \includegraphics[width=\linewidth]{testsystems.pdf}
+  \caption{\label{fig:testsystems}
     Comparisons between BITSS, DNEB, and the string method in the distance from the transition state as a function of the number of calculations of the energy gradient.
     Three test systems are used: (a) a Lennard-Jones seven-particle cluster, (b) cylindrical shell buckling, and (c) wetting of a chemically-striped surface.
     The configurations shown correspond to the two minimum energy states and the transition state, marked by an asterisk.
@@ -223,23 +223,23 @@ Three diverse systems are used for this comparison, exhibiting a broad range of 
 The first system is a two-dimensional, seven-particle cluster, interacting via a Lennard-Jones pair potential.
 This is a frequently used test system for studying transition rates \cite{Wales2002,Passerone2001}.
 Here, the 14 degrees of freedom are the particle coordinates.
-The characteristic transition shown in \cref{fig:speedtest}a sees a particle rearrangement between two close-packed clusters.
+The characteristic transition shown in \cref{fig:testsystems}a sees a particle rearrangement between two close-packed clusters.
 
 The second system is an elastic cylindrical shell, modelled by a triangulated mesh of nodes, which interact via extensional and angular springs.
 The \num{35400} degrees of freedom are the node coordinates in three-dimensional space.
-The characteristic transition in \cref{fig:speedtest}b shows the formation of a stable dimple from an initially unbuckled cylinder.
+The characteristic transition in \cref{fig:testsystems}b shows the formation of a stable dimple from an initially unbuckled cylinder.
 This transition is essential to capture to predict mechanical failure under strain \cite{Panter2019,Virot2017}.
 
 The final system involves a droplet situated on a chemically striped surface with both hydrophilic and hydrophobic regions.
 Droplet transitions on patterned surfaces such as this are vital to understand as powerful bio-inspired liquid manipulation strategies  \cite{Kusumaatmaja2006,Brown2016}.
-In the example shown in \cref{fig:speedtest}c, a droplet transitions from two hydrophilic patches to one patch.
+In the example shown in \cref{fig:testsystems}c, a droplet transitions from two hydrophilic patches to one patch.
 Here, the system is represented by a diffuse-interface model, in which the \num{40000} degrees of freedom are the local fluid compositions at each site of the discretised domain.
 The pathway for this example is highly non-linear in the coordinate space because each degree of freedom only varies when it is at the interface of the droplet.
 As a result, the initial pathway for the chain of states methods cannot be a simple linear interpolation.
 Instead, the position of a semi-circular droplet is interpolated between the two final positions.
 In contrast, it is unnecessary to assume any initial interpolation for the BITSS method.
 
-{\Cref{fig:speedtest}} shows the comparison between BITSS, DNEB and the string method.
+{\Cref{fig:testsystems}} shows the comparison between BITSS, DNEB and the string method.
 Here, the $x$-axis corresponds to the number of calculations of the potential gradient.
 The measure in the $y$-axis is the distance from the true transition state.
 For BITSS, the average of the two states is used for this, whereas for the chain-of-states methods, the closest point on a cubic spline interpolation is used.
@@ -249,14 +249,14 @@ The optimal values are found to be 2, 50, and 20 for the particle cluster, cylin
 In the case of DNEB, the spring constant between the images is optimised instead.
 The spring constants that have been used are $0.1$, $0.01$, and $10^{-4}$ for the three respective systems.
 
-In \cref{fig:speedtest}, for each system, BITSS quickly converges to the transition state.
+In \cref{fig:testsystems}, for each system, BITSS quickly converges to the transition state.
 In contrast, DNEB and the string method converge quickly to an approximation of the minimum energy pathway.
 However, as the images are spaced along the chain of states, it is unlikely that they closely approach the transition state.
-It is interesting to note that for the high-dimensional, non-linear pathways of wetting example shown in \cref{fig:speedtest}c, DNEB and the string method do not substantially reduce the distance to the transition state compared to the initial interpolation.
+It is interesting to note that for the high-dimensional, non-linear pathways of wetting example shown in \cref{fig:testsystems}c, DNEB and the string method do not substantially reduce the distance to the transition state compared to the initial interpolation.
 
 To accurately obtain the transition state, the chain-of-states methods are often used in conjunction with another refinement method.
 One common set of methods are the climbing image hybrid methods \cite{Henkelman2000a,E2007}, but if the pathway is non-linear these can require a large number of images.
-For example, in the wetting example of \cref{fig:speedtest}c, we find even an 100-image initial double-ended search is not sufficient for the climbing image method to then successfully refine the transition state.
+For example, in the wetting example of \cref{fig:testsystems}c, we find even an 100-image initial double-ended search is not sufficient for the climbing image method to then successfully refine the transition state.
 Hybrid eigenvector-following (HEVF) methods \cite{Cerjan1981} are another commonly used approach, starting from the state with the highest energy on the chain.
 In this approach the eigenvector with the smallest eigenvalue of the Hessian is found, along which direction the state is then moved uphill until eventually it reaches the transition state.
 For completeness, we also use a hybrid method combining eigenvector-following with BITSS.
@@ -288,7 +288,7 @@ We see that, for the examples in \cref{tab:speed}, the speed of BITSS with hybri
 Indeed, for the wetting example it is considerably slower.
 Secondly, when the pathways are near-linear, the combination of DNEB and HEVF leads to the fastest convergence.
 For the Lennard-Jones cluster, a small number of images is the most efficient, while an intermediate number of images is optimal for the buckling problem because it will not converge to the correct transition state if there are too few images.
-Despite the large number of degrees of freedom, this buckling mode in \cref{fig:speedtest}c is known to exhibit a linear pathway close to the transition state, being controlled simply by the dimple depth increasing\cite{Panter2019}.
+Despite the large number of degrees of freedom, this buckling mode in \cref{fig:testsystems}c is known to exhibit a linear pathway close to the transition state, being controlled simply by the dimple depth increasing\cite{Panter2019}.
 On the other hand, for the droplet wetting example, DNEB-HEVF is considerably slower, even with a small number of images.
 This is in agreement with our expectation that BITSS offers an efficiency advantage for complex, non-linear pathways.
 
@@ -351,7 +351,7 @@ When only a single state has a zero-gradient mode then the other is likely to sl
 An additional consideration is the case where the potential energy surface is flat at the top of the pathway.
 There are two possibilities here, one is that the potential is flat in a direction perpendicular to the tangent of the pathway, such that the ridge is level.
 In this case BITSS is unaffected and it will be able to converge to some point along the ridge.
-An example of this is the free global rotation and translation of the Lennard-Jones cluster in \cref{fig:speedtest}a.
+An example of this is the free global rotation and translation of the Lennard-Jones cluster in \cref{fig:testsystems}a.
 The other possibility is that the flat mode is in the direction of the pathway.
 In this case there is no single transition state along the pathway, but instead a region.
 BITSS would be ill suited in this situation because the equal-energy constraint would not prevent the images from passing over the saddle and falling to a minimum.
