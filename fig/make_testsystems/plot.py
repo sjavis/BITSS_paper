@@ -13,7 +13,7 @@ lt.update_width('aip-single')
 def str_converter(instr):
     return np.fromstring(instr[1:-1],sep=' ')
 
-w = 3/5
+w = 4/5
 hi = [1/3, 1/3, 1/5] # height of axes relative to width
 hd = 0
 h = np.sum(hi) + 2*hd
