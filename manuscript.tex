@@ -154,7 +154,7 @@ In summary, the method involves iteratively performing the following three steps
   \item Recompute the constraint coefficients, $\kappa_e$ and $\kappa_d$, at regular intervals using \cref{eq:ke,eq:kd}.
 \end{enumerate}
 This process is completed once a suitable convergence criterion is reached.
-This can either be based upon the separation between the states, or the size of gradient at the midpoint between them.
+This can either be based upon the separation between the states, the size of gradient at the midpoint between them, or the change in the position of the midpoint.
 
 Using the BITSS approach, the typical trajectories of the states are demonstrated for a simple 2D potential in \cref{fig:toy2d}a.
 Initially, the lower energy state jumps up to satisfy the equal energy constraint and then moves to minimise the separation without increasing its energy.
@@ -204,7 +204,27 @@ Also, restricting the minimisation to a constant energy surface can result in a 
 
 
 \subsection{Comparison with chain-of-states methods}
-\begin{figure}[htb]
+In contrast to BITSS, chain-of-states methods do not typically find transition states within a reasonable accuracy.
+Instead, they are used to find the full pathway (or an approximation thereof), and a secondary method can then be used to refine to the transition state.
+Because these methods can identify multiple transition state candidates, they are advantageous for pathways with many intermediate minima.
+However, for systems with few or just a single transition state along the pathways, BITSS offers the possibility for improved efficiency and reduced memory requirements, since just two states are being optimised.
+This is particularly likely to be true for complex, non-linear pathways which can need a large number of states to accurately approximate the pathway.
+Also, a complicated initial interpolation may be necessary for these pathways, whereas BITSS requires no such initialisation.
+
+Here we compare the speeds of convergence of BITSS to two often-used chain-of-states methods for finding transition states: climbing-image nudged elastic band (CINEB) \cite{Henkelman2000a}, and DNEB with hybrid eigenvector following (DNEB-HEVF) \cite{Cerjan1981}.
+It is also possible to use hybrid methods based upon the string method, although the results are expected to be similar.
+Further, here we aim to observe how the BITSS method behaves for different systems, rather than providing a comprehensive comparison of the available methods.
+
+The core of these methods involves minimising the total energy of a chain of states, connected by elastic springs to keep them equally spaced along the transition pathway.
+CINEB modifies this by altering the behaviour of the state with the highest energy.
+The direction of minimisation on this state is inverted in the along pathway direction, effectively converting the saddle point into a local minimum.
+Alternatively, DNEB-HEVF involves first minimising the chain of states until a criterion is met, for which we use the root-mean-square of the total energy gradient of the chain. 
+At this point eigenvector-following is performed from the highest energy state, moving uphill along the smallest eigenvector of the Hessian until it reaches the transition state.
+
+It is also possible to combine eigenvector-following with BITSS, which we also include in the comparison for comleteness.
+For this, the switch from BITSS to eigenvector-following is chosen to occur when the average of the two states changes by less than a tenth of the reduction in the distance given by \cref{eq:diteration}.
+
+\begin{figure}[tb]
   \includegraphics{testsystems.pdf}
   \caption{\label{fig:testsystems}
     The three systems used for comparison with chain-of-states methods.
@@ -212,13 +232,6 @@ Also, restricting the minimisation to a constant energy surface can result in a 
     The configurations shown correspond to the two minimum energy states and the transition state, marked by an asterisk.
   }
 \end{figure}
-
-Although reliable, chain-of-states approaches may need to use a large number of states in cases where the transition pathway is highly complex or non-linear.
-Since the BITSS method uses just two states, it has the potential to be more efficient in these cases.
-This is analysed here in two ways.
-First, we measure how quickly BITSS reduces the distance to the transition state, compared to the string method \cite{E2007} and DNEB \cite{Trygubenko2004} using 5, 10, and 20 images (including the endpoints, which are fixed in place at the minima).
-Second, these methods are often used in conjunction with another method to accurately find the transition state.
-Here we compare the number of potential gradient calculations required to reach the transition state for BITSS, BITSS in combination with hybrid eigenvector-following, and DNEB in combination with hybrid eigenvector-following.
 
 Three diverse systems are used for this comparison, exhibiting a broad range of energy landscapes.
 The first system is a two-dimensional, seven-particle cluster, interacting via a Lennard-Jones pair potential.
@@ -236,32 +249,8 @@ Droplet transitions on patterned surfaces such as this are vital to understand a
 In the example shown in \cref{fig:testsystems}c, a droplet transitions from two hydrophilic patches to one patch.
 Here, the system is represented by a diffuse-interface model, in which the \num{40000} degrees of freedom are the local fluid compositions at each site of the discretised domain.
 The pathway for this example is highly non-linear in the coordinate space because each degree of freedom only varies when it is at the interface of the droplet.
-As a result, the initial pathway for the chain of states methods cannot be a simple linear interpolation.
+As a result, the initial pathway for the chain-of-states methods cannot be a simple linear interpolation.
 Instead, the position of a semi-circular droplet is interpolated between the two final positions.
-In contrast, it is unnecessary to assume any initial interpolation for the BITSS method.
-
-{\Cref{fig:testsystems}} shows the comparison between BITSS, DNEB and the string method.
-Here, the $x$-axis corresponds to the number of calculations of the potential gradient.
-The measure in the $y$-axis is the distance from the true transition state.
-For BITSS, the average of the two states is used for this, whereas for the chain-of-states methods, the closest point on a cubic spline interpolation is used.
-The parameters used in the chain-of-states methods are chosen such that they optimise the speed of convergence.
-For the string method, this is the number of downhill iterations before the images are redistributed.
-The optimal values are found to be 2, 50, and 20 for the particle cluster, cylindrical buckling, and striped wetting examples, respectively.
-In the case of DNEB, the spring constant between the images is optimised instead.
-The spring constants that have been used are $0.1$, $0.01$, and $10^{-4}$ for the three respective systems.
-
-In \cref{fig:testsystems}, for each system, BITSS quickly converges to the transition state.
-In contrast, DNEB and the string method converge quickly to an approximation of the minimum energy pathway.
-However, as the images are spaced along the chain of states, it is unlikely that they closely approach the transition state.
-It is interesting to note that for the high-dimensional, non-linear pathways of wetting example shown in \cref{fig:testsystems}c, DNEB and the string method do not substantially reduce the distance to the transition state compared to the initial interpolation.
-
-To accurately obtain the transition state, the chain-of-states methods are often used in conjunction with another refinement method.
-One common set of methods are the climbing image hybrid methods \cite{Henkelman2000a,E2007}, but if the pathway is non-linear these can require a large number of images.
-For example, in the wetting example of \cref{fig:testsystems}c, we find even an 100-image initial double-ended search is not sufficient for the climbing image method to then successfully refine the transition state.
-Hybrid eigenvector-following (HEVF) methods \cite{Cerjan1981} are another commonly used approach, starting from the state with the highest energy on the chain.
-In this approach the eigenvector with the smallest eigenvalue of the Hessian is found, along which direction the state is then moved uphill until eventually it reaches the transition state.
-For completeness, we also use a hybrid method combining eigenvector-following with BITSS.
-For this, the criterion for switching to the eigenvector-following is when the change in the average of the two states is less than a tenth of the distance reduction during a BITSS step.
 
 \begin{table*}[tb]
   \begin{ruledtabular}
@@ -273,27 +262,29 @@ For this, the criterion for switching to the eigenvector-following is when the c
              &             &             & 3           & 5           & 10          & 20          & 3   & 5          & 10          & 20          \\
     \hline
     LJ-7     & 148         & 144         & 135         & 138         & 208         & 361         & 30  & 153        & 2000        & 1692        \\
-    Buckling & \num{12866} & \num{14446} & ---         & \num{7315}  & \num{6242}  & \num{12094} & --- & \num{8352} & \num{19360} & \num{77904} \\
+    Buckling & \num{12866} & \num{14446} & \num{73694} & \num{7315}  & \num{6242}  & \num{12094} & --- & \num{8352} & \num{19360} & \num{77904} \\
     Wetting  & \num{12100} & \num{17262} & \num{17840} & \num{17721} & \num{20221} & \num{48286} & --- & ---        & ---         & ---         \\
   \end{tabular}
   \end{ruledtabular}
   \caption{\label{tab:speed}
     Number of potential gradient calculations required to reach the transition state for the three comparison examples.
-    The climbing-image nudged-elastic-band (CINEB) and DNEB with hybrid eigenvector-following (HEVF) methods have been run for different numbers of images.
+    The climbing-image nudged-elastic-band (CINEB) and DNEB with hybrid eigenvector-following (DNEB-HEVF) methods have been run for different numbers of images.
     Convergence is determined to be when the root-mean-square of the gradient at the estimate for the transition state is less than $10^{-4}$.
     The fields left blank indicate that the method has not converged to the correct transition state.
   }
 \end{table*}
 
-In \cref{tab:speed}, we compare the speed of convergence to the transition state for BITSS, BITSS with hybrid eigenvector-following, and DNEB with hybrid eigenvector-following.
-We do not carry out systematic calculations combining the string method with hybrid eigenvector-following because the results are essentially similar to those for DNEB with hybrid eigenvector-following.
-We see that, for the examples in \cref{tab:speed}, the speed of BITSS with hybrid eigenvector-following does not significantly improve upon the speed of BITSS alone.
-Indeed, for the wetting example it is considerably slower.
-Secondly, when the pathways are near-linear, the combination of DNEB and HEVF leads to the fastest convergence.
-For the Lennard-Jones cluster, a small number of images is the most efficient, while an intermediate number of images is optimal for the buckling problem because it will not converge to the correct transition state if there are too few images.
-Despite the large number of degrees of freedom, this buckling mode in \cref{fig:testsystems}c is known to exhibit a linear pathway close to the transition state, being controlled simply by the dimple depth increasing\cite{Panter2019}.
-On the other hand, for the droplet wetting example, DNEB-HEVF is considerably slower, even with a small number of images.
-This is in agreement with our expectation that BITSS offers an efficiency advantage for complex, non-linear pathways.
+The results for the three systems are shown in \cref{tab:speed}.
+The first thing to note is that using hybrid eigenvector-following does not significantly improve the speed of BITSS.
+Indeed, for the wetting example it is actually considerably faster to use BITSS alone.
+Next, we see that the chain-of-states methods can be faster than BITSS for the systems with more linear pathways, particularly when using few images.
+Although, if too few images are used both CINEB and DNEB-HEVF can struggle, as seen for the cylindrical buckling with three images.
+Meanwhile, for the wetting example, CINEB does not converge to the transition state because the estimated tangent vector is highly inaccurate due to the non-linearity of the pathway.
+A large number of images would have to be used for it to converge.
+Furthermore, we find that BITSS is quite a bit faster than DNEB-HEVF in this case, in line with the prediction that BITSS is advantageous for complex, non-linear pathways.
+
+Overall, while BITSS does not realise the significant improvements in speed that were hypothesised, it is at least comparable with other popular methods, and appears faster for highly non-linear pathways.
+It also benefits from lower computational memory demand and not requiring an initial interpolation.
 
 
 \subsection{Adaptive discretisation}\label{sec:adaptive}
