@@ -26,6 +26,14 @@
 \usepackage{cleveref}
 \Crefname{figure}{Fig.}{Figs.}
 
+% Temporary
+\usepackage{soul}
+\soulregister\cite7
+\soulregister\cref7
+\soulregister\num7
+\soulregister\multicolumn7
+% \renewcommand{\hl}[1]{#1} % Uncomment to remove mark-up
+
 \begin{document}
 \title{A robust and memory-efficient transition state search method for complex energy landscapes}
 \date{\today}
@@ -204,6 +212,7 @@ Also, restricting the minimisation to a constant energy surface can result in a 
 
 
 \subsection{Comparison with chain-of-states methods}
+\hl{%
 In contrast to BITSS, chain-of-states methods do not typically find transition states within a reasonable accuracy.
 Instead, they are used to find the full pathway (or an approximation thereof), and a secondary method can then be used to refine to the transition state.
 Because these methods can identify multiple transition state candidates, they are advantageous for pathways with many intermediate minima.
@@ -213,7 +222,7 @@ Also, a complicated initial interpolation may be necessary for these pathways, w
 
 Here we compare the speeds of convergence of BITSS to two often-used chain-of-states methods for finding transition states: climbing-image nudged elastic band (CINEB) \cite{Henkelman2000a}, and DNEB with hybrid eigenvector following (DNEB-HEVF) \cite{Cerjan1981}.
 It is also possible to use hybrid methods based upon the string method \cite{E2007,Zimmerman2013}, although the results are expected to be similar.
-Also, we primarily aim to observe how the BITSS method behaves for different systems, rather than providing a comprehensive comparison of the available methods, which has been performed in other works \cite{Koslover2007,Sheppard2008}.
+Also, primarily, we aim to observe how the BITSS method behaves for different systems, rather than providing a comprehensive comparison of the available methods, which has been performed in other works \cite{Koslover2007,Sheppard2008}.
 
 The core of these methods involves minimising the total energy of a chain of states, connected by elastic springs to keep them equally spaced along the transition pathway.
 CINEB modifies this by altering the behaviour of the state with the highest energy.
@@ -223,16 +232,18 @@ At this point eigenvector-following is performed from the highest energy state, 
 
 It is also possible to combine eigenvector-following with BITSS, which we also include in the comparison for comleteness.
 For this, the switch from BITSS to eigenvector-following is chosen to occur when the average of the two states changes by less than a tenth of the reduction in the distance given by \cref{eq:diteration}.
+}
 
 \begin{figure}[tb]
   \includegraphics{testsystems.pdf}
   \caption{\label{fig:testsystems}
-    The three systems used for comparison with chain-of-states methods.
-    These are: (a) a Lennard-Jones seven-particle cluster, (b) cylindrical shell buckling, and (c) wetting of a chemically-striped surface.
+    \hl{The three systems used for comparison with chain-of-states methods.
+    These are: (a) a Lennard-Jones seven-particle cluster, (b) cylindrical shell buckling, and (c) wetting of a chemically-striped surface.}
     The configurations shown correspond to the two minimum energy states and the transition state, marked by an asterisk.
   }
 \end{figure}
 
+\hl{%
 Three diverse systems are used for this comparison, exhibiting a broad range of energy landscapes.
 The first system is a two-dimensional, seven-particle cluster, interacting via a Lennard-Jones pair potential.
 This is a frequently used test system for studying transition rates \cite{Wales2002,Passerone2001}.
@@ -243,7 +254,32 @@ The second system is an elastic cylindrical shell, modelled by a triangulated me
 The \num{35400} degrees of freedom are the node coordinates in three-dimensional space.
 The characteristic transition in \cref{fig:testsystems}b shows the formation of a stable dimple from an initially unbuckled cylinder.
 This transition is essential to capture to predict mechanical failure under strain \cite{Panter2019,Virot2017}.
+}
 
+\begin{table*}[tb]
+  \begin{ruledtabular}
+  \begin{tabular}{c cc cccc cccc}
+    \tworow{System} & \tworow{BITSS} &
+      \tworow{\begin{tabular}[c]{@{}c@{}}BITSS-\\HEVF\end{tabular}} &
+        \multicolumn{4}{c}{DNEB-HEVF} & \multicolumn{4}{c}{\hl{CINEB}} \\
+    \cmidrule(lr){4-7}\cmidrule(lr){8-11}
+             &             &             & 3           & 5           & 10          & 20          & \hl{3  } & \hl{5         } & \hl{10         } & \hl{20         } \\
+    \hline                                                                                                                                             
+    LJ-7     & 148         & 144         & 135         & 138         & 208         & 361         & \hl{30 } & \hl{153       } & \hl{2000       } & \hl{1692       } \\
+    Buckling & \num{12866} & \num{14446} & \num{73694} & \num{7315}  & \num{6242}  & \num{12094} & \hl{---} & \hl{\num{8352}} & \hl{\num{19360}} & \hl{\num{77904}} \\
+    Wetting  & \num{12100} & \num{17262} & \num{17840} & \num{17721} & \num{20221} & \num{48286} & \hl{---} & \hl{---       } & \hl{---        } & \hl{---        } \\
+  \end{tabular}
+  \end{ruledtabular}
+  \caption{\label{tab:speed}
+    Number of potential gradient calculations required to reach the transition state for the three comparison examples.
+    \hl{The climbing-image nudged-elastic-band (CINEB) and DNEB with hybrid eigenvector-following (DNEB-HEVF) methods have been run for different numbers of images.
+    Convergence is determined to be when the root-mean-square of the gradient at the estimate for the transition state is less than $10^{-4}$.
+    The fields left blank indicate that the method has not converged to the correct transition state.
+    }
+  }
+\end{table*}
+
+\hl{%
 The final system involves a droplet situated on a chemically striped surface with both hydrophilic and hydrophobic regions.
 Droplet transitions on patterned surfaces such as this are vital to understand as powerful bio-inspired liquid manipulation strategies  \cite{Kusumaatmaja2006,Brown2016}.
 In the example shown in \cref{fig:testsystems}c, a droplet transitions from two hydrophilic patches to one patch.
@@ -251,29 +287,9 @@ Here, the system is represented by a diffuse-interface model, in which the \num{
 The pathway for this example is highly non-linear in the coordinate space because each degree of freedom only varies when it is at the interface of the droplet.
 As a result, the initial pathway for the chain-of-states methods cannot be a simple linear interpolation.
 Instead, the position of a semi-circular droplet is interpolated between the two final positions.
+}
 
-\begin{table*}[tb]
-  \begin{ruledtabular}
-  \begin{tabular}{c cc cccc cccc}
-    \tworow{System} & \tworow{BITSS} &
-      \tworow{\begin{tabular}[c]{@{}c@{}}BITSS-\\HEVF\end{tabular}} &
-      \multicolumn{4}{c}{DNEB-HEVF} & \multicolumn{4}{c}{CINEB} \\
-    \cmidrule(lr){4-7}\cmidrule(lr){8-11}
-             &             &             & 3           & 5           & 10          & 20          & 3   & 5          & 10          & 20          \\
-    \hline
-    LJ-7     & 148         & 144         & 135         & 138         & 208         & 361         & 30  & 153        & 2000        & 1692        \\
-    Buckling & \num{12866} & \num{14446} & \num{73694} & \num{7315}  & \num{6242}  & \num{12094} & --- & \num{8352} & \num{19360} & \num{77904} \\
-    Wetting  & \num{12100} & \num{17262} & \num{17840} & \num{17721} & \num{20221} & \num{48286} & --- & ---        & ---         & ---         \\
-  \end{tabular}
-  \end{ruledtabular}
-  \caption{\label{tab:speed}
-    Number of potential gradient calculations required to reach the transition state for the three comparison examples.
-    The climbing-image nudged-elastic-band (CINEB) and DNEB with hybrid eigenvector-following (DNEB-HEVF) methods have been run for different numbers of images.
-    Convergence is determined to be when the root-mean-square of the gradient at the estimate for the transition state is less than $10^{-4}$.
-    The fields left blank indicate that the method has not converged to the correct transition state.
-  }
-\end{table*}
-
+\hl{%
 The results for the three systems are shown in \cref{tab:speed}.
 The first thing to note is that using hybrid eigenvector-following does not significantly improve the speed of BITSS.
 Indeed, for the wetting example it is actually considerably faster to use BITSS alone.
@@ -285,6 +301,7 @@ Furthermore, we find that BITSS is quite a bit faster than DNEB-HEVF in this cas
 
 Overall, while BITSS does not realise the significant improvements in speed that were hypothesised, it is at least comparable with other popular methods, and appears faster for highly non-linear pathways.
 It also benefits from lower computational memory demand and not requiring an initial interpolation.
+}
 
 
 \subsection{Adaptive discretisation}\label{sec:adaptive}
@@ -460,14 +477,14 @@ The 2D potentials in \cref{fig:toy2d,fig:bracketing} use a sum of Gaussian poten
   \end{tabular}
   \end{ruledtabular}
   \caption{\label{tab:toy2dparams}
-    Parameters for the Gaussians to produce the potential used in \cref{fig:toy2d}.
+    \hl{Parameters for the Gaussians to produce the potential used in \cref{fig:toy2d}.}
   }
 \end{table}
 
 \begin{table}[ht]
   \begin{ruledtabular}
   \begin{tabular}{ccccc}
-    $a$  & $b_x$ & $b_y$ & $c_x$ & $c_y$ \\
+    $a$  & $b_x$ & \hl{$b_y$} & $c_x$ & $c_y$ \\
     \hline
     -1   &   0   &   0   &  10   &  10   \\
      1   &   0   &   0   &   1   &   1   \\
