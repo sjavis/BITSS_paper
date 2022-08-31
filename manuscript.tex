@@ -33,7 +33,7 @@
 \soulregister\cref7
 \soulregister\num7
 \soulregister\multicolumn7
-% \renewcommand{\hl}[1]{#1} % Uncomment to remove mark-up
+\renewcommand{\hl}[1]{#1} % Uncomment to remove mark-up
 
 \begin{document}
 \title{A robust and memory-efficient transition state search method for complex energy landscapes}
@@ -223,17 +223,18 @@ BITSS is advantageous in both these regards, as only two states are evolved, reg
 For these advantages to be of practical use, BITSS must demonstrate at least a comparable speed of convergence to the transition states, relative to these hybrid chain-of-states methods, which we now investigate.
 
 Here we compare the speeds of convergence of BITSS to two widely used approaches for finding transition states that employ chain-of-states methods: climbing-image nudged elastic band (CINEB) \cite{Henkelman2000a}, and DNEB with hybrid eigenvector following (DNEB-HEVF) \cite{Cerjan1981}.
-}{\color{blue}
-It is also possible to use the string method with a climbing image \cite{E2007} or eigenvector following \cite{Zimmerman2013}; although, in this case, the results are expected to be similar to the nudged-elastic-band methods.
-}\hl{%
 The core of these methods involves minimising the total energy of a chain of states, connected by elastic springs to keep them equally spaced along the transition pathway.
-CINEB modifies this by altering the behaviour of the state with the highest energy.
+}{\color{blue}
+We fix the two end-points at the minima, so the number of states that are minimised is two fewer than the number of states in the chain.
+}\hl{%
+CINEB modifies the method by altering the behaviour of the state with the highest energy.
 The direction of minimisation on this state is inverted along the pathway direction, effectively converting the saddle point into a local minimum.
-Alternatively, DNEB-HEVF involves first minimising the chain of states until a criterion is met, for which we use the root-mean-square of the total energy gradient of the chain.
-At this point eigenvector-following is performed from the highest energy state, moving uphill along the smallest eigenvector of the Hessian until it reaches the transition state.
+Alternatively, DNEB-HEVF involves first minimising the chain of states until a criterion is met, and then performing eigenvector-following from the highest energy state, moving uphill along the smallest eigenvector of the Hessian until it reaches the transition state.
 It is also possible to combine eigenvector-following with BITSS, which we also include in the comparison for completeness.
-}{\color{red}
-Move this to methods: For this, the switch from BITSS to eigenvector-following is chosen to occur when the average of the two states changes by less than a tenth of the reduction in the distance given by \cref{eq:diteration}.
+}{\color{blue}
+Additional implementation details for these methods are included in \cref{sec:HEVFdetails}.
+
+It is also possible to use the string method with a climbing image \cite{E2007} or eigenvector following \cite{Zimmerman2013}; although, in this case, the results are expected to be similar to the nudged-elastic-band methods.
 }\hl{%
 We note that our aim in this section is to observe how the BITSS method behaves for different systems, rather than providing a comprehensive comparison of the currently available methods, which has been performed in other works \cite{Koslover2007,Sheppard2008}.
 }
@@ -304,10 +305,9 @@ For the simpler pathways, BITSS is generally slower, but for the complex pathway
 Moreover, we see that for the wetting example, CINEB does not converge to the transition state because the estimated tangent vector is highly inaccurate due to the non-linearity of the pathway.
 
 For situations where memory is limited, it is important to minimise the number of images used.
-As is shown for cylindrical buckling with three images, efficiently finding the TS is challenging for both CINEB and DNEB-HEVF.
-BITSS however converges using only two images.
-
-However, if too few images are used (the minimum number of which is system dependant), both CINEB and DNEB-HEVF can struggle, as observed for the cylindrical buckling with three images.
+}{\color{blue}
+However, efficiently finding the TS is challenging for both CINEB and DNEB-HEVF if too few images are used, as observed for the cylindrical buckling with three images.
+BITSS, on the other hand, converges using only two images.
 }
 
 
@@ -582,10 +582,12 @@ The gradients of these terms are given by,
 \end{align}
 where index $k$ denotes neighbouring nodes at which the evaluation of the gradient uses $\phi_i$.
 
-{\color{red}
-\section{Implementation of the hybrid methods, CINEB, DENB-HEVF, and BITSS-HEVF}
-JRP - Sam can you fill out this section to briefly detail the method parameters?
-Also, say that HEVF was performed using the program OPTIM, with the reference http://www-wales.ch.cam.ac.uk/software.html.
+{\color{blue}
+\section{Implementation details for the DNEB-HEVF and BITSS-HEVF methods}\label{sec:HEVFdetails}
+In the hybrid eigenvector-following methods, criteria are used to determine when the initial method has converged sufficiently, at which point the eigenvector following begins.
+For BITSS, the criterion is when the average of the two states changes during a BITSS step by less than a tenth of the reduction in the separation given by \cref{eq:diteration}.
+As for DNEB, the root-mean-square of the total energy gradient of the chain of states is used with a convergence criterion of $10^{-3}$ for the particle cluster and cylindrical buckling systems, or $10^{-5}$ for the striped wetting.
+The eigenvector-following method itself was performed using the program OPTIM \cite{OPTIM}.
 }
 
 
