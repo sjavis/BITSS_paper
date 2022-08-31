@@ -583,7 +583,10 @@ The gradients of these terms are given by,
 where index $k$ denotes neighbouring nodes at which the evaluation of the gradient uses $\phi_i$.
 
 {\color{blue}
-\section{Implementation details for the DNEB-HEVF and BITSS-HEVF methods}\label{sec:HEVFdetails}
+\section{Implementation details for the CINEB, DNEB-HEVF, and BITSS-HEVF methods}\label{sec:HEVFdetails}
+The spring constants connecting the states in CINEB and DNEB are system dependent such that they keep the states equidistant without overwhelming the single state forces.
+The parameters chosen for this are $10^{-1}$ for the particle cluster, $10^{-2}$ for cylindrical buckling, and $10^{-6}$ for the striped wetting.
+
 In the hybrid eigenvector-following methods, criteria are used to determine when the initial method has converged sufficiently, at which point the eigenvector following begins.
 For BITSS, the criterion is when the average of the two states changes during a BITSS step by less than a tenth of the reduction in the separation given by \cref{eq:diteration}.
 As for DNEB, the root-mean-square of the total energy gradient of the chain of states is used with a convergence criterion of $10^{-3}$ for the particle cluster and cylindrical buckling systems, or $10^{-5}$ for the striped wetting.
