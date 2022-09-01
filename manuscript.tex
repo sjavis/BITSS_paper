@@ -253,7 +253,7 @@ The characteristic transition shown in \cref{fig:testsystems}a sees a particle r
 The second system is an elastic cylindrical shell, modelled by a triangulated mesh of nodes, which interact via extensional and angular springs.
 The \num{35400} degrees of freedom are the node coordinates in three-dimensional space.
 The characteristic transition in \cref{fig:testsystems}b shows the formation of a stable dimple from an initially unbuckled cylinder.
-This transition is essential to capture to predict mechanical failure under strain \cite{Panter2019,Virot2017}.
+This transition is essential to capture and predict mechanical failure under strain \cite{Panter2019,Virot2017}.
 }
 
 \begin{table*}[tb]
@@ -298,7 +298,9 @@ In contrast to the wetting transition's highly non-linear pathway, the pathways 
 For LJ-7, this is the translation of atoms 5 and 6, and for buckling, this is the radial displacement of the centre of the dimple \cite{Panter2019}.
 For the simpler pathways, BITSS is generally slower, but for the complex pathways, BITSS is faster.
 Moreover, we see that for the wetting example, CINEB does not converge to the transition state because the estimated tangent vector is highly inaccurate due to the non-linearity of the pathway.
+}
 
+\hl{%
 For situations where memory is limited, it is important to minimise the number of images used.
 However, efficiently finding the TS is challenging for both CINEB and DNEB-HEVF if too few images are used, as observed for the cylindrical buckling with three images.
 BITSS, on the other hand, converges using only two images.
@@ -576,8 +578,8 @@ The gradients of these terms are given by,
 \end{align}
 where index $k$ denotes neighbouring nodes at which the evaluation of the gradient uses $\phi_i$.
 
-\hl{%
 \section{Implementation details for the CINEB, DNEB-HEVF, and BITSS-HEVF methods}\label{sec:HEVFdetails}
+\hl{%
 The spring constants used to connect the states in the CINEB and DNEB methods are system dependent.
 They are chosen such that they keep the states equidistant without overwhelming the gradients arising from the potential energy landscapes under consideration.
 We employ $10^{-1}$ for the Lennard-Jones particle cluster, $10^{-2}$ for the cylindrical buckling example, and $10^{-6}$ for the striped wetting system.
