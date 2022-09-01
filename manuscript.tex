@@ -26,15 +26,6 @@
 \usepackage{cleveref}
 \Crefname{figure}{Fig.}{Figs.}
 
-% Temporary
-\usepackage{xcolor}
-\usepackage{soul}
-\soulregister\cite7
-\soulregister\cref7
-\soulregister\num7
-\soulregister\multicolumn7
-% \renewcommand{\hl}[1]{#1} % Uncomment to remove mark-up
-
 \begin{document}
 \title{A robust and memory-efficient transition state search method for complex energy landscapes}
 \date{\today}
@@ -213,7 +204,6 @@ Also, restricting the minimisation to a constant energy surface can result in a 
 
 
 \subsection{Comparison with chain-of-states methods}
-\hl{%
 In contrast to BITSS, chain-of-states methods do not typically find transition states directly.
 Instead, they are designed to find the full pathway (or an approximation thereof), and a secondary method can then be used to refine to the transition state.
 As we will demonstrate, this strategy is successful for simple, linear pathways, but faces two key challenges when the pathway is highly non-linear.
@@ -232,18 +222,16 @@ Additional implementation details for these methods are included in \cref{sec:HE
 
 It is also possible to use the string method with a climbing image \cite{E2007} or eigenvector following \cite{Zimmerman2013}; although, in this case, the results are expected to be similar to the nudged elastic band methods.
 We note that our aim in this section is to observe how the BITSS method behaves for different systems, rather than providing a comprehensive comparison of the currently available methods, which has been performed in other works \cite{Koslover2007,Sheppard2008}.
-}
 
 \begin{figure}[tb]
   \includegraphics{testsystems.pdf}
   \caption{\label{fig:testsystems}
-    \hl{The three systems used for comparison with chain-of-states methods.
-    These are: (a) a Lennard-Jones seven-particle cluster, (b) cylindrical shell buckling, and (c) wetting of a chemically-striped surface.}
+    The three systems used for comparison with chain-of-states methods.
+    These are: (a) a Lennard-Jones seven-particle cluster, (b) cylindrical shell buckling, and (c) wetting of a chemically-striped surface.
     The configurations shown correspond to the two minimum energy states and the transition state, marked by an asterisk.
   }
 \end{figure}
 
-\hl{%
 Three diverse systems are used for this comparison, exhibiting a broad range of energy landscapes.
 The first system is a two-dimensional, seven-particle cluster, interacting via a Lennard-Jones pair potential.
 This is a frequently used test system for studying transition rates \cite{Wales2002,Passerone2001}.
@@ -254,32 +242,29 @@ The second system is an elastic cylindrical shell, modelled by a triangulated me
 The \num{35400} degrees of freedom are the node coordinates in three-dimensional space.
 The characteristic transition in \cref{fig:testsystems}b shows the formation of a stable dimple from an initially unbuckled cylinder.
 This transition is essential to capture and predict mechanical failure under strain \cite{Panter2019,Virot2017}.
-}
 
 \begin{table*}[tb]
   \begin{ruledtabular}
   \begin{tabular}{c cc cccc cccc}
     \tworow{System} & \tworow{BITSS} &
       \tworow{\begin{tabular}[c]{@{}c@{}}BITSS-\\HEVF\end{tabular}} &
-        \multicolumn{4}{c}{DNEB-HEVF} & \multicolumn{4}{c}{\hl{CINEB}} \\
+        \multicolumn{4}{c}{DNEB-HEVF} & \multicolumn{4}{c}{CINEB} \\
     \cmidrule(lr){4-7}\cmidrule(lr){8-11}
-             &             &             & 3           & 5           & 10          & 20          & \hl{3  } & \hl{5         } & \hl{10         } & \hl{20         } \\
+             &             &             & 3           & 5           & 10          & 20          & 3   & 5          & 10          & 20          \\
     \hline                                                                                                                                             
-    LJ-7     & 148         & 144         & 135         & 138         & 208         & 361         & \hl{30 } & \hl{153       } & \hl{2000       } & \hl{1692       } \\
-    Buckling & \num{12866} & \num{14446} & \num{73694} & \num{7315}  & \num{6242}  & \num{12094} & \hl{---} & \hl{\num{8352}} & \hl{\num{19360}} & \hl{\num{77904}} \\
-    Wetting  & \num{12100} & \num{17262} & \num{17840} & \num{17721} & \num{20221} & \num{48286} & \hl{---} & \hl{---       } & \hl{---        } & \hl{---        } \\
+    LJ-7     & 148         & 144         & 135         & 138         & 208         & 361         & 30  & 153        & 2000        & 1692        \\
+    Buckling & \num{12866} & \num{14446} & \num{73694} & \num{7315}  & \num{6242}  & \num{12094} & --- & \num{8352} & \num{19360} & \num{77904} \\
+    Wetting  & \num{12100} & \num{17262} & \num{17840} & \num{17721} & \num{20221} & \num{48286} & --- & ---        & ---         & ---         \\
   \end{tabular}
   \end{ruledtabular}
   \caption{\label{tab:speed}
     Number of potential gradient calculations required to reach the transition state for the three comparison examples.
-    \hl{The climbing image nudged elastic band (CINEB) and DNEB with hybrid eigenvector following (DNEB-HEVF) methods have been run for different numbers of images.
+    The climbing image nudged elastic band (CINEB) and DNEB with hybrid eigenvector following (DNEB-HEVF) methods have been run for different numbers of images.
     Convergence is determined to be when the root-mean-square of the gradient at the estimate for the transition state is less than $10^{-4}$.
     The fields left blank indicate that the method has not converged to the correct transition state.
-    }
   }
 \end{table*}
 
-\hl{%
 The final system involves a droplet situated on a chemically striped surface with both hydrophilic and hydrophobic regions.
 Droplet transitions on patterned surfaces such as this are vital to understand as powerful bio-inspired liquid manipulation strategies  \cite{Kusumaatmaja2006,Brown2016}.
 In the example shown in \cref{fig:testsystems}c, a droplet transitions from two hydrophilic patches to one patch.
@@ -287,9 +272,7 @@ Here, the system is represented by a diffuse-interface model, in which the \num{
 The pathway for this example is highly non-linear in the coordinate space because each degree of freedom only varies when it is at the interface of the droplet.
 As a result, the initial pathway for the chain-of-states methods cannot be a simple linear interpolation.
 Instead, the position of a semi-circular droplet is interpolated between the two final positions.
-}
 
-\hl{%
 The results for the three systems are shown in \cref{tab:speed}.
 First, we note that for all three systems, using hybrid eigenvector following does not significantly improve the speed of BITSS.
 Indeed, for buckling and especially wetting, HEVF is detrimental to performance.
@@ -298,13 +281,10 @@ In contrast to the wetting transition's highly non-linear pathway, the pathways 
 For LJ-7, this is the translation of atoms 5 and 6, and for buckling, this is the radial displacement of the centre of the dimple \cite{Panter2019}.
 For the simpler pathways, BITSS is generally slower, but for the complex pathways, BITSS is faster.
 Moreover, we see that for the wetting example, CINEB does not converge to the transition state because the estimated tangent vector is highly inaccurate due to the non-linearity of the pathway.
-}
 
-\hl{%
 For situations where memory is limited, it is important to minimise the number of images used.
 However, efficiently finding the TS is challenging for both CINEB and DNEB-HEVF if too few images are used, as observed for the cylindrical buckling with three images.
 BITSS, on the other hand, converges using only two images.
-}
 
 
 \subsection{Adaptive discretisation}\label{sec:adaptive}
@@ -480,14 +460,14 @@ The 2D potentials in \cref{fig:toy2d,fig:bracketing} use a sum of Gaussian poten
   \end{tabular}
   \end{ruledtabular}
   \caption{\label{tab:toy2dparams}
-    \hl{Parameters for the Gaussians to produce the potential used in \cref{fig:toy2d}.}
+    Parameters for the Gaussians to produce the potential used in \cref{fig:toy2d}.
   }
 \end{table}
 
 \begin{table}[ht]
   \begin{ruledtabular}
   \begin{tabular}{ccccc}
-    $a$  & $b_x$ & \hl{$b_y$} & $c_x$ & $c_y$ \\
+    $a$  & $b_x$ & $b_y$ & $c_x$ & $c_y$ \\
     \hline
     -1   &   0   &   0   &  10   &  10   \\
      1   &   0   &   0   &   1   &   1   \\
@@ -579,7 +559,6 @@ The gradients of these terms are given by,
 where index $k$ denotes neighbouring nodes at which the evaluation of the gradient uses $\phi_i$.
 
 \section{Implementation details for the CINEB, DNEB-HEVF, and BITSS-HEVF methods}\label{sec:HEVFdetails}
-\hl{%
 The spring constants used to connect the states in the CINEB and DNEB methods are system dependent.
 They are chosen such that they keep the states equidistant without overwhelming the gradients arising from the potential energy landscapes under consideration.
 We employ $10^{-1}$ for the Lennard-Jones particle cluster, $10^{-2}$ for the cylindrical buckling example, and $10^{-6}$ for the striped wetting system.
@@ -588,7 +567,6 @@ When hybrid eigenvector following is combined with BITSS or DNEB, we need to set
 For BITSS, the criterion is when the average of the two states changes by less than a tenth of the reduction in the separation given by \cref{eq:diteration} during a BITSS step.
 For DNEB, the root-mean-square of the total energy gradient of the chain of states is used with a convergence criterion of $10^{-3}$ for the particle cluster and cylindrical buckling systems, and $10^{-5}$ for the striped wetting.
 We employ the hybrid eigenvector following method implemented in the program OPTIM \cite{OPTIM}.
-}
 
 
 \bibliography{bibexport.bib}
