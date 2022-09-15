@@ -22,7 +22,8 @@ def plot_cb(fig, y0, htot):
     h3 = 0.325
     h4 = 0.05
     wspace1 = 0.02
-    wspace3 = 0.08
+    wspace3a = 0.05
+    wspace3b = 0.045
     hspace2 = 0.03
     hspace4 = 0.04
     zoom_region = [-30, 30, -30, 30]
@@ -36,7 +37,7 @@ def plot_cb(fig, y0, htot):
     h = (1 - y0) * htot
     hspace1 = (h - h1) / 2
     hspace3 = (h - h4 - h3) / 2
-    wspace2 = (1 - w1 - 3*w2 - w3 - wspace1 - wspace3) / 2
+    wspace2 = (1 - w1 - 3*w2 - w3 - wspace1 - wspace3a - wspace3b) / 2
 
     def load_data(data_file):
         def set_region(tri, disp):
@@ -61,9 +62,10 @@ def plot_cb(fig, y0, htot):
         return tri1, disp1, tri2, disp2, tri3, disp3
 
     def create_axes(fig, y0):
-        xax1 = w1 + wspace1
-        xax2 = xax1 + w2 + wspace2
-        xax3 = xax2 + w2 + wspace2
+        xax21 = w1 + wspace1
+        xax22 = xax21 + w2 + wspace2
+        xax23 = xax22 + w2 + wspace2
+        xax3 = 1 - w3 - wspace3b
         yax1 = y0 + hspace1/htot
         yax21 = 1 - h2/htot
         yax22 = y0 + (h4 + hspace4) / htot
@@ -71,14 +73,14 @@ def plot_cb(fig, y0, htot):
         yax4 = y0 + hspace4/htot
 
         ax1   = fig.add_axes((0, yax1, w1, h1/htot))
-        ax211 = fig.add_axes((xax1, yax21, w2, h2/htot))
-        ax212 = fig.add_axes((xax1, yax22, w2, h2/htot))
-        ax221 = fig.add_axes((xax2, yax21, w2, h2/htot))
-        ax222 = fig.add_axes((xax2, yax22, w2, h2/htot))
-        ax231 = fig.add_axes((xax3, yax21, w2, h2/htot))
-        ax232 = fig.add_axes((xax3, yax22, w2, h2/htot))
-        ax3   = fig.add_axes((1-w3, yax3, w3*0.95, h3/htot))
-        ax4   = fig.add_axes((xax1, yax4, 3*w2+2*wspace2, h4/htot))
+        ax211 = fig.add_axes((xax21, yax21, w2, h2/htot))
+        ax212 = fig.add_axes((xax21, yax22, w2, h2/htot))
+        ax221 = fig.add_axes((xax22, yax21, w2, h2/htot))
+        ax222 = fig.add_axes((xax22, yax22, w2, h2/htot))
+        ax231 = fig.add_axes((xax23, yax21, w2, h2/htot))
+        ax232 = fig.add_axes((xax23, yax22, w2, h2/htot))
+        ax3   = fig.add_axes((xax3, yax3, w3*0.95, h3/htot))
+        ax4   = fig.add_axes((xax21, yax4, 3*w2+2*wspace2, h4/htot))
         axes = [ax1, ax211, ax212, ax221, ax222, ax231, ax232, ax3, ax4]
 
         ax1.axis('off')
@@ -91,13 +93,13 @@ def plot_cb(fig, y0, htot):
         ax1.indicate_inset(bounds=indicator_region, inset_ax=ax211, ec='k')
 
         # State labels
-        fig.text(xax1, yax21+h2/2, 'State 1', rotation='vertical', ha='right', va='center')
-        fig.text(xax1, yax22+h2/2, 'State 2', rotation='vertical', ha='right', va='center')
+        fig.text(xax21, yax21+h2/2, 'State 1', rotation='vertical', ha='right', va='center')
+        fig.text(xax21, yax22+h2/2, 'State 2', rotation='vertical', ha='right', va='center')
 
         # Arrow
         ax4.set_aspect('equal')
         ax4.arrow(0, 0, 1, 0, width=0.015, color='k')
-        fig.text(xax1+1.5*w2+wspace2,  y0+0.4*hspace4/htot, 'BITSS trajectory (increasing resolution)', ha='center', va='bottom')
+        fig.text(xax21+1.5*w2+wspace2,  y0+0.4*hspace4/htot, 'BITSS trajectory (increasing resolution)', ha='center', va='bottom')
         return axes
 
     def plot_cylinder(ax):
@@ -122,6 +124,9 @@ def plot_cb(fig, y0, htot):
         ax.yformatted = False
         ax.format_axes()
         ax.yaxis.set_ticks_position('left')
+        ax.yaxis.set_major_formatter(mpl.ticker.PercentFormatter(1.0, 0, ''))
+        ax.set_ylabel('Displacement / \%', labelpad=2)
+        ax.tick_params(axis='y', which='major', pad=2)
 
     tri1, disp1, tri2, disp2, tri3, disp3 = load_data('cb_data.json')
     vmax = 0.4 * np.max([np.max(np.abs(d)) for d in [disp1, disp2, disp3]])
